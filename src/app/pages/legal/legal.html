@@ -1,0 +1,67 @@
+<main id="top">
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Legal</div>
+    <span class="eyebrow">Trust &amp; legal</span>
+    <h1>Terms, Policies &amp; Responsibilities</h1>
+    <p>The terms that govern how we work together.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="legal-note">
+      <strong>Draft placeholder content.</strong> The sections below are a starting structure only and are not final legal terms, have them reviewed by a qualified lawyer licensed in your jurisdiction before publishing them live on the site.
+    </div>
+    <div class="tabs" id="legalTabs">
+      <button class="tab-btn" [class.active]="active() === 'terms'" (click)="activate('terms')" data-tab="terms">Terms &amp; Conditions</button>
+      <button class="tab-btn" [class.active]="active() === 'privacy'" (click)="activate('privacy')" data-tab="privacy">Privacy Policy</button>
+      <button class="tab-btn" [class.active]="active() === 'refund'" (click)="activate('refund')" data-tab="refund">Refund / Payment Policy</button>
+      <button class="tab-btn" [class.active]="active() === 'shipping-policy'" (click)="activate('shipping-policy')" data-tab="shipping-policy">Shipping Policy</button>
+      <button class="tab-btn" [class.active]="active() === 'responsibilities'" (click)="activate('responsibilities')" data-tab="responsibilities">Responsibilities</button>
+    </div>
+
+    <div class="legal-body">
+      <div class="tab-panel" [class.active]="active() === 'terms'" id="terms">
+        <h3>Terms &amp; Conditions</h3>
+        <p>These terms govern your use of Izuire's sourcing and procurement services. By requesting a quote or placing an order with Izuire Co. Ltd., you agree to the terms outlined here.</p>
+        <h3>Quotes</h3>
+        <p>Quotes provided are estimates based on information available at the time and may change based on supplier pricing, freight rates, or order specifications at the point of confirmation.</p>
+        <h3>Orders</h3>
+        <p>An order is confirmed once a quote is accepted and any required deposit is received. Production or purchase begins only after confirmation.</p>
+      </div>
+      <div class="tab-panel" [class.active]="active() === 'privacy'" id="privacy">
+        <h3>Privacy Policy</h3>
+        <p>Izuire collects the information you provide through our quote, contact, and inquiry forms, such as your name, phone number, email, and order details, to respond to your request and fulfil orders.</p>
+        <h3>How we use your information</h3>
+        <ul>
+          <li>To prepare and communicate quotes</li>
+          <li>To process and fulfil confirmed orders</li>
+          <li>To respond to inquiries and provide support</li>
+        </ul>
+        <p>We do not sell your personal information to third parties.</p>
+      </div>
+      <div class="tab-panel" [class.active]="active() === 'refund'" id="refund">
+        <h3>Refund / Payment Policy</h3>
+        <p>Payment terms are confirmed on each individual quote and may involve a deposit before production or purchase, with the balance due before shipping.</p>
+        <h3>Refunds</h3>
+        <p>Refund eligibility depends on the stage of the order, funds committed to production or already-purchased stock may not be fully refundable. Specific terms are communicated before you confirm an order.</p>
+      </div>
+      <div class="tab-panel" [class.active]="active() === 'shipping-policy'" id="shipping-policy">
+        <h3>Shipping Policy</h3>
+        <p>Shipping method (air or sea) is agreed with you based on your order's timeline, budget and volume (CBM). Estimated timelines are provided at the point of quote and are not guaranteed, as they depend on freight availability and customs processing.</p>
+        <h3>Risk in transit</h3>
+        <p>Once goods are handed to a freight carrier, standard freight insurance terms apply. Optional additional coverage can be discussed for high-value shipments.</p>
+      </div>
+      <div class="tab-panel" [class.active]="active() === 'responsibilities'" id="responsibilities">
+        <h3>Supplier &amp; Customer Responsibilities</h3>
+        <p><strong>Izuire's responsibility:</strong> supplier vetting, negotiation, quality inspection, and coordinating shipping in line with the agreed quote.</p>
+        <p><strong>Customer's responsibility:</strong> providing accurate product specifications, timely payment per agreed terms, and timely response during quality sign-off windows.</p>
+        <p><strong>Supplier's responsibility:</strong> producing goods to the agreed specification and timeline as contracted through Izuire.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>

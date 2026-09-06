@@ -1,0 +1,95 @@
+<main id="top">
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a routerLink="/">Home</a> / FAQ</div>
+    <span class="eyebrow">Common questions</span>
+    <h1>Frequently Asked Questions</h1>
+    <p>Everything buyers usually ask before their first order with Izuire.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="faq-list">
+      
+    <div class="faq-item" id="moq" [class.open]="isOpen('moq')">
+      <button class="faq-q" type="button" (click)="toggle('moq')">
+        <span>What is MOQ?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('moq')"><p>MOQ stands for Minimum Order Quantity, the smallest amount of a product a supplier will produce or sell in one order. MOQs vary by product and factory; we negotiate the lowest workable MOQ for your order and flag it clearly on every quote.</p></div>
+    </div>
+
+    <div class="faq-item" id="not-listed" [class.open]="isOpen('not-listed')">
+      <button class="faq-q" type="button" (click)="toggle('not-listed')">
+        <span>Can I source products not listed on your site?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('not-listed')"><p>Yes. Our marketplace shows trending and popular items, but most of what we source is requested directly. Send us a product photo, link, or description through the Request a Quote form and we'll find it.</p></div>
+    </div>
+
+    <div class="faq-item" id="direct" [class.open]="isOpen('direct')">
+      <button class="faq-q" type="button" (click)="toggle('direct')">
+        <span>Can I buy directly from manufacturers?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('direct')"><p>We work directly with factories and wholesale markets on your behalf, you don't need your own relationship with a manufacturer. This is the core of what Izuire does: we negotiate, inspect and manage the supplier relationship for you.</p></div>
+    </div>
+
+    <div class="faq-item" id="cost" [class.open]="isOpen('cost')">
+      <button class="faq-q" type="button" (click)="toggle('cost')">
+        <span>How much does sourcing cost?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('cost')"><p>There's no upfront fee to request a quote. Our margin is built into the pricing we quote you, so the price you see is the price you pay, no surprise sourcing fees added later.</p></div>
+    </div>
+
+    <div class="faq-item" id="payment" [class.open]="isOpen('payment')">
+      <button class="faq-q" type="button" (click)="toggle('payment')">
+        <span>How does payment work?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('payment')"><p>Once you approve a quote, we share payment instructions and a proforma invoice. Depending on the order, payment may be split, a deposit to begin production or purchase, with the balance due before shipping. Full terms are confirmed on your specific quote.</p></div>
+    </div>
+
+    <div class="faq-item" id="shipping-time" [class.open]="isOpen('shipping-time')">
+      <button class="faq-q" type="button" (click)="toggle('shipping-time')">
+        <span>How long does shipping take?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('shipping-time')"><p>Air freight typically takes days to just over a week door-to-door; sea freight typically takes several weeks depending on the destination and consolidation schedule. Exact timelines are confirmed when we prepare your shipping quote, see our Shipping &amp; Logistics page for more detail.</p></div>
+    </div>
+
+    <div class="faq-item" id="inspect" [class.open]="isOpen('inspect')">
+      <button class="faq-q" type="button" (click)="toggle('inspect')">
+        <span>Do you inspect products before shipping?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('inspect')"><p>Yes. Every order goes through a quality check before it leaves China, and we send photo or video proof so you can confirm before it ships.</p></div>
+    </div>
+
+    <div class="faq-item" id="customize" [class.open]="isOpen('customize')">
+      <button class="faq-q" type="button" (click)="toggle('customize')">
+        <span>Can you customize or brand products?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('customize')"><p>Yes, white labeling and custom packaging/branding are available on eligible products and order volumes. Let us know your requirements when you request a quote.</p></div>
+    </div>
+
+    <div class="faq-item" id="outside-nigeria" [class.open]="isOpen('outside-nigeria')">
+      <button class="faq-q" type="button" (click)="toggle('outside-nigeria')">
+        <span>Can you ship outside Nigeria?</span>
+        <span class="plus" aria-hidden="true"></span>
+      </button>
+      <div class="faq-a" [style.maxHeight]="maxHeight('outside-nigeria')"><p>Yes. While most of our current buyers are in Nigeria, our sourcing and shipping process is built to serve importers across Africa. Tell us your destination when requesting a quote and we'll confirm logistics.</p></div>
+    </div>
+    </div>
+    <div style="text-align:center; margin-top:52px;">
+      <p style="color:var(--ink-60); margin-bottom:18px;">Still have a question?</p>
+      <a routerLink="/contact" class="btn btn-outline">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+</main>

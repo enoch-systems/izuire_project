@@ -1,0 +1,101 @@
+<main id="top">
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Shipping &amp; Logistics</div>
+    <span class="eyebrow">China &rarr; Nigeria &amp; beyond</span>
+    <h1>Shipping &amp; Logistics</h1>
+    <p>From factory floor to your door, we coordinate freight, documentation and delivery so your order doesn't stall in transit.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">The process</span><h2>How your order gets to Nigeria</h2></div>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h4>Consolidation</h4><p>Your order is packed and consolidated with the right documentation at our Guangzhou warehouse.</p></div>
+      <div class="step"><div class="step-num">2</div><h4>Freight Booking</h4><p>We book air or sea freight based on your timeline, budget and shipment volume.</p></div>
+      <div class="step"><div class="step-num">3</div><h4>Customs &amp; Clearing</h4><p>Import documentation and customs clearance are coordinated on arrival.</p></div>
+      <div class="step"><div class="step-num">4</div><h4>Last-Mile Delivery</h4><p>Delivered to your destination city, Lagos, Onitsha, Abuja, or elsewhere in Africa.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section on-paper">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">Choose your method</span><h2>Air freight vs. sea freight</h2></div>
+      <p>We'll recommend the right method for your order, here's how they generally compare.</p>
+    </div>
+    <div class="compare-wrap">
+      <table class="compare-table">
+        <thead><tr><th>&nbsp;</th><th>Air Freight</th><th>Sea Freight</th></tr></thead>
+        <tbody>
+          <tr><td>Speed</td><td>Fastest, days to just over a week</td><td>Slower, typically several weeks</td></tr>
+          <tr><td>Cost profile</td><td>Higher cost per kg</td><td>More cost-effective at volume</td></tr>
+          <tr><td>Best for</td><td>Urgent, lightweight, or smaller orders</td><td>Bulk orders and larger CBM shipments</td></tr>
+          <tr><td>Typical use</td><td>Samples, electronics, urgent restocks</td><td>Thrift bales, building materials, bulk merchandise</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:.82rem; color:var(--ink-40); margin-top:14px;">Exact rates and transit times depend on current freight capacity and your specific route, confirmed on your shipping quote.</p>
+  </div>
+</section>
+
+<section class="section" id="calculator">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">Understanding CBM</span><h2>What is CBM, and why does it matter?</h2></div>
+    </div>
+    <p style="color:var(--ink-60); max-width:640px; margin-bottom:36px;">CBM (Cubic Meter) measures the volume your shipment takes up, length &times; width &times; height, in meters. For sea freight especially, CBM (not just weight) is often what determines your shipping cost, since cargo space is sold by volume. Knowing your CBM upfront helps us quote accurately and helps you compare air vs. sea for your specific order.</p>
+
+    <div class="calc-box">
+      <div class="calc-fields">
+        <h4 style="font-family:var(--font-d); margin-bottom:18px;">Quick CBM Estimator</h4>
+        <div class="form-row">
+          <div class="field"><label for="calcL">Length (cm)</label><input type="number" id="calcL" placeholder="e.g. 60" min="0" (input)="onInput('l', $event)"></div>
+          <div class="field"><label for="calcW">Width (cm)</label><input type="number" id="calcW" placeholder="e.g. 40" min="0" (input)="onInput('w', $event)"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="calcH">Height (cm)</label><input type="number" id="calcH" placeholder="e.g. 40" min="0" (input)="onInput('h', $event)"></div>
+          <div class="field"><label for="calcQty">Number of Cartons</label><input type="number" id="calcQty" placeholder="e.g. 20" min="0" (input)="onInput('qty', $event)"></div>
+        </div>
+      </div>
+      <div class="calc-result">
+        <div class="cbm-num" id="cbmOutput">{{ cbm() }}</div>
+        <div class="cbm-lbl">Total CBM</div>
+        <p>Enter your carton dimensions and quantity to estimate total shipment volume. Use this figure when requesting a shipping quote.</p>
+        <a routerLink="/quote" class="btn btn-primary btn-sm" style="margin-top:16px;">Get a Shipping Quote</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section on-paper">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">Where we deliver</span><h2>Destinations</h2></div>
+    </div>
+    <div class="service-grid">
+      <div class="service-card">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div>
+        <h4>Lagos</h4>
+        <p>Nigeria's primary port of entry, our most common destination for both air and sea shipments.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div>
+        <h4>Onitsha &amp; the Southeast</h4>
+        <p>Home to our registered office, with established routes for onward delivery from Lagos.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg></div>
+        <h4>Other African Destinations</h4>
+        <p>Shipping beyond Nigeria is available, tell us your destination when requesting a quote and we'll confirm logistics.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>

@@ -1,0 +1,21 @@
+<div class="search-overlay" id="searchOverlay" [class.open]="open()" (click)="onBackdrop($event)">
+  <div class="search-panel">
+    <div class="search-panel-input">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" #searchInput [value]="query()" (input)="onInput($event)" placeholder="Search products, guides, suppliers..." autocomplete="off">
+      <button class="search-panel-close" id="searchCloseBtn" type="button" (click)="close()">ESC</button>
+    </div>
+    <div class="search-results" id="searchResults">
+        @for (item of results(); track item.title) {
+          <a class="search-result-item" [routerLink]="item.route" [fragment]="item.fragment">
+            <div class="sr-cat">{{ item.cat }}</div>
+            <div class="sr-title">{{ item.title }}</div>
+            <div class="sr-desc">{{ item.desc }}</div>
+          </a>
+        } @empty {
+          <div class="search-empty">No results. Try a category like "shipping" or "hair".</div>
+        }
+      </div>
+  </div>
+</div>
+

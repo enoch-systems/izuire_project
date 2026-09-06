@@ -1,0 +1,58 @@
+<main id="top">
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Marketplace</div>
+    <span class="eyebrow">Available stock &amp; trending items</span>
+    <h1>Marketplace</h1>
+    <p>A snapshot of what's moving right now. Don't see what you need? Most orders are sourced to request, <a routerLink="/quote" style="color:var(--orange-deep); border-bottom:1px dashed var(--orange-deep);">tell us what you're looking for</a>.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="marketplace-toolbar">
+      <div class="mk-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="mkSearch" placeholder="Search this list..." (input)="onSearch($event)">
+      </div>
+      <div class="currency-toggle" role="group" aria-label="Currency toggle">
+        <button type="button" class="curr-btn" [class.active]="currency() === 'ngn'" (click)="setCurrency('ngn')" data-curr="ngn">&#8358; Naira</button>
+        <button type="button" class="curr-btn" [class.active]="currency() === 'rmb'" (click)="setCurrency('rmb')" data-curr="rmb">&yen; RMB</button>
+      </div>
+    </div>
+    <div class="filter-bar" id="filterBar"><button class="filter-chip" [class.active]="filter() === 'all'" (click)="setFilter('all')" data-filter="all">All</button><button class="filter-chip" [class.active]="filter() === 'electronics'" (click)="setFilter('electronics')" data-filter="electronics">Electronics</button><button class="filter-chip" [class.active]="filter() === 'okrika'" (click)="setFilter('okrika')" data-filter="okrika">Okrika / Thrift</button><button class="filter-chip" [class.active]="filter() === 'building'" (click)="setFilter('building')" data-filter="building">Building Materials</button><button class="filter-chip" [class.active]="filter() === 'hair'" (click)="setFilter('hair')" data-filter="hair">Hair & Wigs</button><button class="filter-chip" [class.active]="filter() === 'solar'" (click)="setFilter('solar')" data-filter="solar">Solar Equipment</button><button class="filter-chip" [class.active]="filter() === 'fashion'" (click)="setFilter('fashion')" data-filter="fashion">Fashion & Footwear</button><button class="filter-chip" [class.active]="filter() === 'kitchen'" (click)="setFilter('kitchen')" data-filter="kitchen">Kitchenware</button></div>
+    <div class="product-grid" id="productGrid">
+      @for (p of products; track p.title) {
+        <div class="product-card" [attr.data-cat]="p.cat" [attr.data-name]="p.name" [style.display]="matches(p) ? null : 'none'">
+          <div class="product-media">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+              @switch (p.icon) {
+                @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+              }
+            </svg>
+            @if (p.verified) { <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Verified</span> }
+          </div>
+          <div class="product-body">
+            <h4>{{ p.title }}</h4>
+            <div class="product-price" [attr.data-ngn]="p.ngn" [attr.data-rmb]="p.rmb"><span class="price-val">{{ currency() === 'ngn' ? p.ngn : p.rmb }}</span> <span class="unit">{{ p.unit }}</span></div>
+            <div class="product-specs">{{ p.specs }}</div>
+            <div class="product-moq">{{ p.moq }}</div>
+            <a routerLink="/quote" class="btn btn-outline btn-sm"><span class="btn-label-full">Request This Product</span><span class="btn-label-short">Request</span></a>
+          </div>
+        </div>
+        }
+    </div>
+    <div class="no-results" id="noResults" [style.display]="noResults() ? 'block' : 'none'">No products match your search. <a routerLink="/quote">Request it directly</a> instead.</div>
+  </div>
+</section>
+
+</main>

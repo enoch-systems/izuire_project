@@ -1,0 +1,88 @@
+<main id="top">
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Request a Quote</div>
+    <span class="eyebrow">Get a price</span>
+    <h1>Request a Quote</h1>
+    <p>Tell us what you're sourcing and we'll come back with pricing, MOQ and lead time, usually within 24 hours.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="rfq-wrap">
+      <div class="rfq-info">
+        <span class="eyebrow">Why request through Izuire</span>
+        <h2 style="font-size:1.6rem; margin:14px 0 16px;">No obligation. No hidden fees.</h2>
+        <div class="rfq-points">
+          <div class="rfq-point"><div class="dot"><svg viewBox="0 0 24 24" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span>Quotes are free, you only pay if you go ahead.</span></div>
+          <div class="rfq-point"><div class="dot"><svg viewBox="0 0 24 24" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span>We negotiate directly with factories on your behalf.</span></div>
+          <div class="rfq-point"><div class="dot"><svg viewBox="0 0 24 24" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span>Every order is quality-checked before it ships.</span></div>
+          <div class="rfq-point"><div class="dot"><svg viewBox="0 0 24 24" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span>Prefer WhatsApp? Send your request straight through.</span></div>
+        </div>
+      </div>
+
+      <form class="rfq-form" id="rfqForm" novalidate (ngSubmit)="submit()">
+        <div class="form-success" id="formSuccess" role="status" [class.show]="success()">Thanks, your request is ready. Continue on WhatsApp to send it, or use the email option below.</div>
+        <div class="form-row">
+          <div class="field" id="field-category" [class.has-error]="submitted() && categoryInvalid()">
+            <label for="rfqCategory">Product / Category <span class="req">*</span></label>
+            <input type="text" id="rfqCategory" name="rfqCategory" [(ngModel)]="rfqCategory" placeholder="e.g. Phone screens, Okrika bales">
+            <div class="field-error">Please tell us what you're sourcing.</div>
+          </div>
+          <div class="field" id="field-qty" [class.has-error]="submitted() && qtyInvalid()">
+            <label for="rfqQty">Quantity <span class="req">*</span></label>
+            <input type="text" id="rfqQty" name="rfqQty" [(ngModel)]="rfqQty" placeholder="e.g. 50 units, 5 bales">
+            <div class="field-error">Please enter a quantity.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="rfqSpecs">Specifications</label>
+          <input type="text" id="rfqSpecs" name="rfqSpecs" [(ngModel)]="rfqSpecs" placeholder="e.g. Grade A, colour, size, model">
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="rfqPrice">Target Price (optional)</label>
+            <input type="text" id="rfqPrice" name="rfqPrice" [(ngModel)]="rfqPrice" placeholder="e.g. ₦20,000 per unit">
+          </div>
+          <div class="field">
+            <label for="rfqDestination">Destination</label>
+            <input type="text" id="rfqDestination" name="rfqDestination" [(ngModel)]="rfqDestination" placeholder="e.g. Lagos, Onitsha">
+          </div>
+        </div>
+        <div class="field">
+          <label for="rfqShipMethod">Preferred Shipping Method</label>
+          <select id="rfqShipMethod" name="rfqShipMethod" [(ngModel)]="rfqShipMethod">
+            <option value="">No preference, advise me</option>
+            <option value="Air Freight">Air Freight</option>
+            <option value="Sea Freight">Sea Freight</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="field" id="field-phone" [class.has-error]="submitted() && phoneInvalid()">
+            <label for="rfqPhone">WhatsApp / Phone <span class="req">*</span></label>
+            <input type="tel" id="rfqPhone" name="rfqPhone" [(ngModel)]="rfqPhone" placeholder="e.g. 0803 000 0000">
+            <div class="field-error">Please enter a phone number.</div>
+          </div>
+          <div class="field" id="field-email" [class.has-error]="submitted() && emailInvalid()">
+            <label for="rfqEmail">Email <span class="req">*</span></label>
+            <input type="email" id="rfqEmail" name="rfqEmail" [(ngModel)]="rfqEmail" placeholder="you&#64;example.com">
+            <div class="field-error">Please enter a valid email.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="rfqDetails">Additional Details</label>
+          <textarea id="rfqDetails" name="rfqDetails" [(ngModel)]="rfqDetails" placeholder="Anything else that helps us quote accurately."></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="rfqSubmit">Send via WhatsApp</button>
+          <a href="#" class="btn btn-outline" id="rfqEmailBtn" (click)="sendEmail($event)">Send via Email</a>
+        </div>
+        <p class="form-note">By submitting, you agree to be contacted about this request. We reply within 24 hours.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
