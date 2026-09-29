@@ -83,7 +83,8 @@ const REASONS: Omit<WhyReason, 'words'>[] = [
  *
  * The six reasons under "Why Izuire" are set as plain text rather than cards: each
  * body copy is split into words and lights up word by word as it is read down the
- * page (see readReasons).
+ * page, while the readout in the section head counts the reasons off (see
+ * readReasons and countTo).
  *
  * Category and product cards also bubble up one at a time as you scroll to them
  * (see revealCards). A card's resting style is its normal style and the "not
@@ -123,6 +124,15 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     words: reason.body.split(' ').map((word, index) => (index === 0 ? word : ` ${word}`)),
   }));
 
+  /** How many of the six have been read. It starts at the full count, because the
+   *  readout is finished-looking until scripting arms the list and rewinds it. */
+  protected readonly readCount = signal(REASONS.length);
+  protected readonly reasonTotal = REASONS.length;
+  /** The readout, zero padded so the digits do not shuffle around while counting. */
+  protected readonly readLabel = computed(
+    () => `${this.pad(this.readCount())} / ${this.pad(this.reasonTotal)}`,
+  );
+
   /** The looping category tile clips plus the Sourcing and Shipping cards',
    *  played/paused from ngAfterViewInit. */
   private readonly catMedia = viewChildren<ElementRef<HTMLVideoElement>>('catMedia');
@@ -137,6 +147,9 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   private revealObserver: IntersectionObserver | undefined;
   private stepObserver: IntersectionObserver | undefined;
   private reasonObserver: IntersectionObserver | undefined;
+  /** Frame of the readout's count-up, so a new count can take over mid-flight and
+   *  the animation can be cancelled on destroy. */
+  private countRaf: number | undefined;
 
   protected goTo(idx: number): void {
     this.current.set(((idx % this.dots.length) + this.dots.length) % this.dots.length);
@@ -169,6 +182,9 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     this.revealObserver?.disconnect();
     this.stepObserver?.disconnect();
     this.reasonObserver?.disconnect();
+    if (this.countRaf !== undefined) {
+      cancelAnimationFrame(this.countRaf);
+    }
   }
 
   /**
@@ -294,14 +310,23 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
    * the copy simply reads as ordinary text.
    */
   private readReasons(): void {
-    const reasons = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('.reason'));
+    const list = this.host.nativeElement.querySelector<HTMLElement>('.reasons');
+    const reasons = list ? Array.from(list.querySelectorAll<HTMLElement>('.reason')) : [];
 
-    if (reasons.length === 0 || typeof IntersectionObserver === 'undefined') {
+    if (!list || reasons.length === 0 || typeof IntersectionObserver === 'undefined') {
       return;
     }
 
+    // Arming rewinds the readout to zero and marks the section, which is what turns
+    // the readout's accent on. It happens here rather than in CSS so the list looks
+    // finished until scripting takes over: with scripting off there is nothing primed
+    // and no count to be stuck on.
+    list.closest('section')?.classList.add('armed');
+    this.readCount.set(0);
+
     this.reasonObserver = new IntersectionObserver(
       (entries) => {
+        let reached = false;
         for (const entry of entries) {
           if (!entry.isIntersecting) {
             continue;
@@ -309,6 +334,12 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
           entry.target.classList.add('reading');
           // One shot: scrolling back up should not replay the reading.
           this.reasonObserver?.unobserve(entry.target);
+          reached = true;
+        }
+        if (reached) {
+          // Counted off the list itself, so two reasons landing in the same frame
+          // still land on the right number.
+          this.countTo(list.querySelectorAll('.reason.reading').length);
         }
       },
       // Most of the reason has to be on screen, so the reading starts when the
@@ -319,6 +350,46 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     for (const reason of reasons) {
       this.reasonObserver.observe(reason);
     }
+  }
+
+  /** Zero pad a count, so the readout keeps its width while the digits tick. */
+  private pad(value: number): string {
+    return value.toString().padStart(2, '0');
+  }
+
+  /**
+   * Roll the readout from wherever it is up to `next` over a fraction of a second, so
+   * the count reads as counting instead of jumping. The fill bar is driven off the
+   * same signal, so it climbs along with the digits. When less motion has been asked
+   * for, the number is simply set.
+   */
+  private countTo(next: number): void {
+    if (this.countRaf !== undefined) {
+      cancelAnimationFrame(this.countRaf);
+      this.countRaf = undefined;
+    }
+
+    const from = this.readCount();
+    if (from === next) {
+      return;
+    }
+
+    const lessMotion =
+      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (lessMotion) {
+      this.readCount.set(next);
+      return;
+    }
+
+    const started = performance.now();
+    const tick = (now: number): void => {
+      const progress = Math.min(1, (now - started) / 420);
+      // Eased out, so the last digit settles rather than crawling in.
+      const eased = 1 - Math.pow(1 - progress, 3);
+      this.readCount.set(Math.round(from + (next - from) * eased));
+      this.countRaf = progress < 1 ? requestAnimationFrame(tick) : undefined;
+    };
+    this.countRaf = requestAnimationFrame(tick);
   }
 
   /**

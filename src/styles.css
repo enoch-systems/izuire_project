@@ -937,6 +937,83 @@
     to{ color:var(--ink-60); }
   }
 
+  /* ============ WHY IZUIRE — THE READOUT ============ */
+  /* A quiet counter with a hairline bar, in the same voice as the rest of the page.
+     It renders finished (06 / 06, bar full) and the digits and the bar are driven off
+     one signal, so the number and the bar climb together; only the accent waits for
+     the section to be armed by home.ts. */
+  .why-meter{
+    display:flex; align-items:center; gap:10px;
+    white-space:nowrap;
+  }
+  .why-meter__label{
+    font-family:var(--font-d); font-weight:600;
+    font-size:.7rem; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink-40);
+  }
+  .why-meter__value{
+    font-family:var(--font-d); font-weight:700; font-size:.9rem;
+    /* Tabular digits, so the readout does not change width while it counts. */
+    font-variant-numeric:tabular-nums;
+    color:var(--ink);
+    transition:color .5s var(--ease);
+  }
+  .why-meter__bar{
+    position:relative; display:block;
+    width:64px; height:2px; border-radius:2px;
+    background:rgba(17,17,17,.10);
+    overflow:hidden;
+  }
+  .why-meter__fill{
+    display:block; height:100%;
+    /* The component feeds it the share read so far; the default keeps a
+       no-scripting page looking finished. */
+    width:calc(var(--progress, 1) * 100%);
+    background:linear-gradient(90deg, var(--orange), var(--orange-deep));
+    border-radius:2px;
+  }
+  .armed .why-meter__value{ color:var(--orange-deep); }
+
+  /* ============ WHY IZUIRE — BLENDED EFFECTS ============ */
+  /* Three small things, all one-shot and all gated on `.reading`, so they play in
+     the same moment the words start and stop costing anything once the list is read:
+     the heading arrives with its copy, a light runs down the line to the next
+     bubble, and the bubble ripples once as it lights. */
+  .reason.reading h3{ animation:reasonHead .55s var(--ease) both; }
+  @keyframes reasonHead{
+    from{ opacity:0; translate:0 10px; }
+    to{ opacity:1; translate:0 0; }
+  }
+
+  /* The comet. It is a fifth of the line tall and travels four and a half times its
+     own height, which lands it past the next bubble. */
+  .reason-line::after{
+    content:"";
+    position:absolute; left:-1px; top:0;
+    width:3px; height:22%; min-height:22px; border-radius:2px;
+    background:linear-gradient(180deg, rgba(245,130,31,0), var(--orange));
+    opacity:0;
+  }
+  .reason.reading .reason-line::after{ animation:reasonTravel 1.15s var(--ease) .3s both; }
+  @keyframes reasonTravel{
+    0%{ opacity:0; transform:translateY(-100%); }
+    20%{ opacity:1; }
+    100%{ opacity:0; transform:translateY(455%); }
+  }
+
+  .reason-dot::after{
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:50%;
+    border:1.5px solid rgba(245,130,31,.55);
+    opacity:0;
+  }
+  .reason.reading .reason-dot::after{ animation:reasonRipple 1.3s var(--ease) .25s both; }
+  @keyframes reasonRipple{
+    0%{ opacity:.9; transform:scale(.85); }
+    100%{ opacity:0; transform:scale(2.6); }
+  }
+
   /* ============ TRUST BAND ============ */
   .trust-band{
     background:var(--ink);

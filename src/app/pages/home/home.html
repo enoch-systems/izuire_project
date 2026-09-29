@@ -297,6 +297,14 @@
   <div class="container">
     <div class="section-head">
       <div><span class="eyebrow">Why Izuire</span><h2>Built for buyers who've been burned before</h2></div>
+      <!-- A quiet readout of how far down the list you are. It renders finished
+           (06 / 06, bar full) and is rewound to zero when home.ts arms the list, so
+           with scripting off it never looks stuck at 00. -->
+      <div class="why-meter">
+        <span class="why-meter__label">Read</span>
+        <span class="why-meter__value">{{ readLabel() }}</span>
+        <span class="why-meter__bar" aria-hidden="true"><span class="why-meter__fill" [style.--progress]="readCount() / reasonTotal"></span></span>
+      </div>
     </div>
     <!-- No cards here on purpose: the six reasons are set as text on a thin line,
          each with a small bubble. The copy lives in home.ts so the body text can be
