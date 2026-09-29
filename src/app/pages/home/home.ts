@@ -70,6 +70,35 @@ const TRUST_STATS: TrustStat[] = [
   { value: 1000, suffix: '+', label: 'Orders fulfilled to Africa' },
 ];
 
+/** One customer story in the testimonials slider. */
+interface Testimonial {
+  quote: string;
+  name: string;
+  role: string;
+}
+
+/** The stories, in the order they are read. */
+const TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      "IZUIRE found me a supplier for screens I'd been struggling to source for months, and the quality check before shipping saved me from a bad batch.",
+    name: 'Chidinma O.',
+    role: 'Electronics Reseller, Lagos',
+  },
+  {
+    quote:
+      'My first Okrika order arrived exactly as graded. Communication was clear from quote to delivery, and pricing was fair for the quality.',
+    name: 'Emeka A.',
+    role: 'Thrift Wholesaler, Onitsha',
+  },
+  {
+    quote:
+      "Having a team physically in Guangzhou made all the difference, they negotiated better terms than I could get on my own.",
+    name: 'Blessing N.',
+    role: 'General Merchandise, Abuja',
+  },
+];
+
 /**
  * Home page. The testimonial slider reproduces the original behavior:
  * prev/next arrows, dots, and auto-advance every 6 seconds.
@@ -115,7 +144,10 @@ const TRUST_STATS: TrustStat[] = [
   templateUrl: './home.html',
 })
 export class Home implements OnInit, OnDestroy, AfterViewInit {
-  protected readonly dots = [0, 1, 2];
+  /** Slider positions, one per story. */
+  protected readonly dots = TESTIMONIALS.map((_, index) => index);
+  /** The stories in the slider, so the slide markup is generated from one place. */
+  protected readonly testimonials = TESTIMONIALS;
   protected readonly current = signal(0);
 
   /** Hero slides, in order. Add another entry here for an 8th slide. */
@@ -253,7 +285,9 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const cards = Array.from(
-      this.host.nativeElement.querySelectorAll<HTMLElement>('.cat-card, .product-card'),
+      this.host.nativeElement.querySelectorAll<HTMLElement>(
+        '.cat-card, .product-card, .subbrand-card, .cta-final',
+      ),
     );
 
     this.revealObserver = new IntersectionObserver(
@@ -283,7 +317,12 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       const position = perGrid.get(parent) ?? 0;
       perGrid.set(parent, position + 1);
       card.style.setProperty('--pop-delay', `${(position % 4) * 90}ms`);
-      card.classList.add('pop');
+      // `.reveal-soft` items are never hidden - only what happens inside them waits
+      // for `.in` - so the page's most important call to action is not left at the
+      // mercy of an observer.
+      if (!card.classList.contains('reveal-soft')) {
+        card.classList.add('pop');
+      }
       this.revealObserver.observe(card);
     }
   }

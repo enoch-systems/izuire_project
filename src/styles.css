@@ -1087,21 +1087,80 @@
     min-height:230px;
     display:flex; flex-direction:column; justify-content:flex-end;
     position:relative; overflow:hidden;
+    /* `isolation` keeps the scan and the ghost wordmark behind the copy. */
+    isolation:isolate;
     transition:transform .3s var(--ease);
   }
   .subbrand-card:hover{transform:translateY(-4px);}
   .subbrand-card.okrika{background:linear-gradient(135deg, #1b1b1b 0%, #111111 60%);}
   .subbrand-card.haircubr{background:linear-gradient(135deg, var(--orange-deep) 0%, var(--orange) 100%);}
-  .subbrand-card .sb-shape{
-    position:absolute; top:-40px; right:-40px;
-    width:220px; height:220px;
-    border-radius:50%;
-    background:rgba(255,255,255,.06);
+  /* A hairline draws across the top of the panel on hover, like a sign switching
+     on. */
+  .subbrand-card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, var(--orange), var(--orange-deep), var(--orange));
+    transform:scaleX(0); transform-origin:left center;
+    transition:transform .6s var(--ease);
   }
+  .subbrand-card:hover::before{transform:scaleX(1);}
+  /* The scan: a skewed bar of light crossing the panel on a slow loop, so the
+     storefront reads as live rather than as a still photograph of one. */
+  .sb-scan{
+    position:absolute; top:-20%; bottom:-20%; left:0;
+    width:32%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
+    transform:skewX(-12deg) translateX(-160%);
+    pointer-events:none;
+  }
+  .subbrand-card.in .sb-scan{ animation:sbSweep 7s linear .8s infinite; }
+  @keyframes sbSweep{
+    from{ transform:skewX(-12deg) translateX(-160%); }
+    to{ transform:skewX(-12deg) translateX(520%); }
+  }
+  /* The brand's own name, huge and faint, drifting behind the copy. */
+  .sb-ghost{
+    position:absolute; right:-10px; bottom:6px;
+    font-family:var(--font-d); font-weight:700;
+    font-size:clamp(3.2rem, 6.4vw, 5.2rem);
+    line-height:.84; letter-spacing:-.03em;
+    color:rgba(255,255,255,.07);
+    white-space:nowrap; pointer-events:none;
+  }
+  .subbrand-card.in .sb-ghost{ animation:sbDrift 9s ease-in-out infinite alternate; }
+  @keyframes sbDrift{
+    from{ transform:translate(0, 0); }
+    to{ transform:translate(-14px, -10px); }
+  }
+  /* Copy above both layers, so the watermark and the scan never sit on the text. */
+  .subbrand-card .eyebrow,
+  .subbrand-card h3,
+  .subbrand-card p,
+  .subbrand-card .sb-cta{ position:relative; z-index:1; }
   .subbrand-card .eyebrow{color:rgba(255,255,255,.7);}
   .subbrand-card .eyebrow::before{background:rgba(255,255,255,.7);}
+  /* The name wipes on like a sign, then the copy and the button follow it in. Shared
+     with the testimonials, hence the neutral name. */
+  .subbrand-card.in h3{ animation:sbName .8s var(--ease) .12s both; }
+  @keyframes sbName{
+    from{ clip-path:inset(0 100% 0 0); letter-spacing:.14em; opacity:0; }
+    to{ clip-path:inset(0 0 0 0); letter-spacing:normal; opacity:1; }
+  }
+  .subbrand-card.in p{ animation:riseIn .6s var(--ease) .3s both; }
+  .subbrand-card.in .sb-cta{ animation:riseIn .6s var(--ease) .42s both; }
+  @keyframes riseIn{
+    from{ opacity:0; translate:0 12px; }
+    to{ opacity:1; translate:0 0; }
+  }
   .subbrand-card h3{color:var(--white); font-size:1.55rem; margin:10px 0 8px;}
   .subbrand-card p{color:rgba(255,255,255,.78); font-size:.9rem; max-width:340px; margin-bottom:20px;}
+  /* The arrow leaves the button when the panel is hovered. */
+  .sb-arrow{
+    display:inline-block; margin-left:8px;
+    opacity:.5; transform:translateX(-2px);
+    transition:transform .3s var(--ease), opacity .3s var(--ease);
+  }
+  .subbrand-card:hover .sb-arrow{transform:translateX(3px); opacity:1;}
 
   /* ============ RFQ FORM ============ */
   .rfq-wrap{
@@ -1167,12 +1226,48 @@
   .testi-slide p{font-size:1.28rem; font-family:var(--font-d); font-weight:500; line-height:1.45; margin-bottom:24px;}
   .testi-person{font-size:.86rem; color:var(--ink-60);}
   .testi-person strong{color:var(--ink); font-family:var(--font-d);}
-  .testi-dots{display:flex; justify-content:center; gap:8px; margin-top:32px;}
+  /* Dwell bars rather than dots: the active one fills over the six seconds before the
+     next story arrives, so the wait is visible instead of a mystery. The 6s matches
+     the auto-advance timer in home.ts. */
+  .testi-dots{display:flex; justify-content:center; gap:10px; margin-top:32px;}
   .testi-dots button{
-    width:8px; height:8px; border-radius:50%; background:var(--line);
-    transition:background .25s var(--ease), transform .25s var(--ease);
+    position:relative; overflow:hidden;
+    width:36px; height:3px; border-radius:2px;
+    background:rgba(17,17,17,.12);
+    transition:background .25s var(--ease), width .25s var(--ease);
   }
-  .testi-dots button.active{background:var(--orange); transform:scale(1.3);}
+  .testi-dots button:hover{width:46px;}
+  .testi-dots button.active{background:rgba(245,130,31,.26);}
+  .testi-dots button.active::after{
+    content:"";
+    position:absolute; inset:0;
+    background:var(--orange);
+    transform-origin:left center;
+    animation:testiDwell 6s linear both;
+  }
+  @keyframes testiDwell{
+    from{transform:scaleX(0);}
+    to{transform:scaleX(1);}
+  }
+  /* The active quote is read in: a band of light travels across the words as the
+     slide lands, so the story looks read rather than swapped in. Gated on
+     background-clip support - anywhere else the quote is simply the ink it was. */
+  @supports ((-webkit-background-clip: text) or (background-clip: text)){
+    .testi-slide.on p{
+      background-image:linear-gradient(100deg, var(--ink) 42%, var(--orange-deep) 50%, var(--ink) 58%);
+      background-size:280% 100%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      animation:testiRead 1.7s var(--ease) both;
+    }
+  }
+  @keyframes testiRead{
+    from{ background-position:170% 0; }
+    to{ background-position:-70% 0; }
+  }
+  /* The name settles in just after the words. */
+  .testi-slide.on .testi-person{ animation:riseIn .6s var(--ease) .5s both; }
   .testi-nav{
     position:absolute; top:50%; transform:translateY(-50%);
     width:38px; height:38px; border-radius:50%;
@@ -1185,6 +1280,55 @@
   .testi-nav.prev{left:-10px;}
   .testi-nav.next{right:-10px;}
   .testi-nav svg{width:16px; height:16px; stroke:var(--ink);}
+
+  /* ============ FINAL CTA ============ */
+  /* The page's closing beacon. Its layout used to be inline styles; these are real
+     classes so the block can carry the glow, the sweep and the button shine. */
+  .cta-final{ text-align:center; overflow:hidden; }
+  /* A soft beacon behind the block that breathes slowly, so the end of the page is
+     still alive even when nothing is happening. */
+  .cta-final__glow{
+    position:absolute; left:50%; top:50%;
+    width:min(760px, 120%); aspect-ratio:1;
+    translate:-50% -50%;
+    background:radial-gradient(circle, rgba(245,130,31,.10) 0%, rgba(245,130,31,.04) 42%, transparent 68%);
+    pointer-events:none;
+    animation:ctaBreath 7s ease-in-out infinite;
+  }
+  @keyframes ctaBreath{
+    0%, 100%{ opacity:.55; scale:.92; }
+    50%{ opacity:1; scale:1.06; }
+  }
+  .cta-final__title{ font-size:2rem; margin-bottom:16px; }
+  /* The headline is swept once by a light band as the section is reached. The rule
+     lives inside @supports because it turns the text transparent, so a browser
+     without background-clip must never see it. */
+  @supports ((-webkit-background-clip: text) or (background-clip: text)){
+    .cta-final.in .cta-final__title{
+      background-image:linear-gradient(100deg, var(--ink) 42%, var(--orange-deep) 50%, var(--ink) 58%);
+      background-size:280% 100%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      animation:ctaSweep 1.8s var(--ease) both;
+    }
+  }
+  @keyframes ctaSweep{
+    from{ background-position:170% 0; }
+    to{ background-position:-70% 0; }
+  }
+  .cta-final__copy{ color:var(--ink-60); max-width:460px; margin:0 auto 28px; }
+  .cta-final__row{ justify-content:center; margin-top:0; }
+  /* The primary button catches a diagonal shine on hover, rather than a lift. */
+  .cta-final__row .btn-primary{ position:relative; overflow:hidden; }
+  .cta-final__row .btn-primary::after{
+    content:"";
+    position:absolute; top:0; bottom:0; left:-60%; width:45%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+    transform:skewX(-16deg);
+    transition:left .6s var(--ease);
+  }
+  .cta-final__row .btn-primary:hover::after{ left:120%; }
 
   /* ============ FOOTER ============ */
   footer{background:var(--ink); color:rgba(255,255,255,.7); padding:64px 0 0;}

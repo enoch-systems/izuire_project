@@ -355,26 +355,36 @@
       <div><span class="eyebrow">Under the IZUIRE umbrella</span><h2>Our sub-brands</h2></div>
       <p>Specialist storefronts for two of our fastest-moving categories.</p>
     </div>
+    <!-- Each panel is a storefront rather than a card: a scan sweeps the surface, the
+         brand sits behind its own ghost wordmark, the name wipes on, and a hairline
+         draws across the top on hover. All of it waits for `.in` from the reveal
+         observer, so it plays as the section is scrolled to. -->
     <div class="subbrand-grid">
       <a class="subbrand-card okrika" routerLink="/quote">
-        <div class="sb-shape" aria-hidden="true"></div>
+        <span class="sb-scan" aria-hidden="true"></span>
+        <span class="sb-ghost" aria-hidden="true">Okrika</span>
         <span class="eyebrow">Thrift &amp; Bales</span>
         <h3>IZUIRE Okrika</h3>
         <p>Graded secondhand clothing bales, sourced and sorted for resellers across Nigeria.</p>
-        <span class="btn btn-outline-light btn-sm">Explore Okrika</span>
+        <span class="btn btn-outline-light btn-sm sb-cta">Explore Okrika<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
       </a>
       <a class="subbrand-card haircubr" routerLink="/quote">
-        <div class="sb-shape" aria-hidden="true"></div>
+        <span class="sb-scan" aria-hidden="true"></span>
+        <span class="sb-ghost" aria-hidden="true">Haircubr</span>
         <span class="eyebrow">Hair &amp; Wigs</span>
         <h3>Haircubr</h3>
         <p>Raw and human hair bundles and units, built to give every woman confidence.</p>
-        <span class="btn btn-outline-light btn-sm">Explore Haircubr</span>
+        <span class="btn btn-outline-light btn-sm sb-cta">Explore Haircubr<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
       </a>
     </div>
   </div>
 </section>
 
 <!-- ============ TESTIMONIALS ============ -->
+<!-- The stories slide as before, but the active quote is read in by a light band
+     sweeping across the words, and the dots are dwell bars that fill over the
+     six seconds before the next story arrives. The stories themselves live in
+     home.ts so the markup is generated from one place. -->
 <section class="section on-paper" id="testimonials">
   <div class="container">
     <div class="testi-wrap">
@@ -383,9 +393,12 @@
       <button class="testi-nav next" id="testiNext" aria-label="Next testimonial" (click)="goTo(current() + 1)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
       <div class="testi-track">
         <div class="testi-slides" id="testiSlides" [style.transform]="'translateX(-' + current() * 100 + '%'">
-          <div class="testi-slide"><p>IZUIRE found me a supplier for screens I'd been struggling to source for months, and the quality check before shipping saved me from a bad batch.</p><div class="testi-person"><strong>Chidinma O.</strong>, Electronics Reseller, Lagos</div></div>
-          <div class="testi-slide"><p>My first Okrika order arrived exactly as graded. Communication was clear from quote to delivery, and pricing was fair for the quality.</p><div class="testi-person"><strong>Emeka A.</strong>, Thrift Wholesaler, Onitsha</div></div>
-          <div class="testi-slide"><p>Having a team physically in Guangzhou made all the difference, they negotiated better terms than I could get on my own.</p><div class="testi-person"><strong>Blessing N.</strong>, General Merchandise, Abuja</div></div>
+          @for (story of testimonials; track story.name) {
+            <div class="testi-slide" [class.on]="current() === $index">
+              <p>{{ story.quote }}</p>
+              <div class="testi-person"><strong>{{ story.name }}</strong>, {{ story.role }}</div>
+            </div>
+          }
         </div>
       </div>
       <div class="testi-dots" id="testiDots">
@@ -398,11 +411,16 @@
 </section>
 
 <!-- ============ FINAL CTA ============ -->
-<section class="section" style="text-align:center;">
+<!-- The page's closing beacon. The inline styles are gone in favour of real classes:
+     a soft glow breathes behind the block, the headline is swept once by a light
+     band when the section is reached, and the primary button catches a shine on
+     hover. `reveal-soft` keeps the observer from ever hiding this section. -->
+<section class="section cta-final reveal-soft">
+  <span class="cta-final__glow" aria-hidden="true"></span>
   <div class="container">
-    <h2 style="font-size:2rem; margin-bottom:16px;">Ready to start sourcing?</h2>
-    <p style="color:var(--ink-60); max-width:460px; margin:0 auto 28px;">Tell us what you need and we'll come back with pricing, MOQ and lead time, usually within 24 hours.</p>
-    <div class="cta-row" style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+    <h2 class="cta-final__title">Ready to start sourcing?</h2>
+    <p class="cta-final__copy">Tell us what you need and we'll come back with pricing, MOQ and lead time, usually within 24 hours.</p>
+    <div class="cta-row cta-final__row">
       <a routerLink="/quote" class="btn btn-primary">Start Sourcing</a>
       <a href="https://wa.me/2340000000000" target="_blank" rel="noopener" class="btn btn-outline">Chat on WhatsApp</a>
     </div>
