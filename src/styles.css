@@ -1062,6 +1062,38 @@
   .service-card h4{font-size:1rem; margin-bottom:8px;}
   .service-card p{font-size:.87rem; color:var(--ink-60); line-height:1.55;}
 
+  /* The Marketplace card is the only service card with a photo behind it: a
+     Cloudinary still of graded thrift bales (ders-images/thrift.jpg), declared
+     on the card's own background so no extra element is needed. It follows the
+     same recipe as the category tiles above — same tile height, same scrim
+     gradient, white icon/title/copy — except the still sits in `background`
+     rather than in a <video>, so its dimming comes from the scrim alone. */
+  .service-card--media{
+    position:relative; overflow:hidden;
+    /* `isolation` keeps the scrim on its own negative layer inside this card,
+       instead of letting it fall behind the section background. */
+    isolation:isolate;
+    background:var(--ink) center/cover no-repeat;
+    border-color:transparent;
+    min-height:200px;
+  }
+  .service-card--media::after{
+    content:"";
+    position:absolute; inset:0;
+    z-index:-1;
+    background:linear-gradient(155deg, rgba(17,17,17,.86) 0%, rgba(17,17,17,.56) 52%, rgba(217,109,20,.66) 100%);
+  }
+  .service-card--marketplace{
+    /* `c_limit` keeps the card's still under the path a phone actually paints and
+       `q_auto:good` lets Cloudinary pick the quality, as on the category tiles. */
+    background-image:url("https://res.cloudinary.com/djdbcoyot/image/upload/c_limit,w_720,q_auto:good/ders-images/thrift.jpg");
+  }
+  .service-card--media .service-icon{background:rgba(255,255,255,.16);}
+  .service-card--media .service-icon svg{stroke:var(--white);}
+  .service-card--media:hover .service-icon{background:var(--orange);}
+  .service-card--media h4{color:var(--white);}
+  .service-card--media p{color:rgba(255,255,255,.74);}
+
   /* ============ FAQ ACCORDION ============ */
   .faq-list{max-width:760px; margin:0 auto;}
   .faq-item{border-bottom:1px solid var(--line);}
