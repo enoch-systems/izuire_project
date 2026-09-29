@@ -9,6 +9,24 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    // Apply the saved mode before first paint. Without this the page renders
+    // light and snaps to dark once the bundle boots, which reads as a glitch
+    // rather than a preference. Reads the same key ThemeService writes.
+    //
+    // The mode is only ever what this site saved — the device's own dark-mode
+    // setting is deliberately not consulted, so a phone with system dark on
+    // still gets the light site. The stylesheet states color-scheme:light for
+    // the same reason, which is what covers the branch where this cannot run.
+    (function () {
+      var theme = 'light';
+      try {
+        if (localStorage.getItem('izuire.theme.v1') === 'dark') theme = 'dark';
+      } catch (e) { /* storage blocked; light stands */ }
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

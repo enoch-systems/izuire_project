@@ -12,12 +12,64 @@
     --line:#E7E2D8;
     --ink-60: rgba(17,17,17,.62);
     --ink-40: rgba(17,17,17,.42);
+    /* Type laid over a photograph or a video scrim. Separate from --white on
+       purpose: these surfaces keep their dark scrim in both modes, so their
+       text must stay light in both too. */
+    --on-media:#FFFFFF;
+    --on-media-60: rgba(255,255,255,.74);
+    /* The header's glass. Two steps because the bar is more opaque once it has
+       taken a scroll: translucent enough to read the hero through at rest, near
+       solid afterwards so the nav never fights the page behind it. They cannot
+       be an alpha of --white, since that variable is the surface colour and
+       goes opaque when it inverts. */
+    --glass: rgba(255,255,255,.88);
+    --glass-scrolled: rgba(255,255,255,.96);
+    /* A border that has to be visible against the current surface. --line is
+       already tuned per mode; this is the stronger hover step, which was
+       written as ink at a low alpha and would vanish on a dark header. */
+    --line-strong: rgba(17,17,17,.25);
     --font-d:'Space Grotesk', sans-serif;
     --font-b:'Inter', sans-serif;
     --ease: cubic-bezier(.22,.61,.36,1);
     --radius: 10px;
+    /* Opt out of the OS setting, explicitly.
+       The default is `normal`, which means "whatever the device prefers" — so a
+       phone with system dark on would paint its scrollbars, form controls and the
+       native <select> popup dark while the page around them stayed light. The
+       mode is the toggle's decision alone, so light is stated here rather than
+       left to the platform. The dark block below outranks this on specificity. */
+    color-scheme:light;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
+  /* Dark mode repaints the palette rather than restyling the site. Every surface
+     below reads one of these six, so switching the attribute repaints the whole
+     page at once. The accents (orange, whatsapp green, confirmation blue) are
+     deliberately NOT redefined: the orange is the brand and reads on both, and
+     the other two are status colours that must stay recognisable. Only the
+     neutrals invert, and the two greys step up rather than swap so surfaces
+     still separate from one another.
+
+     The logo is a dark wordmark on a light plate, so it inverts with the page
+     rather than disappearing into it. */
+  :root[data-theme="dark"]{
+    --ink:#F4F2ED;
+    --white:#14140F;
+    --paper:#1D1D17;
+    --line:#33332B;
+    --ink-60: rgba(244,242,237,.66);
+    --ink-40: rgba(244,242,237,.45);
+    /* The glass darkens rather than clears. At rest it keeps enough opacity to
+       sit over the hero's video without the nav showing through it; scrolled it
+       goes nearly solid so long copy underneath cannot crowd the links. */
+    --glass: rgba(18,18,14,.82);
+    --glass-scrolled: rgba(18,18,14,.94);
+    --line-strong: rgba(244,242,237,.28);
+    color-scheme:dark;
+  }
+  /* The wordmark plate. Inverting it keeps the mark legible in both modes. */
+  :root[data-theme="dark"] .logo-link img,
+  :root[data-theme="dark"] .mobile-nav-top img{ filter:invert(1) hue-rotate(180deg); }
+
   html{scroll-behavior:smooth;}
   body{
     font-family:var(--font-b);
@@ -82,6 +134,10 @@
     color:var(--white);
   }
   .btn-dark:hover{background:#000; transform:translateY(-1px);}
+  /* The flat black hover is a step past --ink, which now lightens in dark mode.
+     A black-on-dark hover would read as a hole, so it is pinned dark there. */
+  :root[data-theme="dark"] .btn-dark{ background:#2A2A24; }
+  :root[data-theme="dark"] .btn-dark:hover{ background:#3A3A32; }
   .btn-outline{
     background:transparent;
     color:var(--ink);
@@ -97,17 +153,20 @@
   /* ============ HEADER ============ */
   #site-header{
     position:sticky; top:0; z-index:150;
-    background:rgba(255,255,255,.88);
+    background:var(--glass);
     -webkit-backdrop-filter:saturate(180%) blur(16px);
     backdrop-filter:saturate(180%) blur(16px);
     border-bottom:1px solid transparent;
     transition:background .4s var(--ease), border-color .4s var(--ease), box-shadow .4s var(--ease);
   }
   #site-header.is-scrolled{
-    background:rgba(255,255,255,.96);
+    background:var(--glass-scrolled);
     border-bottom-color:var(--line);
     box-shadow:0 8px 30px rgba(17,17,17,.075);
   }
+  /* On a dark bar the drop shadow has nothing to sit against, so it is stepped
+     up rather than left to disappear. */
+  :root[data-theme="dark"] #site-header.is-scrolled{ box-shadow:0 8px 30px rgba(0,0,0,.5); }
   .header-inner{
     display:flex; align-items:center; gap:24px;
     min-height:76px; padding:0 24px;
@@ -122,6 +181,14 @@
   .logo-link:hover{ opacity:.82; }
   .logo-link img{ height:32px; width:auto; transition:height .3s var(--ease); }
   #site-header.is-scrolled .logo-link img{ height:29px; }
+  /* The nav slot. The toggle is its own box rather than a nav link, so it takes
+     the same 28px gap but is not a destination — a faint rule marks the edge
+     between the control and the links below it. */
+  .nav-theme{
+    display:flex; align-items:center;
+    margin-right:4px; padding-right:16px;
+    border-right:1px solid var(--line);
+  }
   nav.main-nav{ display:flex; align-items:center; gap:28px; }
   nav.main-nav a{
     font-family:var(--font-d); font-weight:500;
@@ -207,7 +274,7 @@
     transition:border-color .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease), color .25s var(--ease), transform .22s var(--ease);
   }
   .header-search-btn:hover{
-    border-color:rgba(17,17,17,.28); background:#fff; color:var(--ink);
+    border-color:var(--line-strong); background:var(--paper); color:var(--ink);
     box-shadow:0 6px 18px rgba(17,17,17,.08); transform:translateY(-1px);
   }
   .header-search-btn:active{ transform:translateY(0); }
@@ -221,7 +288,7 @@
     letter-spacing:.04em;
     transition:border-color .25s var(--ease), color .25s var(--ease), background .25s var(--ease);
   }
-  .header-search-btn:hover kbd{ border-color:rgba(17,17,17,.22); color:var(--ink-60); background:#fff; }
+  .header-search-btn:hover kbd{ border-color:var(--line-strong); color:var(--ink-60); background:var(--white); }
 
   /* Hamburger */
   .menu-toggle{
@@ -272,6 +339,19 @@
   }
   .mobile-close:hover{ background:var(--paper); }
   .mobile-close svg{ width:20px; height:20px; stroke:var(--ink); }
+  /* The drawer's appearance row. It sits between the close button and the link
+     list, ruled off from both, and is labelled so the switch is not just a pill
+     of unknown purpose on a screen full of destinations. */
+  .mobile-nav-theme{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    margin:0 -20px 8px; padding:14px 20px 16px;
+    border-bottom:1px solid var(--line);
+  }
+  .mobile-nav-theme-label{
+    font-family:var(--font-d); font-weight:600;
+    font-size:.72rem; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--ink-40);
+  }
   /* Pulled to the drawer's own edges, then inset by its side padding so the
      dividers still run full-bleed. Keep these two in step with .mobile-nav. */
   .mobile-nav-links{
@@ -295,6 +375,65 @@
   /* Nothing sits below the list now that the drawer carries no end-of-menu CTA,
      so the last link does not trail a rule out into empty space. */
   .mobile-nav-links a:last-child{ border-bottom:none; }
+
+  /* ============ THEME TOGGLE ============ */
+  /* A switch, not a button with an icon on it. The track carries the state, the
+     knob travels, and the two glyphs cross-fade — so the control reads as one
+     object changing rather than an icon being swapped under the pointer. The
+     label beside it names the mode now in force. */
+  .theme-toggle{
+    display:inline-flex; align-items:center; gap:9px;
+    padding:5px 11px 5px 6px;
+    border:1px solid var(--line); border-radius:999px;
+    background:var(--paper);
+    transition:background .25s var(--ease), border-color .25s var(--ease);
+  }
+  .theme-toggle:hover{ border-color:var(--line-strong); }
+  :root[data-theme="dark"] .theme-toggle:hover{ border-color:rgba(244,242,237,.24); }
+  .theme-toggle:focus-visible{ outline:2px solid var(--orange); outline-offset:2px; }
+  .theme-toggle-track{
+    position:relative; flex:none;
+    width:34px; height:18px; border-radius:999px;
+    /* Warm in both modes: the brand orange, the one thing carried through. In
+       light it is a pale tint of itself so it does not shout at rest; dark
+       brings it to full strength. */
+    background:rgba(245,130,31,.22);
+    transition:background .3s var(--ease);
+  }
+  .theme-toggle.is-dark .theme-toggle-track{ background:var(--orange); }
+  .theme-toggle-knob{
+    position:absolute; top:2px; left:2px;
+    width:14px; height:14px; border-radius:50%;
+    background:var(--white);
+    box-shadow:0 1px 3px rgba(0,0,0,.45);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .3s var(--ease), background .3s var(--ease);
+  }
+  .theme-toggle.is-dark .theme-toggle-knob{ transform:translateX(16px); }
+  .theme-toggle-knob svg{
+    position:absolute;
+    width:9px; height:9px;
+    stroke:var(--orange-deep); fill:none;
+    transition:opacity .25s var(--ease), transform .25s var(--ease);
+  }
+  /* Sun by default, moon once dark, each sliding past the other. */
+  .theme-toggle-moon{ opacity:0; transform:scale(.5) rotate(-40deg); }
+  .theme-toggle.is-dark .theme-toggle-sun{ opacity:0; transform:scale(.5) rotate(40deg); }
+  .theme-toggle.is-dark .theme-toggle-moon{ opacity:1; transform:scale(1) rotate(0); }
+  .theme-toggle-label{
+    font-family:var(--font-d); font-weight:600;
+    font-size:.72rem; letter-spacing:.02em;
+    color:var(--ink-60);
+    min-width:2.6em; text-align:left;
+  }
+  /* Motion here is the whole point of the control, so it is the one thing that
+     has to survive a reduced-motion preference: without the travel it would
+     read as a broken switch. The movement is kept short rather than removed. */
+  @media (prefers-reduced-motion: reduce){
+    .theme-toggle, .theme-toggle-track, .theme-toggle-knob, .theme-toggle-knob svg{
+      transition-duration:.01ms;
+    }
+  }
 
   /* ============ HERO ============ */
   .hero{
@@ -353,13 +492,17 @@
     display:inline-flex; align-items:center;
     width:auto; min-width:220px; max-width:320px;
     margin-top:8px;
-    background:rgba(255,255,255,.9);
-    border:1px solid rgba(17,17,17,.08);
+    /* The picker's plate. A token rather than the white it was written with, so
+       it follows the mode; --glass carries the translucency. */
+    background:var(--glass);
+    border:1px solid var(--line);
     border-radius:16px;
     overflow:hidden;
     box-shadow:0 10px 26px rgba(17,17,17,.04);
     transition:border-color .22s var(--ease), box-shadow .22s var(--ease), transform .22s var(--ease);
   }
+  /* On a dark plate the drop shadow has nothing to sit against, so it steps up. */
+  :root[data-theme="dark"] .hero-search{ box-shadow:0 10px 26px rgba(0,0,0,.4); }
   .hero-search:hover{transform:translateY(-1px);}
   .hero-search:focus-within{
     border-color:rgba(245,130,31,.5);
@@ -369,6 +512,9 @@
     appearance:none; -webkit-appearance:none;
     border:none; cursor:pointer;
     background-color:transparent;
+    /* The chevron is a data-URI, so its stroke is baked in and cannot read a
+       variable. It is drawn light in dark mode to match the text beside it —
+       on the same token-free footing, the dark one would vanish into the plate. */
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23111111' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat:no-repeat;
     background-position:right 16px center;
@@ -380,6 +526,18 @@
     font-family:var(--font-d); font-weight:600;
     font-size:.9rem; color:var(--ink);
     transition:background-color .22s var(--ease);
+  }
+  :root[data-theme="dark"] .hero-search select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23F4F2ED' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  /* The open list is drawn by the browser, not by the page, so it is given its
+     own colours. Without these it keeps the platform's light list in dark mode —
+     a white panel of black options sitting on a dark hero. `option` needs its
+     own rule: the list is not a descendant of the select once open. */
+  .hero-search select option,
+  .hero-search select optgroup{
+    background:var(--white);
+    color:var(--ink);
   }
   .hero-search select:hover{background-color:rgba(17,17,17,.02);}
   .hero-search input{
@@ -419,7 +577,9 @@
   }
   .hero-tags a:hover{
     color:var(--orange-deep);
-    background:#FFF6EC;
+    /* A warm wash under the tag, taken from the orange rather than written as a
+       fixed cream — a literal pale hex would stay a bright block on a dark page. */
+    background:rgba(245,130,31,.12);
     border-color:rgba(245,130,31,.45);
     transform:translateY(-1px);
   }
@@ -490,7 +650,10 @@
   .bg-f svg{ transform:scale(.84) rotate(4deg); }
 
   /* backdrop 7: dark panel, orange motif */
-  .bg-g{ background:var(--ink); --m-wash:rgba(255,255,255,.07); --m-ink:var(--orange); --m-acc:var(--orange); --m-out-op:.45; }
+  /* Fixed dark in both modes: the motif is drawn in a white wash on top of this
+     panel, so following the page's ink colour would put white-on-white in dark
+     mode. */
+  .bg-g{ background:#111111; --m-wash:rgba(255,255,255,.07); --m-ink:var(--orange); --m-acc:var(--orange); --m-out-op:.45; }
 
   /* hero stat badges → 7-slide carousel (steps right → left every 3s) */
   .badge-slider{
@@ -639,6 +802,9 @@
     box-shadow:0 16px 36px rgba(17,17,17,.08);
     border-color:transparent;
   }
+  /* A card lifting off a dark page needs its shadow to grow, not shrink: an ink
+     alpha on a near-black surface is invisible. */
+  :root[data-theme="dark"] .cat-card:hover{ box-shadow:0 16px 36px rgba(0,0,0,.5); }
   .cat-icon{
     width:52px; height:52px;
     border-radius:50%;
@@ -667,7 +833,11 @@
        it those negative layers would drop behind the section's own background and
        the tile would render as a flat dark box. */
     isolation:isolate;
-    background:var(--ink);
+    /* The plate behind the clip is fixed dark in both modes, not --ink. A looping
+       video sits under a scrim built to darken it, and the text over the top is
+       --on-media (light); letting the plate follow the page's ink colour would
+       paint a pale box under a dark scrim in dark mode. */
+    background:#111111;
     border-color:transparent;
     min-height:200px;
   }
@@ -689,10 +859,10 @@
   .cat-card--media:hover .cat-media,
   .service-card--media:hover .cat-media{opacity:.74; transform:scale(1.06);}
   .cat-card--media .cat-icon{background:rgba(255,255,255,.16);}
-  .cat-card--media .cat-icon svg{stroke:var(--white);}
+  .cat-card--media .cat-icon svg{stroke:var(--on-media);}
   .cat-card--media:hover .cat-icon{background:var(--orange);}
-  .cat-card--media h4{color:var(--white);}
-  .cat-card--media span{color:rgba(255,255,255,.74);}
+  .cat-card--media h4{color:var(--on-media);}
+  .cat-card--media span{color:var(--on-media-60);}
 
   /* ============ PRODUCTS ============ */
   .currency-toggle{
@@ -723,6 +893,8 @@
     transition:box-shadow .25s var(--ease), transform .25s var(--ease);
   }
   .product-card:hover{box-shadow:0 18px 36px rgba(17,17,17,.09); transform:translateY(-3px);}
+  /* See .cat-card:hover — the lift shadow has to grow on a dark surface. */
+  :root[data-theme="dark"] .product-card:hover{ box-shadow:0 18px 36px rgba(0,0,0,.5); }
   .product-media{
     aspect-ratio:1/.82;
     background:var(--paper);
@@ -1014,9 +1186,15 @@
   }
 
   /* ============ TRUST BAND ============ */
+  /* One of the page's two deliberately dark surfaces. It stays dark in both
+     modes: a looping clip runs under a scrim built to darken what is behind it,
+     so lifting the band to a pale surface would leave white type and a scrim
+     fighting each other. */
+  :root[data-theme="dark"] .trust-band,
+  :root[data-theme="dark"] footer{ background:#0A0A08; }
   .trust-band{
     background:var(--ink);
-    color:var(--white);
+    color:var(--on-media);
     padding:60px 0;
     position:relative;
   }
@@ -1026,7 +1204,7 @@
     gap:24px;
   }
   .trust-stat{border-left:2px solid var(--orange); padding-left:18px;}
-  .trust-stat .num{font-family:var(--font-d); font-weight:700; font-size:2.1rem; color:var(--white); font-variant-numeric:tabular-nums;}
+  .trust-stat .num{font-family:var(--font-d); font-weight:700; font-size:2.1rem; color:var(--on-media); font-variant-numeric:tabular-nums;}
   /* The `+` rides with the figure and takes the accent, so a count in flight still
      reads as a claim rather than a bare number. */
   .trust-stat .num-suffix{color:var(--orange); font-size:.62em; margin-left:.05em;}
@@ -1213,6 +1391,10 @@
     transition:border-color .2s var(--ease);
   }
   .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--orange); outline:none;}
+  /* The open list is drawn by the browser, so it needs its own colours or it
+     keeps the platform's light panel on a dark form. */
+  .field select option,
+  .field select optgroup{ background:var(--white); color:var(--ink); }
   .field textarea{resize:vertical; min-height:96px;}
   .field-error{font-size:.74rem; color:#C0392B; margin-top:5px; display:none;}
   .field.has-error input, .field.has-error select, .field.has-error textarea{border-color:#C0392B;}
@@ -1351,7 +1533,7 @@
   .footer-logo img{height:26px; margin-bottom:16px; filter:brightness(0) invert(1);}
   .footer-grid p{font-size:.84rem; line-height:1.65; max-width:280px;}
   .footer-col h5{
-    font-family:var(--font-d); color:var(--white); font-size:.82rem;
+    font-family:var(--font-d); color:var(--on-media); font-size:.82rem;
     letter-spacing:.05em; text-transform:uppercase; margin-bottom:16px;
   }
   .footer-col ul{display:flex; flex-direction:column; gap:11px;}
@@ -1443,7 +1625,9 @@
     *{transition:none !important; animation:none !important; scroll-behavior:auto !important;}
     .cat-card--media .cat-media,
     .service-card--media .cat-media{display:none;}
-    .cat-card--media{background:var(--ink) center/cover no-repeat;}
+    /* Reduced motion swaps the clip for a still of the tile's own. The plate
+       stays the same fixed dark, so the swap is the only thing that changes. */
+    .cat-card--media{background:#111111 center/cover no-repeat;}
     .cat-card--electronics{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a1.jpg");}
     .cat-card--okrika{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/secondhandclothing.jpg");}
     .cat-card--building{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a3.jpg");}
@@ -1488,6 +1672,7 @@
     padding:28px 24px; transition:transform .25s var(--ease), box-shadow .25s var(--ease);
   }
   .service-card:hover{transform:translateY(-4px); box-shadow:0 16px 36px rgba(17,17,17,.08);}
+  :root[data-theme="dark"] .service-card:hover{ box-shadow:0 16px 36px rgba(0,0,0,.5); }
   .service-icon{
     width:48px; height:48px; border-radius:10px; background:var(--paper);
     display:flex; align-items:center; justify-content:center; margin-bottom:18px;
@@ -1507,7 +1692,10 @@
     /* `isolation` keeps the scrim on its own negative layer inside this card,
        instead of letting it fall behind the section background. */
     isolation:isolate;
-    background:var(--ink) center/cover no-repeat;
+    /* Fixed dark in both modes, for the same reason as .cat-card--media: the copy
+       over this card is --on-media and sits on a scrim, so the plate underneath
+       must not follow the page's ink colour. */
+    background:#111111 center/cover no-repeat;
     border-color:transparent;
     min-height:200px;
     /* Icon pinned to the top, heading and copy pinned to the bottom, so the four
@@ -1541,15 +1729,15 @@
     background-image:url("https://res.cloudinary.com/djdbcoyot/image/upload/c_limit,w_720,q_auto:good/ders-images/doc.jpg");
   }
   .service-card--media .service-icon{background:rgba(255,255,255,.16);}
-  .service-card--media .service-icon svg{stroke:var(--white);}
+  .service-card--media .service-icon svg{stroke:var(--on-media);}
   .service-card--media:hover .service-icon{background:var(--orange);}
   /* `margin-top:auto` is what pins the heading and copy to the bottom edge: any
      height left over from a shorter paragraph is absorbed above the heading, so
      the icon's own 18px gap is never squeezed out. `text-wrap` balances two-line
      headings and avoids a lone trailing word in the copy; browsers without it set
      the text exactly as before. */
-  .service-card--media h4{color:var(--white); text-wrap:balance; margin-top:auto;}
-  .service-card--media p{color:rgba(255,255,255,.74); text-wrap:pretty;}
+  .service-card--media h4{color:var(--on-media); text-wrap:balance; margin-top:auto;}
+  .service-card--media p{color:var(--on-media-60); text-wrap:pretty;}
 
   /* ============ FAQ ACCORDION ============ */
   .faq-list{max-width:760px; margin:0 auto;}
@@ -1721,7 +1909,7 @@
     transition:border-color .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease), color .25s var(--ease), transform .22s var(--ease);
   }
   .header-search-btn:hover{
-    border-color:rgba(17,17,17,.28); background:#fff; color:var(--ink);
+    border-color:var(--line-strong); background:var(--paper); color:var(--ink);
     box-shadow:0 6px 18px rgba(17,17,17,.08); transform:translateY(-1px);
   }
   .header-search-btn:active{ transform:translateY(0); }
@@ -1732,7 +1920,7 @@
     padding:4px 7px; margin-left:6px; font-family:var(--font-b); letter-spacing:.04em;
     color:var(--ink-40); background:var(--paper);
   }
-  .header-search-btn:hover kbd{ border-color:rgba(17,17,17,.22); color:var(--ink-60); background:#fff; }
+  .header-search-btn:hover kbd{ border-color:var(--line-strong); color:var(--ink-60); background:var(--white); }
 
   @media (max-width: 980px){
     .service-grid{grid-template-columns:1fr 1fr;}
@@ -1822,6 +2010,11 @@
   @media (min-width: 981px) and (max-width: 1240px){
     nav.main-nav{ gap:16px; }
     nav.main-nav a, .nav-dropdown-trigger{ font-size:.86rem; }
+    /* The switch is the widest fixed thing in the nav, so it is the first to
+       give something up: the label goes and the track closes to its padding. */
+    .nav-theme{ margin-right:0; padding-right:12px; }
+    .theme-toggle-label{ display:none; }
+    .theme-toggle{ padding:5px 6px; }
   }
   @media (max-width: 980px){
     nav.main-nav{ display:none; }
@@ -1850,7 +2043,7 @@
     background:var(--white); color:var(--ink-60);
     transition:color .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
   }
-  .header-icon-btn:hover{ border-color:rgba(17,17,17,.25); color:var(--orange-deep); }
+  .header-icon-btn:hover{ border-color:var(--line-strong); color:var(--orange-deep); }
   .header-icon-btn svg{ width:18px; height:18px; stroke:currentColor; }
 
   @media (max-width: 980px){
@@ -2254,7 +2447,7 @@
     background:var(--white); color:var(--ink-60);
     transition:border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease);
   }
-  .cart-btn:hover{ border-color:rgba(17,17,17,.25); color:var(--orange-deep); }
+  .cart-btn:hover{ border-color:var(--line-strong); color:var(--orange-deep); }
   .cart-btn svg{ width:19px; height:19px; stroke:currentColor; }
   .cart-count{
     position:absolute; top:-7px; right:-7px;

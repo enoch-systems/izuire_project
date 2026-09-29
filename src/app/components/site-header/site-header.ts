@@ -3,6 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UiService } from '../../services/ui.service';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
+import { ThemeToggle } from '../theme-toggle/theme-toggle';
 
 /** Desktop nav dropdowns. Only one may be open at a time. */
 type DropdownName = 'categories' | 'resources';
@@ -17,7 +18,7 @@ type DropdownName = 'categories' | 'resources';
  */
 @Component({
   selector: 'app-site-header',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, ThemeToggle],
   templateUrl: './site-header.html',
   host: {
     '(window:scroll)': 'onWindowScroll()',

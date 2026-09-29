@@ -1,0 +1,26 @@
+<!-- The knob slides and the two glyphs cross-fade, so the control reads as one
+     object changing state rather than an icon being swapped. The track is orange
+     when dark, which is the site's one accent and the only colour carried
+     through both modes. -->
+<button
+  type="button"
+  class="theme-toggle"
+  [class.is-dark]="theme.isDark()"
+  [attr.aria-pressed]="theme.isDark()"
+  [attr.aria-label]="theme.isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+  (click)="toggle()"
+>
+  <span class="theme-toggle-track" aria-hidden="true">
+    <span class="theme-toggle-knob">
+      <!-- Sun for the mode you are in, moon for the one you can reach. -->
+      <svg class="theme-toggle-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="4.2"/>
+        <path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/>
+      </svg>
+      <svg class="theme-toggle-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 14.2A8.2 8.2 0 019.8 4a8.4 8.4 0 106.9 12.3 8.2 8.2 0 003.3-2.1z"/>
+      </svg>
+    </span>
+  </span>
+  <span class="theme-toggle-label" aria-hidden="true">{{ theme.isDark() ? 'Dark' : 'Light' }}</span>
+</button>
