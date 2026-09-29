@@ -5,11 +5,22 @@
     </a>
     <nav class="main-nav" aria-label="Primary">
       <a routerLink="/marketplace" routerLinkActive="active">Marketplace</a>
+      <div class="nav-dropdown" [class.open]="isDropdownOpen('categories')">
+        <button class="nav-dropdown-trigger" type="button" (click)="toggleDropdown('categories')" aria-haspopup="true" [attr.aria-expanded]="isDropdownOpen('categories')">Categories
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="nav-dropdown-panel">
+          <a routerLink="/marketplace" fragment="electronics" (click)="closeDropdown()">Phone accessories</a>
+          <a routerLink="/marketplace" fragment="okrika" (click)="closeDropdown()">Okrika bales</a>
+          <a routerLink="/marketplace" fragment="solar" (click)="closeDropdown()">Solar panels</a>
+          <a routerLink="/marketplace" fragment="hair" (click)="closeDropdown()">Human hair</a>
+        </div>
+      </div>
       <a routerLink="/sourcing" routerLinkActive="active">Sourcing</a>
       <a routerLink="/shipping" routerLinkActive="active">Shipping</a>
       <a routerLink="/business-solutions" routerLinkActive="active">Business Solutions</a>
-      <div class="nav-dropdown" [class.open]="dropdownOpen()">
-        <button class="nav-dropdown-trigger" type="button" (click)="toggleDropdown()" aria-haspopup="true" [attr.aria-expanded]="dropdownOpen()">Resources
+      <div class="nav-dropdown" [class.open]="isDropdownOpen('resources')">
+        <button class="nav-dropdown-trigger" type="button" (click)="toggleDropdown('resources')" aria-haspopup="true" [attr.aria-expanded]="isDropdownOpen('resources')">Resources
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="nav-dropdown-panel">
@@ -52,6 +63,10 @@
 
   <nav class="mobile-nav-links" aria-label="Mobile">
     <a (click)="closeMenu()" routerLink="/marketplace" routerLinkActive="active"><span>Marketplace</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
+<a (click)="closeMenu()" routerLink="/marketplace" fragment="electronics"><span>Phone accessories</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
+<a (click)="closeMenu()" routerLink="/marketplace" fragment="okrika"><span>Okrika bales</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
+<a (click)="closeMenu()" routerLink="/marketplace" fragment="solar"><span>Solar panels</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
+<a (click)="closeMenu()" routerLink="/marketplace" fragment="hair"><span>Human hair</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
 <a (click)="closeMenu()" routerLink="/sourcing" routerLinkActive="active"><span>Sourcing</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
 <a (click)="closeMenu()" routerLink="/shipping" routerLinkActive="active"><span>Shipping</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
 <a (click)="closeMenu()" routerLink="/business-solutions" routerLinkActive="active"><span>Business Solutions</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>

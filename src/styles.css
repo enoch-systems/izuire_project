@@ -1,6 +1,8 @@
 :root{
     --orange:#F5821F;
     --orange-deep:#D96D14;
+    --wa:#25D366;
+    --wa-deep:#0E7A3E;
     --ink:#111111;
     --white:#FFFFFF;
     --paper:#F8F8F6;
@@ -64,6 +66,14 @@
   }
   .btn-primary:hover{background:var(--orange-deep); transform:translateY(-1px);}
   .btn-primary:active{transform:translateY(0);}
+  .btn-whatsapp{
+    background:var(--wa);
+    color:var(--white);
+    box-shadow:0 1px 0 rgba(0,0,0,.06);
+  }
+  .btn-whatsapp:hover{background:var(--wa-deep); transform:translateY(-1px);}
+  .btn-whatsapp:active{transform:translateY(0);}
+  .btn-whatsapp svg{width:15px; height:15px; flex-shrink:0;}
   .btn-dark{
     background:var(--ink);
     color:var(--white);
@@ -312,59 +322,127 @@
     gap:40px;
     align-items:center;
   }
-  .hero-copy{padding-bottom:70px; min-width:0;}
-  .hero-copy .eyebrow{margin-bottom:22px;}
+  .hero-copy{
+    display:flex; flex-direction:column; align-items:flex-start;
+    gap:20px;
+    padding-bottom:70px; min-width:0;
+  }
+  .hero-copy > *{margin:0;}
+  .hero-copy .eyebrow{
+    margin:0; padding:8px 15px 8px 12px;
+    background:rgba(245,130,31,.10);
+    border:1px solid rgba(245,130,31,.24);
+    border-radius:999px;
+    font-size:.7rem; letter-spacing:.1em;
+  }
+  .hero-copy .eyebrow::before{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--orange);
+  }
   .hero h1{
     font-size:clamp(2.4rem, 4.4vw, 3.65rem);
-    margin-bottom:20px;
+    margin-bottom:0;
+    max-width:640px;
   }
   .hero h1 em{
     font-style:normal;
     color:var(--orange);
     position:relative;
+    white-space:nowrap;
+  }
+  .hero h1 em::after{
+    content:""; position:absolute;
+    left:-.04em; right:-.04em; bottom:.02em; height:.3em;
+    background:rgba(245,130,31,.16);
+    border-radius:999px;
+    z-index:-1;
   }
   .hero-sub{
-    font-size:1.08rem;
+    font-size:1.06rem;
+    line-height:1.68;
     color:var(--ink-60);
-    max-width:480px;
-    margin-bottom:34px;
+    max-width:530px;
   }
   .hero-search{
-    display:flex;
-    background:var(--white);
-    border:1px solid var(--line);
-    border-radius:8px;
+    display:inline-flex; align-items:center;
+    width:auto; min-width:220px; max-width:320px;
+    margin-top:8px;
+    background:rgba(255,255,255,.9);
+    border:1px solid rgba(17,17,17,.08);
+    border-radius:16px;
     overflow:hidden;
-    max-width:560px;
-    box-shadow:0 10px 30px rgba(17,17,17,.06);
+    box-shadow:0 10px 26px rgba(17,17,17,.04);
+    transition:border-color .22s var(--ease), box-shadow .22s var(--ease), transform .22s var(--ease);
+  }
+  .hero-search:hover{transform:translateY(-1px);}
+  .hero-search:focus-within{
+    border-color:rgba(245,130,31,.5);
+    box-shadow:0 0 0 4px rgba(245,130,31,.12), 0 12px 30px rgba(17,17,17,.06);
   }
   .hero-search select{
-    border:none; background:var(--paper);
-    padding:0 14px;
-    font-size:.84rem;
-    font-family:var(--font-d);
-    font-weight:500;
-    color:var(--ink-60);
-    border-right:1px solid var(--line);
-    max-width:150px;
+    appearance:none; -webkit-appearance:none;
+    border:none; cursor:pointer;
+    background-color:transparent;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23111111' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 16px center;
+    background-size:11px 7px;
+    padding:0 40px 0 18px;
+    min-width:220px; max-width:320px;
+    min-height:58px;
+    width:100%;
+    font-family:var(--font-d); font-weight:600;
+    font-size:.9rem; color:var(--ink);
+    transition:background-color .22s var(--ease);
   }
+  .hero-search select:hover{background-color:rgba(17,17,17,.02);}
   .hero-search input{
-    flex:1; border:none; padding:16px 14px; font-size:.95rem;
+    display:none;
   }
   .hero-search button{
-    background:var(--orange); color:var(--white);
-    padding:0 26px;
-    font-family:var(--font-d); font-weight:600; font-size:.9rem;
-    transition:background .2s var(--ease);
+    display:none;
   }
-  .hero-search button:hover{background:var(--orange-deep);}
+  /* keep the category picker in the hero content on all layouts */
+  .hero-copy .hero-search{display:inline-flex;}
+  .search-band{
+    display:none;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    padding:18px 0;
+  }
+  .search-band .hero-search{
+    max-width:720px; margin:0 auto;
+  }
   .hero-tags{
-    display:flex; flex-wrap:wrap; gap:10px 22px;
-    margin-top:22px;
+    display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+    margin-top:4px;
   }
-  .hero-tags span{font-size:.8rem; color:var(--ink-40);}
-  .hero-tags a{font-size:.8rem; color:var(--ink-60); border-bottom:1px dashed var(--line);}
-  .hero-tags a:hover{color:var(--orange-deep); border-color:var(--orange-deep);}
+  .hero-tags span{
+    font-family:var(--font-d); font-weight:600;
+    font-size:.7rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-40);
+    margin-right:2px;
+  }
+  .hero-tags a{
+    font-size:.8rem; color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:7px 14px;
+    transition:color .22s var(--ease), background .22s var(--ease), border-color .22s var(--ease), transform .22s var(--ease);
+  }
+  .hero-tags a:hover{
+    color:var(--orange-deep);
+    background:#FFF6EC;
+    border-color:rgba(245,130,31,.45);
+    transform:translateY(-1px);
+  }
+  .cta-row{
+    display:flex; flex-wrap:wrap; align-items:center; gap:14px;
+    margin-top:10px;
+  }
+  .cta-row .btn{min-height:52px;}
+  .hero-copy .cta-row .btn-primary{box-shadow:0 12px 26px rgba(245,130,31,.28);}
 
   /* hero visual: angled Z-bridge motif */
   .hero-visual{
@@ -374,19 +452,148 @@
     display:flex; align-items:center; justify-content:center;
   }
   .hero-visual svg{width:100%; height:100%;}
-  .hero-badge{
-    position:absolute;
-    background:var(--white);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:14px 18px;
-    box-shadow:0 14px 34px rgba(17,17,17,.09);
+
+  /* hero backdrop slider: a second layer that slides with every stat card */
+  .badge-bg{ position:absolute; inset:0; overflow:hidden; border-radius:16px; }
+  .badge-bg-track{
+    display:flex; align-items:stretch; height:100%;
+    transition:transform .8s var(--ease);
+    will-change:transform;
+  }
+  .badge-bg-panel{
+    flex:0 0 100%; min-width:0; position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    --m-wash:rgba(245,130,31,.14);
+    --m-ink:var(--ink);
+    --m-acc:var(--orange);
+    --m-out-op:.12;
+  }
+  .badge-bg-panel svg{ transform-origin:center; }
+  .badge-bg-panel .m1{ fill:var(--m-wash); }
+  .badge-bg-panel .m2{ fill:none; stroke:var(--m-ink); stroke-width:2; opacity:var(--m-out-op); }
+  .badge-bg-panel .m3{ fill:var(--m-ink); }
+  .badge-bg-panel .m4{ fill:var(--m-acc); }
+  .badge-bg-panel .m5{ fill:var(--m-ink); }
+  .badge-bg-panel .m6{ fill:var(--m-acc); }
+
+  /* backdrop 1: white, original motif */
+  .bg-a{ background:var(--white); }
+
+  /* backdrop 2: dotted paper, outline-led motif */
+  .bg-b{
+    background-color:var(--paper);
+    background-image:radial-gradient(var(--line) 1.2px, transparent 1.2px);
+    background-size:16px 16px;
+    --m-wash:transparent; --m-acc:var(--ink); --m-out-op:.18;
+  }
+
+  /* backdrop 3: orange wash, tilted motif */
+  .bg-c{ background:rgba(245,130,31,.12); --m-wash:transparent; --m-acc:var(--orange-deep); }
+  .bg-c svg{ transform:rotate(-6deg) scale(.92); }
+
+  /* backdrop 4: paper, mirrored motif */
+  .bg-d{ background:var(--paper); --m-wash:rgba(17,17,17,.07); --m-ink:var(--orange-deep); --m-acc:var(--ink); }
+  .bg-d svg{ transform:scaleX(-1); }
+
+  /* backdrop 5: deeper orange wash, flipped motif */
+  .bg-e{ background:rgba(245,130,31,.22); --m-wash:transparent; --m-acc:var(--ink); }
+  .bg-e svg{ transform:scaleY(-1); }
+
+  /* backdrop 6: white, zoomed and tilted outline motif */
+  .bg-f{ background:var(--white); --m-wash:rgba(17,17,17,.05); --m-ink:var(--orange-deep); --m-out-op:.2; }
+  .bg-f svg{ transform:scale(.84) rotate(4deg); }
+
+  /* backdrop 7: dark panel, orange motif */
+  .bg-g{ background:var(--ink); --m-wash:rgba(255,255,255,.07); --m-ink:var(--orange); --m-acc:var(--orange); --m-out-op:.45; }
+
+  /* hero stat badges → 7-slide carousel (steps right → left every 3s) */
+  .badge-slider{
+    position:absolute; right:2%; bottom:7%;
+    width:min(290px, 62%);
     font-family:var(--font-d);
   }
-  .hero-badge .num{font-size:1.5rem; font-weight:700; color:var(--ink);}
-  .hero-badge .lbl{font-size:.68rem; color:var(--ink-40); text-transform:uppercase; letter-spacing:.06em;}
-  .hero-badge.b1{top:8%; left:0;}
-  .hero-badge.b2{bottom:10%; right:2%;}
+  .badge-viewport{
+    overflow:hidden; border-radius:12px;
+    box-shadow:0 16px 38px rgba(17,17,17,.10);
+  }
+  .badge-track{
+    display:flex; align-items:stretch;
+    transition:transform .65s var(--ease);
+    will-change:transform;
+  }
+  .badge-slide{
+    flex:0 0 100%; min-width:0; min-height:126px;
+    position:relative; overflow:hidden;
+    display:flex; align-items:center; gap:14px;
+    padding:18px;
+    background:var(--white); border:1px solid var(--line); border-radius:12px;
+  }
+  .badge-slider .bs-icon{
+    width:34px; height:34px; flex-shrink:0; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--paper); color:var(--ink);
+  }
+  .badge-slider .bs-icon svg{ width:17px; height:17px; stroke:currentColor; fill:none; }
+  .bs-text{ flex:1; min-width:0; }
+  .bs-num{ font-size:1.7rem; font-weight:700; line-height:1.05; letter-spacing:-.01em; color:var(--ink); }
+  .bs-lbl{ font-size:.66rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-40); margin-top:5px; }
+  .bs-dots{ display:flex; justify-content:flex-end; gap:7px; margin-top:12px; }
+  .bs-dots span{
+    width:7px; height:7px; border-radius:50%; background:var(--line);
+    transition:background .25s var(--ease), width .25s var(--ease);
+  }
+  .bs-dots span.active{ background:var(--orange); width:20px; border-radius:4px; }
+
+  /* slide 1: white card with an orange edge rule */
+  .bs-a{ padding-left:22px; border-left:3px solid var(--orange); }
+  .bs-a .bs-icon{ background:rgba(245,130,31,.12); color:var(--orange-deep); }
+
+  /* slide 2: paper card, dashed outline, orange figure */
+  .bs-b{ background:var(--paper); border-style:dashed; }
+  .bs-b .bs-icon{ background:var(--white); color:var(--ink); }
+  .bs-b .bs-num{ color:var(--orange-deep); }
+
+  /* slide 3: dark card with a diagonal orange wedge */
+  .bs-c{ background:var(--ink); border-color:var(--ink); }
+  .bs-c::after{
+    content:""; position:absolute; top:-34px; right:-34px;
+    width:96px; height:96px; background:var(--orange); opacity:.24;
+    transform:rotate(45deg);
+  }
+  .bs-c .bs-icon{ background:rgba(255,255,255,.10); color:var(--orange); }
+  .bs-c .bs-num{ color:var(--white); }
+  .bs-c .bs-lbl{ color:rgba(255,255,255,.55); }
+
+  /* slide 4: solid orange card, stacked */
+  .bs-d{
+    background:var(--orange); border-color:var(--orange);
+    flex-direction:column; align-items:flex-start; justify-content:center; gap:10px;
+  }
+  .bs-d .bs-icon{ background:rgba(255,255,255,.20); color:var(--white); }
+  .bs-d .bs-num{ color:var(--white); }
+  .bs-d .bs-lbl{ color:rgba(255,255,255,.82); }
+
+  /* slide 5: heavy ink outline, icon on the right */
+  .bs-e{ border:2px solid var(--ink); flex-direction:row-reverse; }
+  .bs-e .bs-icon{ background:var(--ink); color:var(--white); }
+  .bs-e .bs-num{ color:var(--ink); }
+  .bs-e .bs-lbl{ color:var(--orange-deep); }
+
+  /* slide 6: paper card with an ink rail and a lede figure */
+  .bs-f{ background:var(--paper); padding-left:24px; }
+  .bs-f::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--ink); }
+  .bs-f .bs-icon{ background:var(--white); color:var(--orange-deep); }
+  .bs-f .bs-num{ font-size:1.18rem; }
+  .bs-f .bs-lbl{ margin-top:2px; }
+
+  /* slide 7: ink side rail holding the icon */
+  .bs-g{ padding-left:70px; }
+  .bs-g .bs-icon{
+    position:absolute; left:0; top:0; bottom:0;
+    width:54px; height:auto; border-radius:0;
+    background:var(--ink); color:var(--orange);
+  }
+  .bs-g .bs-num{ font-size:1.24rem; }
 
   .diagonal-divider{
     width:100%; height:64px;
@@ -394,6 +601,25 @@
     clip-path:polygon(0 100%, 100% 0, 100% 100%);
     margin-top:40px;
   }
+
+  /* ============ HERO ENTRANCE: right → left slide ============ */
+  @keyframes heroSlideIn{
+    from{ opacity:0; transform:translateX(80px); }
+    to{ opacity:1; transform:translateX(0); }
+  }
+  @keyframes heroSlideInSoft{
+    from{ opacity:0; transform:translateX(56px) scale(.97); }
+    to{ opacity:1; transform:translateX(0) scale(1); }
+  }
+  .hero-slide{ animation:heroSlideIn .8s var(--ease) both; }
+  .hero-copy .eyebrow.hero-slide{ animation-delay:.05s; }
+  .hero-copy h1.hero-slide{ animation-delay:.15s; }
+  .hero-copy .hero-sub.hero-slide{ animation-delay:.25s; }
+  .hero-copy .hero-search.hero-slide{ animation-delay:.35s; }
+  .hero-copy .hero-tags.hero-slide{ animation-delay:.45s; }
+  .hero-copy .cta-row.hero-slide{ animation-delay:.55s; }
+  .hero-visual.hero-slide{ animation:heroSlideInSoft 1s var(--ease) .2s both; }
+  .badge-slider.hero-slide{ animation:heroSlideInSoft .7s var(--ease) .65s both; }
 
   /* ============ SECTION HEADS ============ */
   .section{padding:88px 0;}
@@ -409,6 +635,9 @@
   .cat-grid{
     display:grid;
     grid-template-columns:repeat(4, 1fr);
+    /* Every row is the same height, so all eight video tiles end up the exact
+       same size as the Electronics tile on desktop and on mobile. */
+    grid-auto-rows:1fr;
     gap:16px;
   }
   .cat-card{
@@ -436,6 +665,43 @@
   .cat-card:hover .cat-icon svg{stroke:var(--white);}
   .cat-card h4{font-size:1rem; font-weight:600;}
   .cat-card span{font-size:.8rem; color:var(--ink-40);}
+
+  /* Category cards with a looping Cloudinary video backdrop — all eight
+     categories. Every card carries the same writing pattern (icon, title,
+     caption) and the same minimum tile height, and each card also has a
+     `cat-card--<name>` modifier that supplies its own still frame for
+     reduced-motion users. Video and scrim sit on negative z-index layers so the
+     icon, title and caption stay readable on top of the footage. */
+  .cat-card--media{
+    position:relative; overflow:hidden;
+    /* `isolation` keeps the scrim (-1) and the video (-2) inside this card. Without
+       it those negative layers would drop behind the section's own background and
+       the tile would render as a flat dark box. */
+    isolation:isolate;
+    background:var(--ink);
+    border-color:transparent;
+    min-height:200px;
+  }
+  .cat-card--media .cat-media{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    z-index:-2;
+    opacity:.62;
+    transition:transform .6s var(--ease), opacity .25s var(--ease);
+  }
+  .cat-card--media::after{
+    content:"";
+    position:absolute; inset:0;
+    z-index:-1;
+    background:linear-gradient(155deg, rgba(17,17,17,.82) 0%, rgba(17,17,17,.48) 52%, rgba(217,109,20,.6) 100%);
+  }
+  .cat-card--media:hover .cat-media{opacity:.74; transform:scale(1.06);}
+  .cat-card--media .cat-icon{background:rgba(255,255,255,.16);}
+  .cat-card--media .cat-icon svg{stroke:var(--white);}
+  .cat-card--media:hover .cat-icon{background:var(--orange);}
+  .cat-card--media h4{color:var(--white);}
+  .cat-card--media span{color:rgba(255,255,255,.74);}
 
   /* ============ PRODUCTS ============ */
   .currency-toggle{
@@ -709,18 +975,36 @@
     .footer-grid{grid-template-columns:1fr 1fr;}
   }
   @media (max-width: 620px){
-    .hero-badge{padding:10px 12px; border-radius:8px;}
-    .hero-badge .num{font-size:1.15rem;}
-    .hero-badge .lbl{font-size:.6rem;}
-    .hero-badge.b1{left:4px; top:6%;}
-    .hero-badge.b2{right:4px; bottom:6%;}
-    .hero-search{flex-wrap:wrap; max-width:100%;}
-    .hero-search select{
-      border-right:none; border-bottom:1px solid var(--line);
-      max-width:none; width:100%; padding:14px;
+    .badge-slider{ right:2px; bottom:4%; width:min(250px, 76%); }
+    .badge-bg{ border-radius:10px; }
+    .badge-slide{ min-height:112px; padding:14px; gap:11px; }
+    .badge-slider .bs-icon{ width:30px; height:30px; }
+    .bs-num{ font-size:1.45rem; }
+    .bs-f .bs-num, .bs-g .bs-num{ font-size:1.04rem; }
+    .bs-g{ padding-left:60px; }
+    .bs-g .bs-icon{ width:46px; }
+    .bs-dots{ margin-top:10px; }
+    .hero-search{
+      flex-direction:column; align-items:stretch;
+      width:100%; max-width:100%;
+      margin-top:6px;
     }
-    .hero-search input{width:100%; flex-basis:100%;}
-    .hero-search button{width:100%; padding:14px;}
+    .hero-search select{
+      width:100%; max-width:none; min-height:50px;
+      padding:0 40px 0 16px;
+      background-position:right 16px center;
+      border-right:none; border-bottom:1px solid var(--line);
+      font-size:.95rem;
+    }
+    .hero-search input{
+      width:100%; min-height:52px;
+      padding:15px 16px; font-size:1rem;
+    }
+    .hero-search button{
+      width:100%; min-height:52px;
+      padding:15px 16px; font-size:.95rem;
+      border-left:none; border-top:1px solid var(--line);
+    }
     .container{padding:0 18px;}
     .section{padding:64px 0;}
     .cat-grid{grid-template-columns:1fr 1fr;}
@@ -733,8 +1017,22 @@
     .header-inner{padding:12px 18px;}
   }
 
+  /* Nothing should move for visitors who have asked for less motion: drop the
+     looping clips and give each tile a still frame taken from its own clip one
+     second in (Cloudinary's `so_1` transform), so the section keeps the same look
+     with no playback and no scroll animation. */
   @media (prefers-reduced-motion: reduce){
-    *{transition:none !important; scroll-behavior:auto !important;}
+    *{transition:none !important; animation:none !important; scroll-behavior:auto !important;}
+    .cat-card--media .cat-media{display:none;}
+    .cat-card--media{background:var(--ink) center/cover no-repeat;}
+    .cat-card--electronics{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a1.jpg");}
+    .cat-card--okrika{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/secondhandclothing.jpg");}
+    .cat-card--building{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a3.jpg");}
+    .cat-card--hair{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a2.jpg");}
+    .cat-card--fashion{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/fashionwears.jpg");}
+    .cat-card--general{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/generalmerchandise.jpg");}
+    .cat-card--solar{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/solarequipment.jpg");}
+    .cat-card--kitchen{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/kitcenware.jpg");}
   }
 
   /* ============ SHARED: PAGE HERO (inner pages) ============ */
@@ -1030,6 +1328,13 @@
   .search-result-item:hover{ background:var(--paper); transform:translateX(3px); }
 
   /* ---------- Responsive refinements ---------- */
+  /* The desktop nav carries seven items now, so tighten its rhythm before it
+     is swapped for the hamburger and nothing wraps onto a second line. */
+  @media (min-width: 981px) and (max-width: 1240px){
+    nav.main-nav{ gap:16px; }
+    nav.main-nav a, .nav-dropdown-trigger{ font-size:.86rem; }
+    .header-cta{ padding:0 15px; font-size:.85rem; }
+  }
   @media (max-width: 980px){
     nav.main-nav{ display:none; }
     .header-search-btn{ display:none; }
@@ -1075,14 +1380,11 @@
 
     /* Hero */
     .hero{ padding:44px 0 0; }
-    .hero-copy{ padding-bottom:40px; }
+    .hero-copy{ padding-bottom:40px; gap:16px; }
     .hero h1{ font-size:clamp(1.85rem, 7.2vw, 2.35rem); }
-    .hero-sub{ font-size:.98rem; margin-bottom:26px; }
-    .hero-search select{ padding:14px 13px; }
-    .hero-search input{ padding:15px 13px; }
-    .hero-search button{ padding:15px 13px; min-height:48px; }
+    .hero-sub{ font-size:.98rem; max-width:100%; }
     .hero-visual{ height:300px; }
-    .hero-tags{ margin-top:18px; gap:8px 14px; }
+    .hero-tags{ margin-top:0; gap:7px; }
 
     /* Full-width primary/secondary CTA pairs */
     .cta-row{ width:100%; }
@@ -1296,3 +1598,37 @@
     .product-body .btn{ padding:8px 5px; font-size:.68rem; }
     .currency-toggle button{ font-size:.7rem; padding:8px 8px; }
   }
+
+  /* ============ SCROLL "BUBBLE UP" REVEAL ============ */
+  /* Category and product cards sink slightly and fade in one at a time as you
+     scroll to them. The Home component adds `.pop` to each card (so the cards
+     stay fully visible when JS is off) plus `.in` the moment the card enters the
+     viewport, and sets `--pop-delay` so a row bubbles up in sequence. `translate`
+     and `scale` are separate transform properties, so the existing hover lift
+     (`transform:translateY(-4px)`) still works on top of the pop. */
+  .pop{
+    opacity:0;
+    translate:0 26px;
+    scale:.94;
+    /* This shorthand replaces the transition the cards set for themselves, so the
+       hover properties (transform, box-shadow, border-color) are repeated here -
+       leave them out and the hover lift snaps once a card has been revealed. The
+       bouncy curve drives translate/scale only; the fade stays on the plain ease. */
+    transition:
+      opacity .45s var(--ease),
+      transform .25s var(--ease),
+      translate .6s cubic-bezier(.22, 1.2, .36, 1),
+      scale .6s cubic-bezier(.22, 1.2, .36, 1),
+      box-shadow .25s var(--ease),
+      border-color .25s var(--ease);
+    transition-delay:var(--pop-delay, 0ms);
+  }
+  .pop.in{
+    opacity:1;
+    translate:0 0;
+    scale:1;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .pop, .pop.in{ opacity:1; translate:none; scale:1; }
+  }
+

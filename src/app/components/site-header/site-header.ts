@@ -2,10 +2,14 @@ import { Component, OnDestroy, effect, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UiService } from '../../services/ui.service';
 
+/** Desktop nav dropdowns. Only one may be open at a time. */
+type DropdownName = 'categories' | 'resources';
+
 /**
  * Site header + mobile navigation.
  * Desktop: sticky glass header with active-route highlighting, animated
- * underlines, a hover/click dropdown, and a polished search trigger.
+ * underlines, hover/click dropdowns (Categories and Resources), and a
+ * polished search trigger.
  * Mobile: hamburger that morphs to an X, a scrim + slide-in drawer with
  * staggered chevron links, active-route states and an end-to-end CTA.
  */
@@ -22,7 +26,8 @@ import { UiService } from '../../services/ui.service';
 export class SiteHeader implements OnDestroy {
   protected readonly ui = inject(UiService);
   protected readonly scrolled = signal(false);
-  protected readonly dropdownOpen = signal(false);
+  /** Name of the open desktop dropdown, or null when they are all closed. */
+  protected readonly openDropdown = signal<DropdownName | null>(null);
 
   constructor() {
     // Lock body scroll while the mobile drawer is open.
@@ -51,12 +56,17 @@ export class SiteHeader implements OnDestroy {
     this.ui.openSearch();
   }
 
-  protected toggleDropdown(): void {
-    this.dropdownOpen.update((v) => !v);
+  protected isDropdownOpen(name: DropdownName): boolean {
+    return this.openDropdown() === name;
+  }
+
+  /** Opens `name`, or closes it when it is already the open dropdown. */
+  protected toggleDropdown(name: DropdownName): void {
+    this.openDropdown.update((current) => (current === name ? null : name));
   }
 
   protected closeDropdown(): void {
-    this.dropdownOpen.set(false);
+    this.openDropdown.set(null);
   }
 
   protected onWindowScroll(): void {
@@ -66,12 +76,12 @@ export class SiteHeader implements OnDestroy {
   protected onKeydown(event: KeyboardEvent): void {
     if (event.key !== 'Escape') return;
     if (this.ui.menuOpen()) this.ui.closeMenu();
-    if (this.dropdownOpen()) this.dropdownOpen.set(false);
+    if (this.openDropdown()) this.openDropdown.set(null);
   }
 
   protected onDocumentClick(event: Event): void {
-    if (!this.dropdownOpen()) return;
+    if (!this.openDropdown()) return;
     const target = event.target as HTMLElement | null;
-    if (target && !target.closest('.nav-dropdown')) this.dropdownOpen.set(false);
+    if (target && !target.closest('.nav-dropdown')) this.openDropdown.set(null);
   }
 }
