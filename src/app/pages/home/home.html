@@ -278,13 +278,17 @@
       <div><span class="eyebrow">The process</span><h2>How it works</h2></div>
       <p>One request, a few simple steps, and your order lands, inspected, consolidated and shipped.</p>
     </div>
-    <div class="steps">
-      <div class="step"><div class="step-num">1</div><h4>Tell Us What You Need</h4><p>A category, a product photo, or a link, plus your target quantity.</p></div>
-      <div class="step"><div class="step-num">2</div><h4>We Source &amp; Quote</h4><p>Our Guangzhou team pulls quotes from vetted factories and markets.</p></div>
-      <div class="step"><div class="step-num">3</div><h4>You Approve</h4><p>Confirm pricing and terms before anything moves into production.</p></div>
-      <div class="step"><div class="step-num">4</div><h4>We Inspect &amp; Ship</h4><p>Quality-checked, consolidated, and shipped to your door.</p></div>
+    <!-- The rail: home.ts arms it and lights each point as it is scrolled into view
+         (see watchSteps), which charges the join behind it and starts the pulse on
+         the point just reached. Nothing is primed in CSS, so with scripting off the
+         four points and their joins simply render finished. -->
+    <div class="steps steps--rail">
+      <div class="step"><div class="step-num">1<span class="step-ping" aria-hidden="true"></span></div><h4>Tell Us What You Need</h4><p>A category, a product photo, or a link, plus your target quantity.</p></div>
+      <div class="step"><div class="step-num">2<span class="step-ping" aria-hidden="true"></span></div><h4>We Source &amp; Quote</h4><p>Our Guangzhou team pulls quotes from vetted factories and markets.</p></div>
+      <div class="step"><div class="step-num">3<span class="step-ping" aria-hidden="true"></span></div><h4>You Approve</h4><p>Confirm pricing and terms before anything moves into production.</p></div>
+      <div class="step"><div class="step-num">4<span class="step-ping" aria-hidden="true"></span></div><h4>We Inspect &amp; Ship</h4><p>Quality-checked, consolidated, and shipped to your door.</p></div>
     </div>
-    <div style="text-align:center; margin-top:40px;"><a routerLink="/sourcing" class="btn btn-outline btn-sm">See the Full Sourcing Process</a></div>
+    <div class="steps-cta"><a routerLink="/sourcing" class="btn btn-outline btn-sm">See the Full Sourcing Process</a></div>
   </div>
 </section>
 

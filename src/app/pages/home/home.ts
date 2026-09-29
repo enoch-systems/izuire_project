@@ -40,6 +40,11 @@ interface HeroStat {
  * clips inside the viewport play (see playCategoryClips) so the browser never
  * decodes every clip at once and off-screen ones stay on their poster frame.
  *
+ * The four process steps sit on a rail: each point lights as it is reached and the
+ * join behind it charges up from the point before, so the section reads as a
+ * signal travelling from "tell us what you need" to "shipped to your door" (see
+ * watchSteps). The pulses on the points are pure CSS.
+ *
  * Category and product cards also bubble up one at a time as you scroll to them
  * (see revealCards). A card's resting style is its normal style and the "not
  * revealed yet" class is added from script, so nothing disappears when JS is off.
@@ -82,6 +87,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   private snapTimer: ReturnType<typeof setTimeout> | undefined;
   private mediaObserver: IntersectionObserver | undefined;
   private revealObserver: IntersectionObserver | undefined;
+  private stepObserver: IntersectionObserver | undefined;
 
   protected goTo(idx: number): void {
     this.current.set(((idx % this.dots.length) + this.dots.length) % this.dots.length);
@@ -112,15 +118,18 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     clearTimeout(this.snapTimer);
     this.mediaObserver?.disconnect();
     this.revealObserver?.disconnect();
+    this.stepObserver?.disconnect();
   }
 
   /**
    * Wire up the on-scroll behavior once the view exists: play the category clips
-   * that are on screen and bubble the cards up as they are reached.
+   * that are on screen, bubble the cards up as they are reached, and light the
+   * process rail as it is scrolled through.
    */
   ngAfterViewInit(): void {
     this.playCategoryClips();
     this.revealCards();
+    this.watchSteps();
   }
 
   /**
@@ -167,6 +176,60 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       card.style.setProperty('--pop-delay', `${(position % 4) * 90}ms`);
       card.classList.add('pop');
       this.revealObserver.observe(card);
+    }
+  }
+
+  /**
+   * Light the process rail as it is scrolled through: each step takes its own
+   * delay, then `.live` the moment it reaches the viewport, and the step before it
+   * gets `.linked` so the join between the two points charges up behind it.
+   *
+   * The rail is armed here rather than in the stylesheet, because the CSS resting
+   * state is the finished rail. With scripting off nothing is armed, so the four
+   * points and their joins are already lit and the section never looks half-drawn.
+   */
+  private watchSteps(): void {
+    const rail = this.host.nativeElement.querySelector<HTMLElement>('.steps--rail');
+    const steps = rail ? Array.from(rail.querySelectorAll<HTMLElement>('.step')) : [];
+
+    if (!rail || steps.length === 0 || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
+    steps.forEach((step, index) => {
+      step.style.setProperty('--step-delay', `${index * 130}ms`);
+      // A join charges as the point it leads to is reached, not with its own point,
+      // so the light always runs forwards along the rail.
+      step.style.setProperty('--link-delay', `${(index + 1) * 130}ms`);
+      // Offsets the pulses so the rings read as one signal running down the rail.
+      step.style.setProperty('--ping-delay', `${index * 0.45}s`);
+    });
+
+    rail.classList.add('armed');
+
+    this.stepObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) {
+            continue;
+          }
+          const step = entry.target as HTMLElement;
+          step.classList.add('live');
+          const previous = step.previousElementSibling;
+          if (previous instanceof HTMLElement) {
+            previous.classList.add('linked');
+          }
+          // One shot: scrolling back up should not replay the ignition.
+          this.stepObserver?.unobserve(step);
+        }
+      },
+      // The point has to be properly on screen rather than clipping an edge before
+      // it counts as reached.
+      { threshold: 0.4 },
+    );
+
+    for (const step of steps) {
+      this.stepObserver.observe(step);
     }
   }
 

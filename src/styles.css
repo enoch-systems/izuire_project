@@ -760,7 +760,7 @@
   .product-moq{font-size:.76rem; color:var(--ink-40);}
   .product-body .btn{margin-top:10px;}
 
-  /* ============ HOW IT WORKS ============ */
+  /* ============ HOW IT WORKS (the process rail) ============ */
   .steps{
     display:grid;
     grid-template-columns:repeat(4, 1fr);
@@ -785,6 +785,83 @@
   }
   .step h4{font-size:1.03rem; margin-bottom:8px;}
   .step p{font-size:.87rem; color:var(--ink-60);}
+
+  /* The rail the home page's steps run on. Each step owns the join between its own
+     point and the next one: a dim track (::before) with an orange charge over it
+     (::after) that grows from nothing to full as the next point lights up, so the
+     signal appears to travel from point to point as the section is scrolled
+     through. The shared .steps grid above is left alone, so the shipping page
+     keeps the plain version of the same component. */
+  .steps--rail{--rail-ring:6px;}
+  /* A rail draws its own joins, so it does not want the flat bar across the row. */
+  .steps--rail::before{display:none;}
+  .steps--rail .step::before,
+  .steps--rail .step::after{
+    content:"";
+    position:absolute; top:26px; left:26px;
+    width:100%; height:2px; border-radius:2px;
+  }
+  /* The dim route ahead of the signal. */
+  .steps--rail .step::before{background:rgba(17,17,17,.10);}
+  /* The charge, drawn from this point towards the next one. The gradient is twice
+     the width of the line and slides on a loop, so the rail keeps a slow current
+     running through it even when nothing is scrolling. */
+  .steps--rail .step::after{
+    background:linear-gradient(90deg, var(--orange), var(--orange-deep), var(--orange));
+    background-size:200% 100%;
+    animation:railFlow 3.6s linear infinite;
+    transform-origin:left center;
+    transition:transform .7s cubic-bezier(.22, 1, .36, 1) var(--link-delay, 0ms);
+  }
+  /* Nothing runs off the end of the last point. */
+  .steps--rail .step:last-child::before,
+  .steps--rail .step:last-child::after{display:none;}
+
+  /* Arming is done from home.ts, never here, so the resting page is the finished
+     rail: with scripting off all four points and their joins are lit. */
+  .steps--rail.armed .step::after{transform:scaleX(0);}
+  .steps--rail.armed .step.linked::after{transform:scaleX(1);}
+
+  .steps--rail .step-num{
+    /* The pulse ring is positioned against the point itself. */
+    position:relative;
+    /* The ring is painted in the section's own paper so the rail appears to pass
+       behind each point rather than through it. */
+    background:linear-gradient(135deg, var(--orange), var(--orange-deep));
+    box-shadow:0 0 0 var(--rail-ring) var(--paper), 0 0 26px rgba(245,130,31,.5);
+    transition:
+      background .5s var(--ease) var(--step-delay, 0ms),
+      color .5s var(--ease) var(--step-delay, 0ms),
+      box-shadow .5s var(--ease) var(--step-delay, 0ms);
+  }
+  /* Points the signal has not reached yet read as pale stops on the route. */
+  .steps--rail.armed .step:not(.live) .step-num{
+    background:rgba(17,17,17,.10);
+    color:var(--ink-40);
+    box-shadow:0 0 0 var(--rail-ring) var(--paper);
+  }
+  /* A pulse leaves each point once it has been reached; the per-step delay turns
+     the four pulses into one signal travelling down the rail. */
+  .step-ping{
+    position:absolute; inset:0;
+    border-radius:50%;
+    border:1.5px solid rgba(245,130,31,.7);
+    opacity:0;
+  }
+  .steps--rail.armed .step.live .step-ping{
+    animation:stepPing 3.2s cubic-bezier(.22, .61, .36, 1) infinite;
+    animation-delay:var(--ping-delay, 0ms);
+  }
+  @keyframes railFlow{
+    from{background-position:0 0;}
+    to{background-position:-200% 0;}
+  }
+  @keyframes stepPing{
+    0%{transform:scale(1); opacity:.9;}
+    70%, 100%{transform:scale(1.99); opacity:0;}
+  }
+
+  .steps-cta{margin-top:44px; text-align:center;}
 
   /* ============ TRUST BAND ============ */
   .trust-band{
@@ -1707,5 +1784,51 @@
   }
   @media (prefers-reduced-motion: reduce){
     .pop, .pop.in{ opacity:1; translate:none; scale:1; }
+  }
+
+  /* ============ THE PROCESS RAIL — RESPONSIVE ============ */
+  /* Two points per row: keep the join that stays inside the row and drop the one
+     that would run off the end of it. */
+  @media (min-width: 621px) and (max-width: 980px){
+    .steps--rail .step:nth-child(even)::before,
+    .steps--rail .step:nth-child(even)::after{ display:none; }
+  }
+
+  /* One point per row, so the rail turns vertical: each step becomes
+     [point | copy] and the charge runs down the left of the column instead of
+     across the row, pausing at every point like stops on a line. Kept at the end
+     of the sheet so it wins over the mobile rules further up. */
+  @media (max-width: 620px){
+    .steps--rail{ --rail-ring:4px; }
+    .steps--rail .step{
+      display:grid;
+      grid-template-columns:46px 1fr;
+      column-gap:18px;
+      padding-right:0;
+    }
+    .steps--rail .step-num{ grid-area:1 / 1; margin-bottom:0; }
+    .steps--rail .step h4{ grid-area:1 / 2; align-self:center; margin-bottom:0; }
+    .steps--rail .step p{ grid-area:2 / 2; margin-top:8px; }
+
+    .steps--rail .step::before,
+    .steps--rail .step::after{
+      top:52px; left:22px; right:auto;
+      bottom:-34px; width:2px; height:auto;
+    }
+    .steps--rail .step::after{ transform-origin:center top; }
+    .steps--rail.armed .step::after{ transform:scaleY(0); }
+    .steps--rail.armed .step.linked::after{ transform:scaleY(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    /* Every point already reached and every join already charged, with no motion
+       in either rail orientation. */
+    .steps--rail.armed .step::after{ transform:none; }
+    .steps--rail.armed .step:not(.live) .step-num{
+      background:linear-gradient(135deg, var(--orange), var(--orange-deep));
+      color:var(--white);
+      box-shadow:0 0 0 var(--rail-ring) var(--paper);
+    }
+    .step-ping{ display:none; }
   }
 
