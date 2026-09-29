@@ -42,6 +42,11 @@ testem.log
 /typings
 __screenshots__/
 
+# Scratch images pulled down by fetch_candidates.js for visual review. The ones
+# that got used were uploaded to Cloudinary and are referenced by URL from
+# marketplace-data.ts, so the files themselves are working material, not source.
+/candidates
+
 # System files
 .DS_Store
 Thumbs.db

@@ -1,0 +1,13 @@
+<!-- The toast is keyed on `seq` so re-adding the same product restarts the
+     entrance animation rather than leaving the previous one in place. -->
+@if (fly.toast(); as toast) {
+  <button type="button" class="cart-toast" role="status" aria-live="polite" (click)="dismiss()">
+    <span class="cart-toast-tick" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </span>
+    <span class="cart-toast-body">
+      <span class="cart-toast-title">{{ toast.title }} added to cart</span>
+      <span class="cart-toast-hint">Review your basket</span>
+    </span>
+  </button>
+}

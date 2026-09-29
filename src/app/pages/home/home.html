@@ -230,49 +230,115 @@
 </section>
 
 <!-- ============ FEATURED PRODUCTS ============ -->
+<!-- The four on show are read from the marketplace catalogue rather than written
+     out again here (see FEATURED in marketplace-data), so the price and MOQ on
+     these cards can never drift from the listing they link to.
+
+     Each card adds straight to the cart instead of routing out to the quote
+     form; the cart then carries the basket through to the quote page. Adding
+     lands the line at that product's minimum, and the button confirms for a
+     moment via CartService.addedId. styles.css lays the cards out as a row on
+     narrow screens, where four columns would squeeze the text too far. -->
 <section class="section" id="products">
   <div class="container">
     <div class="section-head">
       <div><span class="eyebrow">Trending this month</span><h2>Featured products</h2></div>
-      <a routerLink="/marketplace" class="btn btn-outline btn-sm">View Full Marketplace</a>
     </div>
-    <div class="product-grid">
-      <div class="product-card">
-        <div class="product-media"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="7" y="2" width="10" height="20" rx="2"/></svg><span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></div>
-        <div class="product-body">
-          <h4>A-Grade Phone Screens (Assorted)</h4>
-          <div class="product-price" data-ngn="&#8358;18,500 – &#8358;64,000" data-rmb="&yen;58 – &yen;200"><span class="price-val">&#8358;18,500 – &#8358;64,000</span> <span class="unit">/ unit</span></div>
-          <div class="product-moq">MOQ: 20 units</div>
-          <a routerLink="/quote" class="btn btn-outline btn-sm">Request Quote</a>
+    <div class="product-pager">
+      <div class="product-pager-viewport">
+        <div class="product-pager-track" [style.transform]="'translateX(-' + page() * 100 + '%)'">
+          @for (group of pages; track $index) {
+            <div class="product-grid product-grid--featured">
+              @for (p of group; track p.id) {
+                <article class="product-card">
+                  <div class="product-media" [class.product-media--photo]="p.image">
+                    @if (p.image; as img) {
+                      <!-- Where a listing has a real photo it stands in for the icon.
+                           Alt is empty because the product title follows immediately
+                           below and already names the card. -->
+                      <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                    } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                      @switch (p.icon) {
+                        @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                        @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                        @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                        @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                        @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                        @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                        @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                        @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                        @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                      }
+                    </svg>
+                    }
+                    @if (p.verified) {
+                      <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
+                    }
+                  </div>
+                  <div class="product-body">
+                    <h4 class="product-title">{{ p.title }}</h4>
+                    <div class="product-specs">{{ p.specs }}</div>
+                    <div class="product-price">
+                      <span class="price-val">{{ p.ngn }}</span>
+                      <span class="unit">{{ p.unit }}</span>
+                    </div>
+                    <!-- Units. The card starts on a single unit and the count is set
+                         here rather than stated as an "MOQ: 50 units" note, so the
+                         shopper picks a number and adds exactly that many. The
+                         price beside it is the unit price and does not move with
+                         this — the basket total is worked out on the cart page. -->
+                    <div class="product-qty">
+                      <button type="button" class="product-qty-step" (click)="stepQty(p.id, -1)" [disabled]="qtyFor(p.id) <= 1" [attr.aria-label]="'One fewer unit of ' + p.title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+                      </button>
+                      <input class="product-qty-input" type="number" inputmode="numeric" [value]="qtyFor(p.id)" min="1" step="1" (input)="typeQty(p.id, $any($event.target).value)" [attr.aria-label]="'Units of ' + p.title">
+                      <button type="button" class="product-qty-step" (click)="stepQty(p.id, 1)" [attr.aria-label]="'One more unit of ' + p.title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                      </button>
+                      <span class="product-qty-unit" aria-hidden="true">units</span>
+                    </div>
+                    <button type="button" class="btn btn-primary product-add" (click)="addToCart(p, $event)" [class.is-added]="cart.addedId() === p.id" [attr.aria-label]="cart.addedId() === p.id ? p.title + ' added to cart' : 'Add ' + p.title + ' to cart'">
+                      <!-- Two icons in one box so the swap is a cross-fade: the plus
+                           fades out as the tick draws itself in. -->
+                      <span class="product-add-icons" aria-hidden="true">
+                        <svg class="product-add-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                        <svg class="product-add-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      </span>
+                      <span>{{ cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          }
         </div>
       </div>
-      <div class="product-card">
-        <div class="product-media"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M6 3h12l3 5-9 13L3 8z"/></svg></div>
-        <div class="product-body">
-          <h4>Okrika Mixed Bale — Grade A</h4>
-          <div class="product-price" data-ngn="&#8358;185,000 / bale" data-rmb="&yen;580 / bale"><span class="price-val">&#8358;185,000 / bale</span></div>
-          <div class="product-moq">MOQ: 1 bale (100kg)</div>
-          <a routerLink="/quote" class="btn btn-outline btn-sm">Request Quote</a>
+
+      <!-- One dot per page, with a chevron either side of them. They sit above
+           "View Full Marketplace" so the route on and the ways into the rest of
+           the range are read together. The chevrons stop at the ends instead of
+           wrapping: the dots already say how much of the range is left, and a
+           chevron that reappears at the far end would work against that. -->
+      <div class="product-dots">
+        <button type="button" class="product-dots-nav" (click)="stepPage(-1)" [disabled]="page() === 0" aria-label="Previous products">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="product-dots-track" role="tablist" aria-label="Featured product pages">
+          @for (group of pages; track $index) {
+            <button type="button" class="product-dot" role="tab" [class.active]="page() === $index" (click)="goToPage($index)" [attr.aria-selected]="page() === $index" [attr.aria-label]="'Page ' + ($index + 1) + ' of ' + pages.length"></button>
+          }
         </div>
+        <button type="button" class="product-dots-nav" (click)="stepPage(1)" [disabled]="page() === pages.length - 1" aria-label="Next products">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
       </div>
-      <div class="product-card">
-        <div class="product-media"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg><span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Verified</span></div>
-        <div class="product-body">
-          <h4>150W Solar Panel (Monocrystalline)</h4>
-          <div class="product-price" data-ngn="&#8358;46,000 / panel" data-rmb="&yen;145 / panel"><span class="price-val">&#8358;46,000 / panel</span></div>
-          <div class="product-moq">MOQ: 10 panels</div>
-          <a routerLink="/quote" class="btn btn-outline btn-sm">Request Quote</a>
-        </div>
-      </div>
-      <div class="product-card">
-        <div class="product-media"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/></svg></div>
-        <div class="product-body">
-          <h4>Raw Human Hair Bundles, 20"</h4>
-          <div class="product-price" data-ngn="&#8358;38,000 / bundle" data-rmb="&yen;120 / bundle"><span class="price-val">&#8358;38,000 / bundle</span></div>
-          <div class="product-moq">MOQ: 12 bundles</div>
-          <a routerLink="/quote" class="btn btn-outline btn-sm">Request Quote</a>
-        </div>
-      </div>
+    </div>
+
+    <!-- Under the cards rather than beside the heading: the grid is the thing
+         being introduced, so "see the rest of it" reads as the next step after. -->
+    <div class="section-foot">
+      <a routerLink="/marketplace" class="btn btn-outline">View Full Marketplace</a>
     </div>
   </div>
 </section>

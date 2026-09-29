@@ -1,6 +1,9 @@
 :root{
     --orange:#F5821F;
     --orange-deep:#D96D14;
+    /* Confirmation blue, used only for the "added" state of a cart button. */
+    --blue:#2563EB;
+    --blue-deep:#1D4ED8;
     --wa:#25D366;
     --wa-deep:#0E7A3E;
     --ink:#111111;
@@ -249,11 +252,14 @@
   /* Mobile drawer */
   .mobile-nav{
     position:fixed; top:0; right:0; bottom:0; left:auto;
-    width:min(360px, 88vw); z-index:210;
+    /* The narrow end of the drawer. At 260px the side padding and link size come
+       down with it, so "Business Solutions" still sits on one line beside its
+       chevron; 72vw keeps it proportional on the smallest phones. */
+    width:min(260px, 72vw); z-index:210;
     background:var(--white);
     transform:translateX(102%);
     transition:transform .4s var(--ease);
-    padding:20px 24px 24px; overflow:hidden;
+    padding:20px 20px 24px; overflow:hidden;
     display:flex; flex-direction:column;
     box-shadow:-24px 0 60px rgba(17,17,17,.18);
   }
@@ -266,13 +272,15 @@
   }
   .mobile-close:hover{ background:var(--paper); }
   .mobile-close svg{ width:20px; height:20px; stroke:var(--ink); }
+  /* Pulled to the drawer's own edges, then inset by its side padding so the
+     dividers still run full-bleed. Keep these two in step with .mobile-nav. */
   .mobile-nav-links{
     flex:1; overflow-y:auto; overscroll-behavior:contain;
-    margin:0 -24px; padding:4px 24px 8px;
+    margin:0 -20px; padding:4px 20px 8px;
   }
   .mobile-nav-links a{
     display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:16px 2px; font-family:var(--font-d); font-weight:600; font-size:1.04rem;
+    padding:16px 2px; font-family:var(--font-d); font-weight:600; font-size:.98rem;
     color:var(--ink); border-bottom:1px solid var(--line);
     transition:color .22s var(--ease), padding-left .22s var(--ease);
   }
@@ -722,6 +730,19 @@
     position:relative;
   }
   .product-media svg{width:46%; height:46%; stroke:var(--ink); opacity:.72;}
+  /* A listing photo shows the whole product rather than filling the frame: the
+     shots are portrait and the media area is landscape, so cover crops the item
+     itself away. `contain` keeps all of it. The photo sits on white rather than
+     the paper tint the icon cards use, because a product shot is a photo on a
+     studio background and the warm off-white reads as a colour cast against it.
+     The photo's own edges dissolve into it, so the card reads as one surface. */
+  .product-media--photo{ background:var(--white); }
+  .product-media img{
+    width:100%; height:100%;
+    object-fit:contain;
+    padding:6%;
+    display:block;
+  }
   .verified-badge{
     position:absolute; top:10px; left:10px;
     background:var(--orange); color:var(--white);
@@ -2215,5 +2236,474 @@
     .reason-body{ font-size:.96rem; line-height:1.6; }
     .reason-line{ left:7px; }
     .reason-dot{ left:1px; top:8px; }
+  }
+
+
+/* =====================================================
+   CART
+   ===================================================== */
+
+  /* Header trigger. Sits outside .header-actions on purpose: that cluster is
+     hidden below 980px, and the cart has to stay reachable there. It borrows
+     the visual language of .header-icon-btn. */
+  .cart-btn{
+    position:relative; flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:40px; height:40px;
+    border:1px solid var(--line); border-radius:10px;
+    background:var(--white); color:var(--ink-60);
+    transition:border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease);
+  }
+  .cart-btn:hover{ border-color:rgba(17,17,17,.25); color:var(--orange-deep); }
+  .cart-btn svg{ width:19px; height:19px; stroke:currentColor; }
+  .cart-count{
+    position:absolute; top:-7px; right:-7px;
+    min-width:20px; height:20px; padding:0 5px;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--orange); color:var(--white);
+    border:2px solid var(--white); border-radius:999px;
+    font-family:var(--font-d); font-weight:700; font-size:.62rem; line-height:1;
+  }
+  /* The button takes the impact of the product landing in it: one quick squeeze
+     and a ring, so the eye is sent to where the thing went. */
+  .cart-btn.is-landed{ animation:cart-landed .42s var(--ease); }
+  @keyframes cart-landed{
+    0%{ transform:scale(1); }
+    30%{ transform:scale(.84); box-shadow:0 0 0 6px rgba(37,99,235,.16); }
+    60%{ transform:scale(1.1); box-shadow:0 0 0 10px rgba(37,99,235,.08); }
+    100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(37,99,235,0); }
+  }
+
+  /* ============ ADDED-TO-CART TOAST + FLYING GHOST ============= */
+  /* The ghost is a fixed-position copy of a card's picture, built in script and
+     animated with the Web Animations API. It carries no animation of its own —
+     the keyframes do the work — so all this needs to do is hold it still at the
+     source box, cut it out cleanly, and keep it out of the tab order. */
+  .fly-ghost{
+    position:fixed; z-index:1200;
+    pointer-events:none;
+    /* The ghost turns as it flies, so it pivots on its own centre — the mouth
+       opens about the middle of the picture rather than swinging from a corner. */
+    transform-origin:center center;
+    will-change:transform, clip-path, opacity;
+  }
+  .fly-ghost img{
+    width:100%; height:100%;
+    object-fit:contain;
+    background:var(--white);
+  }
+
+  /* The confirmation. Anchored bottom right on the root layer so it survives
+     scrolling and never sits inside a section's stacking context. */
+  .cart-toast{
+    position:fixed; right:24px; bottom:24px; z-index:1300;
+    display:flex; align-items:center; gap:12px;
+    max-width:min(360px, calc(100vw - 48px));
+    padding:13px 18px 13px 14px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-left:4px solid var(--wa);
+    border-radius:12px;
+    box-shadow:0 16px 40px rgba(17,17,17,.16);
+    text-align:left;
+    /* Arrives from the bottom right and settles; the picture has just landed
+       from that direction, so the toast comes from the same corner. */
+    animation:toast-in .38s var(--ease);
+  }
+  .cart-toast:hover{ box-shadow:0 20px 48px rgba(17,17,17,.2); }
+  .cart-toast-tick{
+    flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:30px; height:30px; border-radius:50%;
+    background:var(--wa); color:var(--white);
+  }
+  .cart-toast-tick svg{ width:16px; height:16px; stroke:currentColor; fill:none; }
+  .cart-toast-body{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .cart-toast-title{
+    font-family:var(--font-d); font-weight:600; font-size:.9rem; line-height:1.3;
+    color:var(--ink);
+    /* Long product names wrap to two lines rather than stretching the toast off
+       the edge of a narrow screen. */
+    overflow-wrap:anywhere;
+  }
+  .cart-toast-hint{ font-size:.74rem; color:var(--ink-40); }
+  @keyframes toast-in{
+    from{ opacity:0; transform:translateY(14px) scale(.96); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  @media (max-width: 620px){
+    .cart-toast{ right:14px; bottom:14px; max-width:calc(100vw - 28px); }
+  }
+
+  /* Both the flight and the toast are movement the shopper did not ask for, so
+     they are dropped entirely when reduced motion is set. The add still happens
+     and the toast still says so — only the animation goes. */
+  @media (prefers-reduced-motion: reduce){
+    .fly-ghost{ display:none; }
+    .cart-toast{ animation:none; }
+    .cart-btn.is-landed{ animation:none; }
+    .product-grid--featured .product-add.is-added{ animation:none; }
+    .product-grid--featured .product-add.is-added .product-add-tick{ animation:none; stroke-dashoffset:0; }
+  }
+
+  /* Cart page: lines on the left, a sticky summary beside them. */
+  .cart-layout{ display:grid; grid-template-columns:1fr 320px; gap:28px; align-items:start; }
+  .cart-line{
+    display:grid; grid-template-columns:84px 1fr auto; gap:18px; align-items:start;
+    padding:18px 0; border-bottom:1px solid var(--line);
+  }
+  .cart-line:first-child{ border-top:1px solid var(--line); }
+  .cart-line-media{
+    position:relative; aspect-ratio:1/1;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--paper); border-radius:8px; overflow:hidden;
+  }
+  .cart-line-media svg{ width:44%; height:44%; stroke:var(--ink); opacity:.72; }
+  .cart-line-main{ min-width:0; }
+  .cart-line-main h3{
+    font-size:1rem; font-weight:600; line-height:1.35; color:var(--ink);
+    /* Long product names wrap rather than widen the row. */
+    overflow-wrap:anywhere;
+  }
+  .cart-line-meta{
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px;
+    margin-top:6px; font-size:.82rem;
+  }
+  .cart-line-unit{ font-family:var(--font-d); font-weight:600; color:var(--ink-60); }
+  .cart-line-moq{ color:var(--ink-40); }
+
+  .cart-qty{ display:flex; align-items:center; gap:10px; margin-top:14px; }
+  .cart-qty-label{
+    font-family:var(--font-d); font-size:.68rem; font-weight:600;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--ink-40);
+  }
+  .qty-stepper{
+    display:inline-flex; align-items:center;
+    border:1px solid var(--line); border-radius:8px; overflow:hidden;
+    background:var(--white);
+  }
+  .qty-stepper button{
+    width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center;
+    font-size:1.05rem; line-height:1; color:var(--ink-60);
+    transition:background .18s var(--ease), color .18s var(--ease);
+  }
+  .qty-stepper button:hover{ background:var(--paper); color:var(--orange-deep); }
+  .qty-stepper output{
+    min-width:52px; text-align:center;
+    font-family:var(--font-d); font-weight:700; font-size:.9rem;
+    border-left:1px solid var(--line); border-right:1px solid var(--line);
+    padding:0 6px; line-height:34px;
+  }
+
+  .cart-line-end{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+  .cart-line-total{
+    font-family:var(--font-d); font-weight:700; font-size:1.05rem;
+    color:var(--ink); white-space:nowrap;
+  }
+  .cart-remove{
+    font-size:.78rem; color:var(--ink-40);
+    border-bottom:1px solid transparent;
+    transition:color .18s var(--ease), border-color .18s var(--ease);
+  }
+  .cart-remove:hover{ color:var(--orange-deep); border-bottom-color:var(--orange-deep); }
+  .cart-clear{ margin-top:16px; font-size:.82rem; color:var(--ink-40); transition:color .18s var(--ease); }
+  .cart-clear:hover{ color:var(--orange-deep); }
+
+  .cart-summary{
+    position:sticky; top:96px;
+    padding:22px; background:var(--paper);
+    border:1px solid var(--line); border-radius:var(--radius);
+  }
+  .cart-summary h2{ font-size:1.15rem; margin-bottom:16px; }
+  .cart-summary dl{ display:flex; flex-direction:column; gap:10px; }
+  .cart-summary dl > div{ display:flex; justify-content:space-between; gap:12px; font-size:.86rem; }
+  .cart-summary dt{ color:var(--ink-60); }
+  .cart-summary dd{ font-family:var(--font-d); font-weight:600; color:var(--ink); }
+  .cart-summary-note dd{ color:var(--ink-40); font-family:var(--font-b); font-weight:400; }
+  .cart-summary-total{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    margin-top:16px; padding-top:16px; border-top:1px solid var(--line);
+  }
+  .cart-summary-total span{ font-size:.86rem; color:var(--ink-60); }
+  .cart-summary-total strong{ font-family:var(--font-d); font-size:1.35rem; letter-spacing:-.01em; }
+  .cart-summary-fine{ margin-top:12px; font-size:.74rem; line-height:1.55; color:var(--ink-40); }
+  .cart-summary-cta{ width:100%; margin-top:18px; }
+  .cart-summary-more{ display:block; text-align:center; margin-top:12px; font-size:.84rem; color:var(--ink-60); }
+  .cart-summary-more:hover{ color:var(--orange-deep); }
+
+  .cart-empty{ text-align:center; padding:56px 0; }
+  .cart-empty svg{ width:52px; height:52px; stroke:var(--ink-40); margin-bottom:18px; }
+  .cart-empty h2{ font-size:1.5rem; margin-bottom:8px; }
+  .cart-empty p{ color:var(--ink-60); max-width:420px; margin:0 auto 26px; }
+  .cart-empty-actions{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  @media (max-width: 900px){
+    .cart-layout{ grid-template-columns:1fr; gap:24px; }
+    .cart-summary{ position:static; }
+  }
+  @media (max-width: 620px){
+    /* The row becomes thumb-beside-text, with the money and the button each
+       keeping a full line so neither is squeezed into a column. */
+    .cart-line{ grid-template-columns:68px 1fr; gap:14px; padding:16px 0; }
+    .cart-line-end{
+      grid-column:1 / -1; flex-direction:row; align-items:center;
+      justify-content:space-between; width:100%;
+    }
+    .cart-summary{ padding:18px; }
+    .cart-summary-total strong{ font-size:1.2rem; }
+  }
+
+/* =====================================================
+   FEATURED PRODUCTS (home)
+   =====================================================
+   Scoped under .product-grid--featured so the marketplace catalogue keeps the
+   card it already has.
+
+   Type inside these cards scales against .product-body's own width (container
+   units) rather than the viewport, so the text fits at any column count instead
+   of needing a breakpoint per size. Each size is declared twice — plain value
+   first — so a browser without container-query support keeps a sensible size
+   rather than dropping the whole declaration. */
+
+  .product-grid--featured .product-body{ container-type:inline-size; padding:18px 18px 20px; gap:0; }
+
+  /* Dot pager over the grid. Every page sits side by side on one track and the
+     track is moved with a single transform, so travelling to a later page slides
+     left and going back slides right automatically — there is no direction state
+     that could drift out of step with the index. */
+  .product-pager-viewport{
+    overflow:hidden;
+    /* Vertical padding, not overflow-clip-margin: the latter expands the clip on all
+       four sides, which would let the next page's cards bleed in at the right edge.
+       This leaves the drop to hover-shadow room and clips the slides flush. The
+       matching negative margins cancel it out so the grid's own spacing is
+       unchanged. */
+    padding:12px 0 26px;
+    margin:-12px 0 -26px;
+  }
+  .product-pager-track{
+    display:flex;
+    transition:transform .5s var(--ease);
+    will-change:transform;
+  }
+  .product-pager-page, .product-pager-track > .product-grid{ flex:0 0 100%; min-width:0; }
+
+  /* Dots with a chevron either side of them, one row centred under the grid: the
+     dots say how much of the range is left and the chevrons walk it a page at a
+     time. The dots keep their own track so their gap is the dot gap and the extra
+     space to the chevrons is set once, here, on the row. */
+  .product-dots{
+    display:flex; justify-content:center; align-items:center; gap:14px;
+    margin-top:30px;
+  }
+  .product-dots-track{ display:flex; align-items:center; gap:4px; }
+  .product-dot{
+    /* A 9px dot is a poor tap target, so the button is 26px and the dot is drawn
+       inside it by ::after. */
+    width:26px; height:26px; padding:0;
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:50%;
+  }
+  .product-dot::after{
+    content:""; width:9px; height:9px; border-radius:50%;
+    background:var(--line);
+    transition:background .22s var(--ease), transform .22s var(--ease);
+  }
+  .product-dot:hover::after{ background:rgba(245,130,31,.45); }
+  .product-dot.active::after{ background:var(--orange); transform:scale(1.3); }
+
+  /* The chevrons: the same disc as the testimonial arrows, but keyed to the orange
+     the dots light with, so the pager reads as one control rather than two. */
+  .product-dots-nav{
+    width:34px; height:34px; flex:none; padding:0;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); border-radius:50%;
+    background:var(--white);
+    transition:background .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease);
+  }
+  .product-dots-nav svg{
+    width:16px; height:16px; stroke:var(--ink);
+    transition:stroke .2s var(--ease);
+  }
+  .product-dots-nav:hover:not(:disabled){
+    background:rgba(245,130,31,.09);
+    border-color:rgba(245,130,31,.45);
+  }
+  .product-dots-nav:hover:not(:disabled) svg{ stroke:var(--orange); }
+  /* At either end of the range there is nowhere to step to, so the chevron fades
+     back and takes its pointer with it. */
+  .product-dots-nav:disabled{ opacity:.35; cursor:default; }
+
+  .product-grid--featured .product-title{
+    font-size:.9rem;
+    font-size:clamp(.84rem, 2.6cqw + .5rem, .98rem);
+    line-height:1.3; font-weight:600; margin:0 0 4px;
+    /* Two lines then ellipsis, so cards across a row stay the same height. */
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .product-grid--featured .product-specs{
+    font-size:.74rem;
+    font-size:clamp(.68rem, 1.5cqw + .42rem, .76rem);
+    color:var(--ink-40); line-height:1.4; margin:0 0 12px;
+    display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+  /* Price leads: a warm panel in ink type, the unit demoted beside it. */
+  .product-grid--featured .product-price{
+    display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px;
+    margin:0 0 10px; padding:10px 12px;
+    background:rgba(245,130,31,.09); border-radius:8px;
+    font-family:var(--font-d); font-weight:700;
+    font-size:1.05rem;
+    font-size:clamp(.95rem, 3cqw + .55rem, 1.18rem);
+    line-height:1.2; letter-spacing:-.01em; color:var(--ink);
+    /* A long price range breaks inside the panel instead of widening the card. */
+    min-width:0; overflow-wrap:anywhere;
+  }
+  .product-grid--featured .product-price .unit{
+    font-family:var(--font-b); font-weight:400;
+    font-size:.72rem;
+    font-size:clamp(.66rem, 1.4cqw + .4rem, .74rem);
+    color:var(--ink-60);
+  }
+
+  /* Unit count. The card does not state a minimum as a note — it offers a number
+     to set, with the steppers either side of a field that can also be typed
+     into. The stepper is a control rather than a label, so it sits in the ink
+     and takes a pressed state, where the old MOQ pill stayed quiet. */
+  .product-grid--featured .product-qty{
+    display:flex; align-items:center;
+    align-self:flex-start;
+    border:1px solid var(--line); border-radius:8px;
+    background:var(--white);
+    margin:0 0 14px; overflow:hidden;
+  }
+  .product-grid--featured .product-qty:focus-within{
+    border-color:rgba(245,130,31,.5);
+    box-shadow:0 0 0 3px rgba(245,130,31,.1);
+  }
+  .product-grid--featured .product-qty-step{
+    width:34px; align-self:stretch; flex:none;
+    display:inline-flex; align-items:center; justify-content:center;
+    color:var(--ink-60);
+    transition:background .18s var(--ease), color .18s var(--ease);
+  }
+  .product-grid--featured .product-qty-step:hover:not(:disabled){
+    background:var(--paper); color:var(--ink);
+  }
+  .product-grid--featured .product-qty-step:active:not(:disabled){ background:var(--line); }
+  .product-grid--featured .product-qty-step:disabled{ opacity:.3; cursor:not-allowed; }
+  .product-grid--featured .product-qty-step svg{ width:13px; height:13px; stroke:currentColor; }
+  .product-grid--featured .product-qty-input{
+    /* The native spinner is dropped because it steps by 1, and these products
+       are ordered in minimum-sized jumps — the steppers either side are the
+       intended way to move. Typing is still free. */
+    appearance:none; -moz-appearance:textfield;
+    width:58px; padding:9px 0; margin:0;
+    border:0; border-left:1px solid var(--line); border-right:1px solid var(--line);
+    background:transparent;
+    font-family:var(--font-d); font-weight:600; font-size:.86rem;
+    font-size:clamp(.78rem, 1.5cqw + .46rem, .88rem);
+    text-align:center; color:var(--ink);
+  }
+  .product-grid--featured .product-qty-input::-webkit-outer-spin-button,
+  .product-grid--featured .product-qty-input::-webkit-inner-spin-button{
+    -webkit-appearance:none; margin:0;
+  }
+  .product-grid--featured .product-qty-input:focus{ outline:none; }
+  .product-grid--featured .product-qty-unit{
+    padding:0 10px 0 8px;
+    font-size:.72rem;
+    font-size:clamp(.66rem, 1.3cqw + .42rem, .74rem);
+    color:var(--ink-40); white-space:nowrap;
+  }
+
+  .product-grid--featured .product-body .product-add{
+    width:100%; margin-top:auto;
+    padding:12px 14px; border-radius:8px;
+    font-size:.86rem;
+    font-size:clamp(.76rem, 1.7cqw + .45rem, .86rem);
+  }
+  .product-grid--featured .product-add svg{ width:15px; height:15px; flex-shrink:0; }
+  /* The two icons share one box so the swap is a cross-fade: the plus fades out
+     as the tick draws itself in, rather than one being torn down and the other
+     built. */
+  .product-grid--featured .product-add-icons{
+    position:relative; display:inline-flex;
+    width:15px; height:15px; flex-shrink:0;
+  }
+  .product-grid--featured .product-add-icons svg{
+    position:absolute; inset:0; width:15px; height:15px;
+  }
+  .product-grid--featured .product-add-tick{ opacity:0; }
+  /* Confirmation after a click: the button steps out of the orange and reads as
+     done. Blue rather than ink here so "added" is its own state and not just
+     another dark button — the tick and the colour say the same thing at once. */
+  .product-grid--featured .product-add.is-added{
+    background:var(--blue);
+    /* A small press-in, so the click registers on the button as well as in the
+       picture flying away from it. */
+    animation:added-press .32s var(--ease);
+  }
+  .product-grid--featured .product-add.is-added .product-add-plus{ opacity:0; transform:scale(.6); }
+  .product-grid--featured .product-add.is-added .product-add-tick{
+    opacity:1;
+    /* The tick is drawn on by its own stroke rather than simply appearing, which
+       is what makes the state read as a confirmation. */
+    stroke-dasharray:24; stroke-dashoffset:24;
+    animation:tick-draw .34s var(--ease) forwards;
+  }
+  @keyframes tick-draw{ to{ stroke-dashoffset:0; } }
+  @keyframes added-press{
+    0%{ transform:scale(1); }
+    35%{ transform:scale(.94); }
+    100%{ transform:scale(1); }
+  }
+  .product-grid--featured .product-add-plus{ transition:opacity .18s var(--ease), transform .18s var(--ease); }
+
+  /* Centred close to a section. Used where the call to action belongs after the
+     content it refers to rather than beside the heading. */
+  .section-foot{
+    display:flex; justify-content:center;
+    margin-top:34px;
+  }
+
+  @media (max-width: 620px){
+    /* One card per row, thumb beside the text. Two columns would leave ~170px
+       for a title, a price range and a button — too little to read. */
+    .product-grid--featured{ grid-template-columns:1fr; gap:12px; margin-top:24px; }
+    .product-grid--featured .product-card{ flex-direction:row; align-items:stretch; }
+    /* A listing shot is the whole point of the card, so the thumb is given real
+       width rather than the sliver a bare icon can get away with. It is sized
+       against the card so the split holds at any screen: 36% of a 390px phone
+       still leaves ~200px of text, and on a 620px screen it tops out at 170px
+       with ~385px for the copy. The floor keeps it readable on a 320px screen. */
+    .product-grid--featured .product-media{
+      width:118px;
+      width:clamp(118px, 36%, 170px);
+      flex:none; aspect-ratio:auto;
+    }
+    .product-grid--featured .product-body{ flex:1; min-width:0; padding:14px; }
+    .product-grid--featured .product-title{ margin-bottom:2px; }
+    .product-grid--featured .product-specs{ margin-bottom:10px; }
+    .product-grid--featured .product-price{ margin-bottom:8px; padding:9px 11px; }
+    .product-grid--featured .product-qty{ margin-bottom:12px; }
+    /* A thumb this size still cannot carry a full-size badge, so it keeps its
+       compact form rather than covering the shot. */
+    .product-grid--featured .verified-badge{
+      top:6px; left:6px; padding:3px 6px; font-size:.5rem; border-radius:3px;
+    }
+    .product-grid--featured .verified-badge svg{ width:8px; height:8px; }
+
+    /* The pager narrows with the section: the chevrons step down a touch and the
+       gap to the dots tightens so the whole row keeps clear of the card edges. */
+    .product-dots{ gap:8px; margin-top:24px; }
+    .product-dots-nav{ width:32px; height:32px; }
+    .product-dots-nav svg{ width:15px; height:15px; }
   }
 

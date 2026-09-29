@@ -1,6 +1,8 @@
 import { Component, OnDestroy, effect, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UiService } from '../../services/ui.service';
+import { CartService } from '../../services/cart.service';
+import { FlyToCartService } from '../../services/fly-to-cart.service';
 
 /** Desktop nav dropdowns. Only one may be open at a time. */
 type DropdownName = 'categories' | 'resources';
@@ -25,6 +27,18 @@ type DropdownName = 'categories' | 'resources';
 })
 export class SiteHeader implements OnDestroy {
   protected readonly ui = inject(UiService);
+  /** Drives the header's cart badge. */
+  protected readonly cart = inject(CartService);
+  /** Bumped when a product's picture lands in this button. */
+  private readonly fly = inject(FlyToCartService);
+  /**
+   * True for the moment a product lands, so the button takes the impact. Held as
+   * a signal rather than read straight off `landed` because that counter never
+   * resets — it has to go up and come back down, or the button would stay lit
+   * after the first add.
+   */
+  protected readonly cartLanded = signal(false);
+  private landTimer: ReturnType<typeof setTimeout> | undefined;
   protected readonly scrolled = signal(false);
   /** Name of the open desktop dropdown, or null when they are all closed. */
   protected readonly openDropdown = signal<DropdownName | null>(null);
@@ -34,10 +48,19 @@ export class SiteHeader implements OnDestroy {
     effect(() => {
       document.body.style.overflow = this.ui.menuOpen() ? 'hidden' : '';
     });
+
+    // Flash the cart button each time a product's picture lands in it.
+    effect(() => {
+      if (this.fly.landed() === 0) return;
+      this.cartLanded.set(true);
+      clearTimeout(this.landTimer);
+      this.landTimer = setTimeout(() => this.cartLanded.set(false), 420);
+    });
   }
 
   ngOnDestroy(): void {
     document.body.style.overflow = '';
+    clearTimeout(this.landTimer);
   }
 
   protected menuOpen() {

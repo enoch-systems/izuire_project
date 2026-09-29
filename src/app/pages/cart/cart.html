@@ -1,0 +1,88 @@
+<main id="top">
+
+<section class="page-hero">
+  <div class="container">
+    <div class="breadcrumb"><a routerLink="/">Home</a> / Cart</div>
+    <span class="eyebrow">Your basket</span>
+    <h1>Cart</h1>
+    <p>Quantities move in whole minimums, because these are wholesale lines. Send the basket through and we'll confirm freight, duties and final pricing.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    @if (cart.isEmpty()) {
+      <div class="cart-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/></svg>
+        <h2>Your cart is empty</h2>
+        <p>Browse what's in stock, or tell us what you're sourcing and we'll find it.</p>
+        <div class="cart-empty-actions">
+          <a routerLink="/marketplace" class="btn btn-primary">Browse the marketplace</a>
+          <a routerLink="/quote" class="btn btn-outline">Request a quote</a>
+        </div>
+      </div>
+    } @else {
+      <div class="cart-layout">
+        <div class="cart-lines">
+          @for (line of cart.items(); track line.id) {
+            <article class="cart-line">
+              <div class="cart-line-media">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                  @switch (line.icon) {
+                    @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                    @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                    @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                    @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                    @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                    @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                    @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                    @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                    @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                  }
+                </svg>
+                @if (line.verified) { <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span> }
+              </div>
+
+              <div class="cart-line-main">
+                <h3>{{ line.title }}</h3>
+                <div class="cart-line-meta">
+                  <span class="cart-line-unit">{{ money(line.unitPrice) }} {{ line.unit }}</span>
+                  <span class="cart-line-moq">Min. {{ stepLabel(line) }}</span>
+                </div>
+                <div class="cart-qty">
+                  <span class="cart-qty-label">Quantity</span>
+                  <div class="qty-stepper">
+                    <button type="button" (click)="step(line.id, -1)" [attr.aria-label]="'Decrease quantity of ' + line.title">&minus;</button>
+                    <output>{{ line.qty }}</output>
+                    <button type="button" (click)="step(line.id, 1)" [attr.aria-label]="'Increase quantity of ' + line.title">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cart-line-end">
+                <div class="cart-line-total">{{ lineTotal(line) }}</div>
+                <button type="button" class="cart-remove" (click)="remove(line.id)">Remove<span class="sr-only"> {{ line.title }}</span></button>
+              </div>
+            </article>
+          }
+          <button type="button" class="cart-clear" (click)="clear()">Empty the cart</button>
+        </div>
+
+        <aside class="cart-summary">
+          <h2>Summary</h2>
+          <dl>
+            <div><dt>Units</dt><dd>{{ cart.count() }}</dd></div>
+            <div><dt>Goods subtotal</dt><dd>{{ money(cart.subtotal()) }}</dd></div>
+            <div class="cart-summary-note"><dt>Freight &amp; duties</dt><dd>Quoted separately</dd></div>
+          </dl>
+          <div class="cart-summary-total"><span>Subtotal</span><strong>{{ money(cart.subtotal()) }}</strong></div>
+          <p class="cart-summary-fine">Figures are indicative and exclude freight, insurance and import duty. Your final invoice is confirmed with your quote.</p>
+          <a routerLink="/quote" class="btn btn-primary cart-summary-cta">Request this quote</a>
+          <a routerLink="/marketplace" class="cart-summary-more">Keep shopping</a>
+        </aside>
+      </div>
+    }
+  </div>
+</section>
+
+</main>

@@ -5,11 +5,12 @@ import { filter } from 'rxjs';
 import { SiteHeader } from './components/site-header/site-header';
 import { SiteFooter } from './components/site-footer/site-footer';
 import { SearchOverlay } from './components/search-overlay/search-overlay';
+import { CartToast } from './components/cart-toast/cart-toast';
 import { MediaMuteService } from './services/media-mute.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SiteHeader, SiteFooter, SearchOverlay],
+  imports: [RouterOutlet, SiteHeader, SiteFooter, SearchOverlay, CartToast],
   templateUrl: './app.html',
 })
 export class App {

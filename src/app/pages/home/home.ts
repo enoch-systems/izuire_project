@@ -10,6 +10,9 @@ import {
   viewChildren,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { FEATURED, Product, PRODUCTS } from '../marketplace/marketplace-data';
+import { CartService } from '../../services/cart.service';
+import { FlyToCartService } from '../../services/fly-to-cart.service';
 
 /** One slide of the hero stat carousel (a card plus its backdrop design). */
 interface HeroStat {
@@ -98,6 +101,19 @@ const TESTIMONIALS: Testimonial[] = [
     role: 'General Merchandise, Abuja',
   },
 ];
+
+/** Products per pager page. Four keeps the grid's own four-column rhythm. */
+const PAGE_SIZE = 4;
+
+/**
+ * The showcase, split into pages for the dot pager under the grid. Chunked from
+ * the whole catalogue so the pager actually cycles through the range rather than
+ * shuffling the same four cards; the trailing page takes whatever is left.
+ */
+const PRODUCT_PAGES: Product[][] = [];
+for (let i = 0; i < PRODUCTS.length; i += PAGE_SIZE) {
+  PRODUCT_PAGES.push(PRODUCTS.slice(i, i + PAGE_SIZE));
+}
 
 /**
  * Home page. The testimonial slider reproduces the original behavior:
@@ -204,6 +220,92 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
       this.format(Math.round(stat.value * this.trustShares()[index])),
     ),
   );
+
+  /** The four products under "Featured products", in showcase order. */
+  protected readonly featured = FEATURED;
+
+  /** The showcase as pager pages, and which one is showing. */
+  protected readonly pages = PRODUCT_PAGES;
+  protected readonly page = signal(0);
+
+  /**
+   * Show a page of the showcase. The track is moved with a single transform, so
+   * travelling to a later page slides left and going back slides right on its
+   * own — there is no direction state to keep in step with the index.
+   */
+  protected goToPage(index: number): void {
+    this.page.set(index);
+  }
+
+  /**
+   * Step the showcase a page back or forward from the chevrons either side of the
+   * dots. The index is clamped rather than wrapped, matching the disabled state the
+   * chevrons take at each end, so a step can never land off the end of the track.
+   */
+  protected stepPage(delta: number): void {
+    const next = this.page() + delta;
+    this.page.set(Math.min(Math.max(next, 0), this.pages.length - 1));
+  }
+
+  /** The cart. Its count drives the header badge; `addedId` flashes the card's
+   *  button to "Added" for a moment after a click. */
+  protected readonly cart = inject(CartService);
+  /** Sends the clicked product's picture into the header cart and raises the toast. */
+  private readonly flyToCart = inject(FlyToCartService);
+
+  /**
+   * Add a featured product at the quantity its card is showing, then fly its
+   * picture into the cart. The event is used to find the card being clicked
+   * rather than passing the element through the template, so the markup stays a
+   * plain `addToCart(p, $event)` call and the button needs no reference of its
+   * own.
+   */
+  protected addToCart(product: Product, event: Event): void {
+    this.cart.addQty(product, this.qtyFor(product.id));
+    // closest() is typed as Element; the card really is an HTMLElement, and the
+    // service only ever reads a rect off it.
+    const card = (event.currentTarget as HTMLElement | null)?.closest<HTMLElement>('.product-card');
+    if (card) this.flyToCart.flyFrom(card, product);
+  }
+
+  /**
+   * Every card starts on a single unit, whatever the product's MOQ. The
+   * wholesale minimum is a fact about ordering, not a reason to make someone
+   * click four times to find out the price of one — a buyer who wants 50 types
+   * it or steps up to it.
+   */
+  protected readonly defaultQty = 1;
+
+  /**
+   * The unit count each card's stepper is currently showing, keyed by product id.
+   * Held per card rather than as one number because the showcase shows four
+   * products at a time and each keeps its own figure while you page through.
+   */
+  private readonly qtyDrafts = signal<Record<string, number>>({});
+
+  /** The count a card is showing, defaulting to a single unit. */
+  protected qtyFor(id: string): number {
+    return this.qtyDrafts()[id] ?? this.defaultQty;
+  }
+
+  /** Step a card's count by single units, never below one. */
+  protected stepQty(id: string, delta: number): void {
+    this.setQty(id, Math.max(1, this.qtyFor(id) + delta));
+  }
+
+  /**
+   * Take a typed count. Empty and unparseable input falls back to a single unit
+   * rather than zero, so clearing the box can never mean "order none of it" —
+   * dropping a line is the cart's business, not the card's.
+   */
+  protected typeQty(id: string, raw: string): void {
+    const parsed = Number.parseInt(raw, 10);
+    this.setQty(id, Number.isFinite(parsed) ? Math.max(1, parsed) : 1);
+  }
+
+  private setQty(id: string, qty: number): void {
+    this.qtyDrafts.update((drafts) => ({ ...drafts, [id]: qty }));
+  }
 
   /** The looping category tile clips plus the Sourcing and Shipping cards',
    *  played/paused from ngAfterViewInit. */

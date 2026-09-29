@@ -10,6 +10,7 @@ import { BusinessSolutions } from './pages/business-solutions/business-solutions
 import { Shipping } from './pages/shipping/shipping';
 import { Sourcing } from './pages/sourcing/sourcing';
 import { Marketplace } from './pages/marketplace/marketplace';
+import { Cart } from './pages/cart/cart';
 
 /**
  * One route per original HTML page, with the same titles and meta
@@ -85,6 +86,12 @@ export const routes: Routes = [
     component: Marketplace,
     title: 'Marketplace — Available Stock | Izuire',
     data: { desc: 'Browse trending products sourced from China — electronics, Okrika thrift bales, building materials, hair, solar equipment and more. Request a quote on any item.' },
+  },
+  {
+    path: 'cart',
+    component: Cart,
+    title: 'Your Cart — Izuire',
+    data: { desc: 'Review the products you have added, adjust quantities to your minimums, and send the basket through for a quote.' },
   },
   { path: '**', redirectTo: '' },
 ];
