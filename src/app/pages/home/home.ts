@@ -291,7 +291,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
     const cards = Array.from(
       this.host.nativeElement.querySelectorAll<HTMLElement>(
-        '.cat-card, .product-card, .subbrand-card, .cta-final',
+        '.cat-card, .product-card, .subbrand, .cta-final',
       ),
     );
 

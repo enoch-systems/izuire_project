@@ -85,12 +85,6 @@
     border:1.5px solid var(--ink);
   }
   .btn-outline:hover{background:var(--ink); color:var(--white);}
-  .btn-outline-light{
-    background:transparent;
-    color:var(--white);
-    border:1.5px solid rgba(255,255,255,.55);
-  }
-  .btn-outline-light:hover{background:var(--white); color:var(--ink); border-color:var(--white);}
   .btn-sm{padding:10px 18px; font-size:.82rem; border-radius:5px;}
   .btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
     outline:2.5px solid var(--orange-deep);
@@ -1076,91 +1070,101 @@
   }
 
   /* ============ SUB-BRANDS ============ */
-  .subbrand-grid{
+  /* No boxes, no panels, no rounded fills: two columns of type split by a hairline,
+     each one a window onto its own category. A still of the category sits behind the
+     words at a couple of percent of itself, blurred, and opens up when the brand is
+     hovered - the storefront showing what it actually sells, without a card around it.
+     The brand name is the loudest thing on the page here, not the picture. */
+  .subbrand-rail{
     display:grid;
-    grid-template-columns:repeat(2, 1fr);
-    gap:22px;
+    grid-template-columns:1fr 1fr;
+    border-top:1px solid var(--line);
   }
-  .subbrand-card{
-    border-radius:14px;
-    padding:38px;
-    min-height:230px;
-    display:flex; flex-direction:column; justify-content:flex-end;
+  .subbrand{
     position:relative; overflow:hidden;
-    /* `isolation` keeps the scan and the ghost wordmark behind the copy. */
+    display:block;
+    padding:40px 44px 42px;
+    /* `isolation` keeps the still and the wash behind the words. */
     isolation:isolate;
-    transition:transform .3s var(--ease);
   }
-  .subbrand-card:hover{transform:translateY(-4px);}
-  .subbrand-card.okrika{background:linear-gradient(135deg, #1b1b1b 0%, #111111 60%);}
-  .subbrand-card.haircubr{background:linear-gradient(135deg, var(--orange-deep) 0%, var(--orange) 100%);}
-  /* A hairline draws across the top of the panel on hover, like a sign switching
-     on. */
-  .subbrand-card::before{
+  .subbrand + .subbrand{ border-left:1px solid var(--line); }
+  /* The window. */
+  .sb-media{
+    position:absolute; inset:0; z-index:-2;
+    overflow:hidden;
+  }
+  .sb-media img{
+    width:100%; height:100%; object-fit:cover;
+    /* Held back and out of focus at rest, which is what makes opening up read as an
+       event rather than as a picture that was always there. */
+    filter:blur(3px) saturate(.85);
+    opacity:.14; scale:1.02;
+    transition:opacity .6s var(--ease), scale .9s var(--ease), filter .6s var(--ease);
+  }
+  .subbrand:hover .sb-media img,
+  .subbrand:focus-visible .sb-media img{
+    opacity:.55; scale:1.09; filter:blur(0) saturate(1);
+  }
+  /* The wash: the words keep exactly the contrast they have everywhere else on the
+     page, and the still reads through it rather than fighting it. */
+  .subbrand::after{
     content:"";
-    position:absolute; top:0; left:0; right:0; height:2px;
-    background:linear-gradient(90deg, var(--orange), var(--orange-deep), var(--orange));
+    position:absolute; inset:0; z-index:-1;
+    background:linear-gradient(100deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.72) 100%);
+  }
+  /* Three sizes again, this time led by the brand. */
+  .sb-kicker{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:var(--font-d); font-weight:600;
+    font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--orange-deep);
+  }
+  .sb-kicker::before{
+    content:""; width:16px; height:2px; background:currentColor;
+  }
+  .subbrand h3{
+    font-size:clamp(1.9rem, 3.4vw, 2.7rem);
+    line-height:1.02; letter-spacing:-.02em;
+    margin:14px 0 12px;
+  }
+  .subbrand p{ font-size:.95rem; color:var(--ink-60); max-width:36ch; margin-bottom:26px; }
+  /* The link is a line of type, not a button: an orange rule draws under it and the
+     arrow steps out. */
+  .sb-link{
+    position:relative;
+    display:inline-flex; align-items:center;
+    font-family:var(--font-d); font-weight:600; font-size:.92rem;
+    color:var(--ink);
+  }
+  .sb-link::before{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-7px; height:2px;
+    background:var(--orange);
     transform:scaleX(0); transform-origin:left center;
-    transition:transform .6s var(--ease);
+    transition:transform .45s var(--ease);
   }
-  .subbrand-card:hover::before{transform:scaleX(1);}
-  /* The scan: a skewed bar of light crossing the panel on a slow loop, so the
-     storefront reads as live rather than as a still photograph of one. */
-  .sb-scan{
-    position:absolute; top:-20%; bottom:-20%; left:0;
-    width:32%;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
-    transform:skewX(-12deg) translateX(-160%);
-    pointer-events:none;
+  .subbrand:hover .sb-link::before,
+  .subbrand:focus-visible .sb-link::before{ transform:scaleX(1); }
+  .sb-arrow{
+    display:inline-block; margin-left:9px;
+    opacity:.45; transform:translateX(-3px);
+    transition:transform .3s var(--ease), opacity .3s var(--ease);
   }
-  .subbrand-card.in .sb-scan{ animation:sbSweep 7s linear .8s infinite; }
-  @keyframes sbSweep{
-    from{ transform:skewX(-12deg) translateX(-160%); }
-    to{ transform:skewX(-12deg) translateX(520%); }
-  }
-  /* The brand's own name, huge and faint, drifting behind the copy. */
-  .sb-ghost{
-    position:absolute; right:-10px; bottom:6px;
-    font-family:var(--font-d); font-weight:700;
-    font-size:clamp(3.2rem, 6.4vw, 5.2rem);
-    line-height:.84; letter-spacing:-.03em;
-    color:rgba(255,255,255,.07);
-    white-space:nowrap; pointer-events:none;
-  }
-  .subbrand-card.in .sb-ghost{ animation:sbDrift 9s ease-in-out infinite alternate; }
-  @keyframes sbDrift{
-    from{ transform:translate(0, 0); }
-    to{ transform:translate(-14px, -10px); }
-  }
-  /* Copy above both layers, so the watermark and the scan never sit on the text. */
-  .subbrand-card .eyebrow,
-  .subbrand-card h3,
-  .subbrand-card p,
-  .subbrand-card .sb-cta{ position:relative; z-index:1; }
-  .subbrand-card .eyebrow{color:rgba(255,255,255,.7);}
-  .subbrand-card .eyebrow::before{background:rgba(255,255,255,.7);}
-  /* The name wipes on like a sign, then the copy and the button follow it in. Shared
-     with the testimonials, hence the neutral name. */
-  .subbrand-card.in h3{ animation:sbName .8s var(--ease) .12s both; }
+  .subbrand:hover .sb-arrow,
+  .subbrand:focus-visible .sb-arrow{ transform:translateX(3px); opacity:1; }
+  /* Still reveals on scroll: the name wipes on, the copy and the link rise behind it.
+     `riseIn` is shared with the testimonials. */
+  .subbrand.in h3{ animation:sbName .8s var(--ease) .12s both; }
   @keyframes sbName{
     from{ clip-path:inset(0 100% 0 0); letter-spacing:.14em; opacity:0; }
     to{ clip-path:inset(0 0 0 0); letter-spacing:normal; opacity:1; }
   }
-  .subbrand-card.in p{ animation:riseIn .6s var(--ease) .3s both; }
-  .subbrand-card.in .sb-cta{ animation:riseIn .6s var(--ease) .42s both; }
+  .subbrand.in p{ animation:riseIn .6s var(--ease) .3s both; }
+  .subbrand.in .sb-link{ animation:riseIn .6s var(--ease) .42s both; }
   @keyframes riseIn{
     from{ opacity:0; translate:0 12px; }
     to{ opacity:1; translate:0 0; }
   }
-  .subbrand-card h3{color:var(--white); font-size:1.55rem; margin:10px 0 8px;}
-  .subbrand-card p{color:rgba(255,255,255,.78); font-size:.9rem; max-width:340px; margin-bottom:20px;}
-  /* The arrow leaves the button when the panel is hovered. */
-  .sb-arrow{
-    display:inline-block; margin-left:8px;
-    opacity:.5; transform:translateX(-2px);
-    transition:transform .3s var(--ease), opacity .3s var(--ease);
-  }
-  .subbrand-card:hover .sb-arrow{transform:translateX(3px); opacity:1;}
 
   /* ============ RFQ FORM ============ */
   .rfq-wrap{
@@ -1376,7 +1380,9 @@
     .steps{grid-template-columns:repeat(2,1fr); row-gap:36px;}
     .steps::before{display:none;}
     .trust-stats{grid-template-columns:repeat(2,1fr); row-gap:28px;}
-    .subbrand-grid{grid-template-columns:1fr;}
+    /* Stacked, so the hairline between the two columns turns horizontal. */
+    .subbrand-rail{grid-template-columns:1fr;}
+    .subbrand + .subbrand{ border-left:none; border-top:1px solid var(--line); }
     .rfq-wrap{grid-template-columns:1fr;}
     .footer-grid{grid-template-columns:1fr 1fr;}
   }
@@ -1907,9 +1913,8 @@
     .testi-dots{ margin-top:26px; }
 
     /* Sub-brands */
-    .subbrand-grid{ gap:16px; }
-    .subbrand-card{ padding:28px 24px; min-height:200px; }
-    .subbrand-card h3{ font-size:1.35rem; }
+    .subbrand{ padding:30px 24px 32px; }
+    .subbrand h3{ font-size:1.7rem; }
 
     /* Forms / RFQ */
     .rfq-form{ padding:24px 20px; border-radius:12px; }
@@ -1997,8 +2002,8 @@
     .service-icon{ width:44px; height:44px; }
     .service-card h4{ font-size:.96rem; }
     .trust-stat .num{ font-size:1.4rem; }
-    .subbrand-card{ padding:24px 20px; min-height:180px; }
-    .subbrand-card p{ font-size:.86rem; }
+    .subbrand{ padding:24px 20px 26px; }
+    .subbrand p{ font-size:.88rem; }
     .rfq-form{ padding:20px 16px; }
     .testi-slide p{ font-size:.98rem; }
     .footer-bottom{ font-size:.74rem; }

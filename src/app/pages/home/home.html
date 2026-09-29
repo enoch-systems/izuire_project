@@ -364,26 +364,26 @@
       <div><span class="eyebrow">Under the IZUIRE umbrella</span><h2>Our sub-brands</h2></div>
       <p>Specialist storefronts for two of our fastest-moving categories.</p>
     </div>
-    <!-- Each panel is a storefront rather than a card: a scan sweeps the surface, the
-         brand sits behind its own ghost wordmark, the name wipes on, and a hairline
-         draws across the top on hover. All of it waits for `.in` from the reveal
-         observer, so it plays as the section is scrolled to. -->
-    <div class="subbrand-grid">
-      <a class="subbrand-card okrika" routerLink="/quote">
-        <span class="sb-scan" aria-hidden="true"></span>
-        <span class="sb-ghost" aria-hidden="true">Okrika</span>
-        <span class="eyebrow">Thrift &amp; Bales</span>
+    <!-- No cards: two unboxed columns split by a hairline, each one a window onto its
+         own category. A still of the category sits behind the words, held right back
+         until the brand is hovered, when it opens up - so each storefront shows what
+         it actually sells without a box around it. The name still wipes on and the
+         copy still rises behind it as the section is scrolled to (see
+         revealCards), and the link's rule draws on hover. -->
+    <div class="subbrand-rail">
+      <a class="subbrand okrika" routerLink="/quote">
+        <span class="sb-media" aria-hidden="true"><img src="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_720/ders-videos/secondhandclothing.jpg" alt="" loading="lazy" width="720" height="480"></span>
+        <span class="sb-kicker">Thrift &amp; Bales</span>
         <h3>IZUIRE Okrika</h3>
         <p>Graded secondhand clothing bales, sourced and sorted for resellers across Nigeria.</p>
-        <span class="btn btn-outline-light btn-sm sb-cta">Explore Okrika<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="sb-link">Explore Okrika<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
       </a>
-      <a class="subbrand-card haircubr" routerLink="/quote">
-        <span class="sb-scan" aria-hidden="true"></span>
-        <span class="sb-ghost" aria-hidden="true">Haircubr</span>
-        <span class="eyebrow">Hair &amp; Wigs</span>
+      <a class="subbrand haircubr" routerLink="/quote">
+        <span class="sb-media" aria-hidden="true"><img src="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_720/ders-videos/a2.jpg" alt="" loading="lazy" width="720" height="480"></span>
+        <span class="sb-kicker">Hair &amp; Wigs</span>
         <h3>Haircubr</h3>
         <p>Raw and human hair bundles and units, built to give every woman confidence.</p>
-        <span class="btn btn-outline-light btn-sm sb-cta">Explore Haircubr<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
+        <span class="sb-link">Explore Haircubr<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
       </a>
     </div>
   </div>
