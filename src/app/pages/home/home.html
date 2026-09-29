@@ -299,16 +299,15 @@
       <div><span class="eyebrow">Why Izuire</span><h2>Built for buyers who've been burned before</h2></div>
     </div>
     <!-- No cards here on purpose: the six reasons are set as text on a thin line,
-         each with a small bubble and a quiet index. The copy lives in home.ts so
-         the body text can be split into words, which read in one after the other as
-         each reason is reached (see readReasons). With scripting off the words are
-         just ordinary text. -->
+         each with a small bubble. The copy lives in home.ts so the body text can be
+         split into words, which read in one after the other as each reason is
+         reached (see readReasons). With scripting off the words are just ordinary
+         text. -->
     <div class="reasons">
-      @for (reason of reasons; track reason.code) {
+      @for (reason of reasons; track reason.title) {
         <article class="reason">
           <span class="reason-line" aria-hidden="true"></span>
           <span class="reason-dot" aria-hidden="true"></span>
-          <span class="reason-code">{{ reason.code }}</span>
           <h3>{{ reason.title }}</h3>
           <p class="reason-body">@for (word of reason.words; track $index) {<span class="word" [style.--w]="$index">{{ word }}</span>}</p>
         </article>

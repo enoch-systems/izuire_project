@@ -22,8 +22,6 @@ interface HeroStat {
 
 /** One of the reasons listed under "Why Izuire". */
 interface WhyReason {
-  /** Two-digit index printed beside the heading. */
-  code: string;
   title: string;
   body: string;
   /** `body` split into words, each carrying its own leading space. */
@@ -33,32 +31,26 @@ interface WhyReason {
 /** The reasons, in the order they are read down the page. */
 const REASONS: Omit<WhyReason, 'words'>[] = [
   {
-    code: '01',
     title: 'China Sourcing Network',
     body: "Years inside Guangzhou's markets and factory networks, not a broker working from a spreadsheet.",
   },
   {
-    code: '02',
     title: 'Supplier Verification',
     body: 'Every supplier is checked before your money goes anywhere near them.',
   },
   {
-    code: '03',
     title: 'Quality Control',
     body: 'Inspected before shipping, with photo and video proof, every time.',
   },
   {
-    code: '04',
     title: 'Transparent Process',
     body: 'Clear pricing and order status, no radio silence between quote and delivery.',
   },
   {
-    code: '05',
     title: 'Procurement Support',
     body: 'From MOQ negotiation to custom packaging, support beyond just placing an order.',
   },
   {
-    code: '06',
     title: 'Shipping Coordination',
     body: "Freight, documentation and customs handled, you're not chasing three parties.",
   },
