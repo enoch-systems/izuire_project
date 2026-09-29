@@ -325,13 +325,20 @@
 </section>
 
 <!-- ============ TRUST BAND ============ -->
+<!-- The four figures count up as the band is scrolled into view, each one starting a
+     beat after the one before it, with the bar under each number filling as it goes
+     (see watchTrust in home.ts). The three sign-offs below settle in sequence once
+     the count has landed. Without scripting the band simply renders finished. -->
 <section class="trust-band">
   <div class="container">
     <div class="trust-stats">
-      <div class="trust-stat"><div class="num">6+</div><div class="lbl">Years sourcing from China</div></div>
-      <div class="trust-stat"><div class="num">8</div><div class="lbl">Product categories covered</div></div>
-      <div class="trust-stat"><div class="num">50+</div><div class="lbl">Suppliers vetted &amp; managed</div></div>
-      <div class="trust-stat"><div class="num">1,000+</div><div class="lbl">Orders fulfilled to Africa</div></div>
+      @for (stat of trustStats; track stat.label) {
+        <div class="trust-stat">
+          <div class="num"><span class="num-count">{{ shownTrust()[$index] }}</span><span class="num-suffix">{{ stat.suffix }}</span></div>
+          <div class="lbl">{{ stat.label }}</div>
+          <span class="trust-stat__bar" aria-hidden="true"><span class="trust-stat__fill" [style.--progress]="trustShares()[$index]"></span></span>
+        </div>
+      }
     </div>
     <div class="trust-badges">
       <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>CAC-Registered, Izuire Co. Ltd.</div>

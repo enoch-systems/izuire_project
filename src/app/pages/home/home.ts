@@ -56,6 +56,20 @@ const REASONS: Omit<WhyReason, 'words'>[] = [
   },
 ];
 
+/** One figure in the trust band. `suffix` is the part that is not a number. */
+interface TrustStat {
+  value: number;
+  suffix: string;
+  label: string;
+}
+
+const TRUST_STATS: TrustStat[] = [
+  { value: 6, suffix: '+', label: 'Years sourcing from China' },
+  { value: 8, suffix: '', label: 'Product categories covered' },
+  { value: 50, suffix: '+', label: 'Suppliers vetted & managed' },
+  { value: 1000, suffix: '+', label: 'Orders fulfilled to Africa' },
+];
+
 /**
  * Home page. The testimonial slider reproduces the original behavior:
  * prev/next arrows, dots, and auto-advance every 6 seconds.
@@ -85,6 +99,11 @@ const REASONS: Omit<WhyReason, 'words'>[] = [
  * body copy is split into words and lights up word by word as it is read down the
  * page, while the readout in the section head counts the reasons off (see
  * readReasons and countTo).
+ *
+ * The trust band below counts its figures up from zero when the band is scrolled to,
+ * each one starting a beat after the one before it, with a bar filling under each
+ * number and the three sign-off badges settling in once the count has landed (see
+ * watchTrust and tween).
  *
  * Category and product cards also bubble up one at a time as you scroll to them
  * (see revealCards). A card's resting style is its normal style and the "not
@@ -133,6 +152,26 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     () => `${this.pad(this.readCount())} / ${this.pad(this.reasonTotal)}`,
   );
 
+  /** The trust band's figures. `trustProgress` runs 0 → 1 while the band counts, and
+   *  starts at 1 so the band reads as finished until scripting rewinds it. */
+  protected readonly trustStats = TRUST_STATS;
+  private readonly trustProgress = signal(1);
+  /** How far each figure has got, staggered so the count travels across the band
+   *  instead of all four climbing at once: each starts a tenth later and counts
+   *  through the same 70% of the run. */
+  protected readonly trustShares = computed(() => {
+    const progress = this.trustProgress();
+    return TRUST_STATS.map((_, index) =>
+      Math.min(1, Math.max(0, (progress - index * 0.1) / 0.7)),
+    );
+  });
+  /** The digits as they stand, grouped so 1,000 counts as 1,000. */
+  protected readonly shownTrust = computed(() =>
+    TRUST_STATS.map((stat, index) =>
+      this.format(Math.round(stat.value * this.trustShares()[index])),
+    ),
+  );
+
   /** The looping category tile clips plus the Sourcing and Shipping cards',
    *  played/paused from ngAfterViewInit. */
   private readonly catMedia = viewChildren<ElementRef<HTMLVideoElement>>('catMedia');
@@ -147,9 +186,11 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   private revealObserver: IntersectionObserver | undefined;
   private stepObserver: IntersectionObserver | undefined;
   private reasonObserver: IntersectionObserver | undefined;
-  /** Frame of the readout's count-up, so a new count can take over mid-flight and
-   *  the animation can be cancelled on destroy. */
-  private countRaf: number | undefined;
+  /** Cancel handles for the two count-ups, so a new one can take over mid-flight and
+   *  both can be stopped when the view goes away. */
+  private cancelCount: (() => void) | undefined;
+  private cancelTrust: (() => void) | undefined;
+  private trustObserver: IntersectionObserver | undefined;
 
   protected goTo(idx: number): void {
     this.current.set(((idx % this.dots.length) + this.dots.length) % this.dots.length);
@@ -182,21 +223,22 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     this.revealObserver?.disconnect();
     this.stepObserver?.disconnect();
     this.reasonObserver?.disconnect();
-    if (this.countRaf !== undefined) {
-      cancelAnimationFrame(this.countRaf);
-    }
+    this.trustObserver?.disconnect();
+    this.cancelCount?.();
+    this.cancelTrust?.();
   }
 
   /**
    * Wire up the on-scroll behavior once the view exists: play the category clips
    * that are on screen, bubble the cards up as they are reached, light the process
-   * rail as it is scrolled through, and read the reasons in.
+   * rail as it is scrolled through, read the reasons in, and count the trust band up.
    */
   ngAfterViewInit(): void {
     this.playCategoryClips();
     this.revealCards();
     this.watchSteps();
     this.readReasons();
+    this.watchTrust();
   }
 
   /**
@@ -360,36 +402,85 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Roll the readout from wherever it is up to `next` over a fraction of a second, so
    * the count reads as counting instead of jumping. The fill bar is driven off the
-   * same signal, so it climbs along with the digits. When less motion has been asked
-   * for, the number is simply set.
+   * same signal, so it climbs along with the digits.
    */
   private countTo(next: number): void {
-    if (this.countRaf !== undefined) {
-      cancelAnimationFrame(this.countRaf);
-      this.countRaf = undefined;
-    }
+    this.cancelCount?.();
+    this.cancelCount = undefined;
 
     const from = this.readCount();
     if (from === next) {
       return;
     }
+    this.cancelCount = this.tween(from, next, 420, (value) =>
+      this.readCount.set(Math.round(value)),
+    );
+  }
 
-    const lessMotion =
-      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (lessMotion) {
-      this.readCount.set(next);
+  /**
+   * Count the trust band up as it is scrolled to. The figures run from zero to their
+   * real values, staggered across the band, and the three sign-off badges below
+   * settle in sequence once the count has landed. Nothing is primed until the band is
+   * actually reached, so without scripting the band renders finished.
+   */
+  private watchTrust(): void {
+    const band = this.host.nativeElement.querySelector<HTMLElement>('.trust-band');
+
+    if (!band || typeof IntersectionObserver === 'undefined') {
       return;
     }
 
+    this.trustObserver = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) {
+          return;
+        }
+        // One shot: the count should not replay on every pass.
+        this.trustObserver?.disconnect();
+
+        band.classList.add('armed');
+        this.trustProgress.set(0);
+        this.cancelTrust = this.tween(0, 1, 1500, (value) => {
+          this.trustProgress.set(value);
+          if (value >= 1) {
+            band.classList.add('counted');
+          }
+        });
+      },
+      { threshold: 0.45 },
+    );
+
+    this.trustObserver.observe(band);
+  }
+
+  /**
+   * Ease a number from one value to another over `duration` milliseconds, handing
+   * every frame's value to `apply`. Eased out, so whatever it drives settles rather
+   * than crawling in. When less motion has been asked for, the end value is applied
+   * straight away. Returns a cancel function.
+   */
+  private tween(from: number, to: number, duration: number, apply: (value: number) => void): () => void {
+    const lessMotion =
+      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (lessMotion) {
+      apply(to);
+      return () => undefined;
+    }
+
     const started = performance.now();
-    const tick = (now: number): void => {
-      const progress = Math.min(1, (now - started) / 420);
-      // Eased out, so the last digit settles rather than crawling in.
-      const eased = 1 - Math.pow(1 - progress, 3);
-      this.readCount.set(Math.round(from + (next - from) * eased));
-      this.countRaf = progress < 1 ? requestAnimationFrame(tick) : undefined;
+    let frame = 0;
+    const step = (now: number): void => {
+      const progress = Math.min(1, (now - started) / duration);
+      apply(from + (to - from) * (1 - Math.pow(1 - progress, 3)));
+      frame = progress < 1 ? requestAnimationFrame(step) : 0;
     };
-    this.countRaf = requestAnimationFrame(tick);
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }
+
+  /** Group a count, so a figure in flight reads as 1,000 and not 1000. */
+  private format(value: number): string {
+    return value.toLocaleString('en-US');
   }
 
   /**
