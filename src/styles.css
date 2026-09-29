@@ -672,9 +672,9 @@
      `cat-card--<name>` modifier that supplies its own still frame for
      reduced-motion users. Video and scrim sit on negative z-index layers so the
      icon, title and caption stay readable on top of the footage.
-     The `.cat-media` and hover rules below are shared with the Shipping service
-     card, which loops a clip the same way through the same #catMedia template
-     ref, so those selectors list both card families. */
+     The `.cat-media` and hover rules below are shared with the Sourcing and
+     Shipping service cards, which loop a clip the same way through the same
+     #catMedia template ref, so those selectors list both card families. */
   .cat-card--media{
     position:relative; overflow:hidden;
     /* `isolation` keeps the scrim (-1) and the video (-2) inside this card. Without
@@ -1023,10 +1023,10 @@
   }
 
   /* Nothing should move for visitors who have asked for less motion: drop the
-     looping clips and give each tile — plus the Shipping service card, which
-     shares the same ref — a still frame taken from its own clip one second in
-     (Cloudinary's `so_1` transform), so the sections keep the same look with no
-     playback and no scroll animation. */
+     looping clips and give each tile — plus the Sourcing and Shipping service
+     cards, which share the same ref — a still frame taken from its own clip one
+     second in (Cloudinary's `so_1` transform), so the sections keep the same look
+     with no playback and no scroll animation. */
   @media (prefers-reduced-motion: reduce){
     *{transition:none !important; animation:none !important; scroll-behavior:auto !important;}
     .cat-card--media .cat-media,
@@ -1040,8 +1040,9 @@
     .cat-card--general{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/generalmerchandise.jpg");}
     .cat-card--solar{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/solarequipment.jpg");}
     .cat-card--kitchen{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/kitcenware.jpg");}
-    /* The Shipping service card loops the ninth clip, so it falls back to a still
-       of its own the same way. */
+    /* The two service cards that loop clips fall back to a still of their own the
+       same way. */
+    .service-card--sourcing{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/sourcing.jpg");}
     .service-card--shipping{background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/ship.jpg");}
   }
 
@@ -1072,12 +1073,12 @@
   .service-card h4{font-size:1rem; margin-bottom:8px;}
   .service-card p{font-size:.87rem; color:var(--ink-60); line-height:1.55;}
 
-  /* Three service cards go dark and carry imagery of their own, following the
+  /* All four service cards go dark and carry imagery of their own, following the
      same recipe as the category tiles above — same tile height, same scrim
      gradient, white icon/title/copy. Marketplace and Business Solutions put a
      Cloudinary still on the card's own `background`, so their dimming comes from
-     the scrim alone; Shipping loops a clip instead (see the shared .cat-media
-     rules further up). */
+     the scrim alone; Sourcing and Shipping loop a clip instead (see the shared
+     .cat-media rules further up). */
   .service-card--media{
     position:relative; overflow:hidden;
     /* `isolation` keeps the scrim on its own negative layer inside this card,
