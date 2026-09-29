@@ -330,6 +330,15 @@
      (see watchTrust in home.ts). The three sign-offs below settle in sequence once
      the count has landed. Without scripting the band simply renders finished. -->
 <section class="trust-band">
+  <!-- A blurred loop of ship.mp4 runs behind the figures, on the same in-view terms
+       as the category tiles. The scrim that keeps the text legible is the wrapper's
+       own ::after in styles.css, and the poster still takes over under
+       prefers-reduced-motion. -->
+  <div class="bg-media" aria-hidden="true">
+    <video #bgMedia class="bg-video" muted loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/ship.jpg">
+      <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_640,e_blur:300,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
+    </video>
+  </div>
   <div class="container">
     <div class="trust-stats">
       @for (stat of trustStats; track stat.label) {
@@ -416,6 +425,13 @@
      band when the section is reached, and the primary button catches a shine on
      hover. `reveal-soft` keeps the observer from ever hiding this section. -->
 <section class="section cta-final reveal-soft">
+  <!-- sourcing.mp4, blurred, sits under a white wash: the closing words keep the
+       contrast they had on a flat background while the page still moves behind them. -->
+  <div class="bg-media" aria-hidden="true">
+    <video #bgMedia class="bg-video" muted loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/sourcing.jpg">
+      <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_640,e_blur:300,q_auto:low/ders-videos/sourcing.mp4" type="video/mp4">
+    </video>
+  </div>
   <span class="cta-final__glow" aria-hidden="true"></span>
   <div class="container">
     <h2 class="cta-final__title">Ready to start sourcing?</h2>

@@ -115,7 +115,8 @@ const TESTIMONIALS: Testimonial[] = [
  * because the clone matches slide 1 exactly.
  *
  * Each of the eight category tiles loops a short Cloudinary clip, and so do the
- * Sourcing and Shipping service cards through the same #catMedia ref. Only the
+ * Sourcing and Shipping service cards through the same #catMedia ref. The trust band
+ * and the closing CTA carry their own blurred backdrops on the same terms. Only the
  * clips inside the viewport play (see playCategoryClips) so the browser never
  * decodes every clip at once and off-screen ones stay on their poster frame.
  *
@@ -207,6 +208,10 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   /** The looping category tile clips plus the Sourcing and Shipping cards',
    *  played/paused from ngAfterViewInit. */
   private readonly catMedia = viewChildren<ElementRef<HTMLVideoElement>>('catMedia');
+
+  /** The two full-bleed section backdrops (trust band, closing CTA). They are played
+   *  and paused on the same terms as the tiles, by playCategoryClips. */
+  private readonly bgMedia = viewChildren<ElementRef<HTMLVideoElement>>('bgMedia');
 
   /** This component's root element, so we can find the cards to reveal on scroll. */
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -529,7 +534,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
    * which is the plain autoplay behavior.
    */
   private playCategoryClips(): void {
-    const videos = this.catMedia().map((ref) => ref.nativeElement);
+    const videos = [...this.catMedia(), ...this.bgMedia()].map((ref) => ref.nativeElement);
 
     if (videos.length === 0) {
       return;

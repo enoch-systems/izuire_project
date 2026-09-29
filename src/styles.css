@@ -2156,6 +2156,59 @@
     .step-ping{ display:none; }
   }
 
+  /* ============ SECTION BACKDROPS — TRUST BAND + CLOSING CTA ============ */
+  /* Two sections carry a looping clip behind them. They ride the same in-view playback
+     as the category tiles (see playCategoryClips), and each carries a scrim so the
+     text sits on the contrast it had on a flat background. The clips are blurred in
+     the URL: at this size that reads as texture rather than as footage, and it takes
+     ship.mp4 from 24 MB to 1.8 MB. */
+  .bg-media{
+    position:absolute; inset:0;
+    overflow:hidden; pointer-events:none;
+  }
+  .bg-video{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+  }
+  /* The scrim rides on the wrapper, so it is above the clip and below the copy. */
+  .bg-media::after{
+    content:"";
+    position:absolute; inset:0;
+  }
+  .trust-band{ overflow:hidden; }
+  .trust-band .bg-media::after{
+    background:linear-gradient(180deg, rgba(17,17,17,.5) 0%, rgba(17,17,17,.72) 100%);
+  }
+  .trust-band .bg-video{ opacity:.45; }
+  /* A white wash rather than a dark one: the closing words are ink on white, so the
+     clip is faded towards the page rather than the page towards the clip. */
+  .cta-final .bg-media::after{ background:rgba(255,255,255,.8); }
+  .cta-final .bg-video{ opacity:.5; }
+  /* Copy above the backdrop, always. The glow is raised to the same layer so the
+     wash does not mute it. */
+  .trust-band > .container,
+  .cta-final > .container{ position:relative; z-index:1; }
+  .cta-final__glow{ z-index:0; }
+  /* Narrow screens carry more text per pixel, so the clips step back. */
+  @media (max-width: 620px){
+    .trust-band .bg-video{ opacity:.36; }
+    .cta-final .bg-video{ opacity:.4; }
+  }
+  /* Less motion: no playback at all, and each backdrop becomes a still from its own
+     clip - the same trade the category tiles make. */
+  @media (prefers-reduced-motion: reduce){
+    .bg-video{ display:none; }
+    .trust-band{
+      background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/ship.jpg");
+      background-size:cover; background-position:center;
+    }
+    .cta-final{
+      background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/sourcing.jpg");
+      background-size:cover; background-position:center;
+    }
+  }
+
   /* ============ THE REASONS LIST — MOBILE ============ */
   /* The line moves closer to the edge and the type steps down, but the list stays
      text on a line rather than turning into cards. */
