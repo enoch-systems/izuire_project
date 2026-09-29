@@ -1060,6 +1060,17 @@
 
   /* ============ SERVICE / ICON CARDS ============ */
   .service-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  /* The home services row is the one that holds four cards, so it runs 4-up:
+     same column count, gap and equal-height rows as .cat-grid, which makes it
+     line up column-for-column with the eight category tiles below instead of
+     leaving the fourth card stranded in a half-empty 3-up row. The steps down to
+     2-up and then a single column come from the shared .service-grid rules in the
+     responsive section. */
+  .service-grid--media{
+    grid-template-columns:repeat(4,1fr);
+    grid-auto-rows:1fr;
+    gap:16px;
+  }
   .service-card{
     background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
     padding:28px 24px; transition:transform .25s var(--ease), box-shadow .25s var(--ease);
@@ -1087,13 +1098,25 @@
     background:var(--ink) center/cover no-repeat;
     border-color:transparent;
     min-height:200px;
+    /* Icon pinned to the top, heading and copy pinned to the bottom, so the four
+       cards share one baseline even though their paragraphs differ in length. */
+    display:flex; flex-direction:column;
   }
   .service-card--media::after{
     content:"";
     position:absolute; inset:0;
     z-index:-1;
-    background:linear-gradient(155deg, rgba(17,17,17,.86) 0%, rgba(17,17,17,.56) 52%, rgba(217,109,20,.66) 100%);
+    /* Two layers: the house 155deg scrim, plus a soft wash across the bottom,
+       which is where the copy is anchored (see the h4's margin-top:auto), so
+       white text never sits on a bright patch of photo. */
+    background:
+      linear-gradient(0deg, rgba(17,17,17,.62) 0%, rgba(17,17,17,0) 58%),
+      linear-gradient(155deg, rgba(17,17,17,.86) 0%, rgba(17,17,17,.52) 52%, rgba(217,109,20,.62) 100%);
+    /* Hover eases the scrim back a little, so the photo underneath wakes up
+       alongside the card's lift. */
+    transition:opacity .3s var(--ease);
   }
+  .service-card--media:hover::after{opacity:.9;}
   /* The two still-backed cards: a photo of graded thrift bales for Marketplace
      and a documented-proof shot for Business Solutions, both uploaded to
      Cloudinary's ders-images folder. `c_limit` keeps each still under the path a
@@ -1108,8 +1131,13 @@
   .service-card--media .service-icon{background:rgba(255,255,255,.16);}
   .service-card--media .service-icon svg{stroke:var(--white);}
   .service-card--media:hover .service-icon{background:var(--orange);}
-  .service-card--media h4{color:var(--white);}
-  .service-card--media p{color:rgba(255,255,255,.74);}
+  /* `margin-top:auto` is what pins the heading and copy to the bottom edge: any
+     height left over from a shorter paragraph is absorbed above the heading, so
+     the icon's own 18px gap is never squeezed out. `text-wrap` balances two-line
+     headings and avoids a lone trailing word in the copy; browsers without it set
+     the text exactly as before. */
+  .service-card--media h4{color:var(--white); text-wrap:balance; margin-top:auto;}
+  .service-card--media p{color:rgba(255,255,255,.74); text-wrap:pretty;}
 
   /* ============ FAQ ACCORDION ============ */
   .faq-list{max-width:760px; margin:0 auto;}
