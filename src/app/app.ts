@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 import { SiteHeader } from './components/site-header/site-header';
 import { SiteFooter } from './components/site-footer/site-footer';
 import { SearchOverlay } from './components/search-overlay/search-overlay';
+import { MediaMuteService } from './services/media-mute.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,11 @@ export class App {
   constructor() {
     const router = inject(Router);
     const meta = inject(Meta);
+
+    // Every clip on this site is decorative, so none of them play sound. This
+    // holds the line from the root component, which covers each route as it is
+    // activated rather than leaving it to whichever page happens to remember.
+    inject(MediaMuteService).start();
 
     // Keep the meta description in sync with the active page, like the
     // per-page <meta name="description"> tags in the original site.

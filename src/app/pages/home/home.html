@@ -119,7 +119,7 @@
            Icons are Lucide (lucide.dev, ISC licence), inlined at the site's
            1.8 stroke width. -->
       <a class="service-card service-card--media service-card--sourcing" routerLink="/sourcing">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/sourcing.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/sourcing.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/sourcing.mp4" type="video/mp4">
         </video>
         <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></div>
@@ -132,7 +132,7 @@
         <p>Browse trending stock across eight categories, with live pricing and MOQ.</p>
       </a>
       <a class="service-card service-card--media service-card--shipping" routerLink="/shipping">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/ship.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/ship.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
         </video>
         <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></div>
@@ -155,7 +155,13 @@
      scrolls away, which is what the #catMedia refs on each <video> are for. Under
      prefers-reduced-motion styles.css swaps the clips for still frames, so every
      tile also carries a `cat-card--<name>` class and a poster still of its own.
-     Tile icons are Lucide icons (lucide.dev, ISC licence). -->
+     Tile icons are Lucide icons (lucide.dev, ISC licence).
+
+     Every clip here and on the service cards is silent. `[muted]` is a property
+     binding rather than a bare `muted` attribute because `muted` is an IDL property
+     that a player can reset when it loads a source; the binding sets the property
+     itself. home.ts re-asserts it with a zero volume on every play(), and
+     MediaMuteService keeps it true site-wide. -->
 <section class="section on-paper" id="categories">
   <div class="container">
     <div class="section-head">
@@ -164,56 +170,56 @@
     </div>
     <div class="cat-grid">
       <div class="cat-card cat-card--media cat-card--electronics">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a1.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a1.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/a1.mp4" type="video/mp4">
         </video>
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></div>
         <h4>Electronics &amp; Phone Accessories</h4><span>Phones, screens, chargers &amp; more</span>
       </div>
       <div class="cat-card cat-card--media cat-card--okrika">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/secondhandclothing.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/secondhandclothing.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/secondhandclothing.mp4" type="video/mp4">
         </video>
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg></div>
         <h4>Secondhand Clothing (Okrika)</h4><span>Graded thrift bales</span>
       </div>
       <div class="cat-card cat-card--media cat-card--building">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a3.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a3.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/a3.mp4" type="video/mp4">
         </video>
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M14 6a6 6 0 0 1 6 6v3"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><rect x="2" y="15" width="20" height="4" rx="1"/></svg></div>
         <h4>Building Materials</h4><span>Fittings, tiles &amp; hardware</span>
       </div>
       <div class="cat-card cat-card--media cat-card--hair">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a2.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/a2.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/a2.mp4" type="video/mp4">
         </video>
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg></div>
         <h4>Hair &amp; Wigs</h4><span>Raw &amp; human hair units</span>
       </div>
       <div class="cat-card cat-card--media cat-card--fashion">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/fashionwears.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/fashionwears.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/fashionwears.mp4" type="video/mp4">
         </video>
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/></svg></div>
         <h4>Fashion &amp; Footwear</h4><span>Shoes, bags &amp; apparel</span>
       </div>
       <div class="cat-card cat-card--media cat-card--general">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/generalmerchandise.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/generalmerchandise.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/generalmerchandise.mp4" type="video/mp4">
         </video>
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg></div>
         <h4>General Merchandise</h4><span>Wholesale &amp; retail goods</span>
       </div>
       <div class="cat-card cat-card--media cat-card--solar">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/solarequipment.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/solarequipment.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/solarequipment.mp4" type="video/mp4">
         </video>
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></div>
         <h4>Solar Equipment</h4><span>Panels, batteries &amp; inverters</span>
       </div>
       <div class="cat-card cat-card--media cat-card--kitchen">
-        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/kitcenware.jpg">
+        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/kitcenware.jpg">
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/kitcenware.mp4" type="video/mp4">
         </video>
         <div class="cat-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20"/><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="m4 8 16-4"/><path d="m8.86 6.78-.45-1.81a2 2 0 0 1 1.45-2.43l1.94-.48a2 2 0 0 1 2.43 1.46l.45 1.8"/></svg></div>
@@ -328,14 +334,17 @@
 <!-- The four figures count up as the band is scrolled into view, each one starting a
      beat after the one before it, with the bar under each number filling as it goes
      (see watchTrust in home.ts). The three sign-offs below settle in sequence once
-     the count has landed. Without scripting the band simply renders finished. -->
+     the count has landed. Without scripting the band simply renders finished.
+
+     `autoplay` needs `muted`, which `[muted]` sets as a property -- see the note
+     above the category tiles on why that is not a plain attribute. -->
 <section class="trust-band">
   <!-- A blurred loop of ship.mp4 runs behind the figures, on the same in-view terms
        as the category tiles. The scrim that keeps the text legible is the wrapper's
        own ::after in styles.css, and the poster still takes over under
        prefers-reduced-motion. -->
   <div class="bg-media" aria-hidden="true">
-    <video #bgMedia class="bg-video" autoplay muted loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/ship.jpg">
+    <video #bgMedia class="bg-video" autoplay [muted]="true" loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/ship.jpg">
       <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_640,e_blur:300,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
     </video>
   </div>
@@ -428,7 +437,7 @@
   <!-- sourcing.mp4, blurred, sits under a white wash: the closing words keep the
        contrast they had on a flat background while the page still moves behind them. -->
   <div class="bg-media" aria-hidden="true">
-    <video #bgMedia class="bg-video" autoplay muted loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/sourcing.jpg">
+    <video #bgMedia class="bg-video" autoplay [muted]="true" loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/sourcing.jpg">
       <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_640,e_blur:300,q_auto:low/ders-videos/sourcing.mp4" type="video/mp4">
     </video>
   </div>

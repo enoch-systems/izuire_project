@@ -542,7 +542,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
     if (typeof IntersectionObserver === 'undefined') {
       for (const video of videos) {
-        void video.play().catch(() => undefined);
+        this.playSilent(video);
       }
       return;
     }
@@ -552,7 +552,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
         for (const entry of entries) {
           const video = entry.target as HTMLVideoElement;
           if (entry.isIntersecting) {
-            void video.play().catch(() => undefined);
+            this.playSilent(video);
           } else {
             video.pause();
           }
@@ -564,5 +564,18 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     for (const video of videos) {
       this.mediaObserver.observe(video);
     }
+  }
+
+  /**
+   * Start a clip in silence. A player resets `muted` when it loads a source, so the
+   * template attribute cannot be trusted to still hold by the time a tile scrolls
+   * into view. Re-assert the property and pin the volume on every start, which is
+   * also what keeps autoplay from being blocked. MediaMuteService holds the same
+   * line for every clip on the site.
+   */
+  private playSilent(video: HTMLVideoElement): void {
+    video.muted = true;
+    video.volume = 0;
+    void video.play().catch(() => undefined);
   }
 }
