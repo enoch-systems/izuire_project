@@ -188,7 +188,7 @@
   .nav-dropdown-panel a:hover{ background:var(--paper); color:var(--ink); transform:translateX(3px); }
   .nav-dropdown-panel a.active{ background:rgba(245,130,31,.09); color:var(--orange-deep); }
 
-  /* Header actions cluster (search trigger + CTA) */
+  /* Header actions cluster (the search trigger) */
   .header-actions{
     display:flex; align-items:center; gap:12px; flex-shrink:0;
   }
@@ -219,17 +219,6 @@
     transition:border-color .25s var(--ease), color .25s var(--ease), background .25s var(--ease);
   }
   .header-search-btn:hover kbd{ border-color:rgba(17,17,17,.22); color:var(--ink-60); background:#fff; }
-
-  /* Header CTA */
-  .header-cta{
-    flex-shrink:0; height:40px; padding:0 20px; border-radius:8px;
-    box-shadow:0 1px 0 rgba(0,0,0,.08), 0 6px 16px rgba(245,130,31,.22);
-    transition:transform .22s var(--ease), box-shadow .22s var(--ease);
-  }
-  .header-cta:hover{
-    transform:translateY(-1px);
-    box-shadow:0 8px 24px rgba(245,130,31,.3);
-  }
 
   /* Hamburger */
   .menu-toggle{
@@ -295,14 +284,9 @@
   .mobile-nav-links a:hover svg{ transform:translateX(3px); stroke:var(--orange-deep); }
   .mobile-nav-links a.active{ color:var(--orange-deep); }
   .mobile-nav-links a.active svg{ stroke:var(--orange-deep); }
-  .mobile-nav-foot{
-    margin-top:auto; padding:16px 0 4px; border-top:1px solid var(--line);
-  }
-  .mobile-nav-cta{
-    display:inline-flex; width:100%; min-height:48px; padding:0 22px;
-    justify-content:center; border-radius:10px;
-  }
-  .mobile-nav a.btn, .mobile-nav-cta{ border-bottom:none; }
+  /* Nothing sits below the list now that the drawer carries no end-of-menu CTA,
+     so the last link does not trail a rule out into empty space. */
+  .mobile-nav-links a:last-child{ border-bottom:none; }
 
   /* ============ HERO ============ */
   .hero{
@@ -1817,19 +1801,19 @@
   @media (min-width: 981px) and (max-width: 1240px){
     nav.main-nav{ gap:16px; }
     nav.main-nav a, .nav-dropdown-trigger{ font-size:.86rem; }
-    .header-cta{ padding:0 15px; font-size:.85rem; }
   }
   @media (max-width: 980px){
     nav.main-nav{ display:none; }
-    .header-search-btn{ display:none; }
+    /* The icon-only search trigger takes over below this width, so the desktop
+       cluster is hidden whole rather than left as an empty box between the logo
+       and that trigger, which the header's own gap would otherwise widen. */
+    .header-actions{ display:none; }
     .menu-toggle{ display:flex; }
     .header-inner{ gap:12px; }
-    .header-cta{ margin-left:auto; }
   }
   @media (max-width: 620px){
     .header-inner{ min-height:64px; padding:0 18px; }
     .logo-link img{ height:26px; }
-    .header-cta{ padding:0 14px; font-size:.85rem; }
   }
 /* =====================================================
      EXTRA MOBILE FIT — appended responsive refinements
@@ -2014,7 +1998,6 @@
     .container{ padding:0 14px; }
     .header-inner{ padding:0 14px; gap:10px; }
     .logo-link img{ height:24px; }
-    .header-cta{ padding:0 12px; font-size:.76rem; }
     .menu-toggle{ padding:7px; }
     .hero-tags span, .hero-tags a{ font-size:.76rem; }
     .filter-chip{ padding:8px 12px; font-size:.74rem; }
