@@ -43,7 +43,7 @@
           </div>
           <div class="product-body">
             <h4>{{ p.title }}</h4>
-            <div class="product-price" [attr.data-ngn]="p.ngn" [attr.data-rmb]="p.rmb"><span class="price-val">{{ currency() === 'ngn' ? p.ngn : p.rmb }}</span> <span class="unit">{{ p.unit }}</span></div>
+            <div class="product-price"><span class="price-val">{{ currency() === 'ngn' ? p.ngn : p.rmb }}</span> <span class="unit">{{ p.unit }}</span></div>
             <div class="product-specs">{{ p.specs }}</div>
             <div class="product-moq">{{ p.moq }}</div>
             <a routerLink="/quote" class="btn btn-outline btn-sm"><span class="btn-label-full">Request This Product</span><span class="btn-label-short">Request</span></a>

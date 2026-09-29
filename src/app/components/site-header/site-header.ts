@@ -4,6 +4,7 @@ import { UiService } from '../../services/ui.service';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 import { ThemeToggle } from '../theme-toggle/theme-toggle';
+import { LOGO_SRC } from '../../logo';
 
 /** Desktop nav dropdowns. Only one may be open at a time. */
 type DropdownName = 'categories' | 'resources';
@@ -28,6 +29,8 @@ type DropdownName = 'categories' | 'resources';
 })
 export class SiteHeader implements OnDestroy {
   protected readonly ui = inject(UiService);
+  /** The wordmark, from the one shared copy in logo.ts. */
+  protected readonly logo = LOGO_SRC;
   /** Drives the header's cart badge. */
   protected readonly cart = inject(CartService);
   /** Bumped when a product's picture lands in this button. */
@@ -78,6 +81,18 @@ export class SiteHeader implements OnDestroy {
 
   protected openSearch(): void {
     this.ui.openSearch();
+  }
+
+  /**
+   * Signing the mark again when the logo is clicked.
+   *
+   * The link is left alone: the click still navigates home, and the animation
+   * plays over the top of it. Holding the navigation back until the signature
+   * finished would make the logo feel broken, and routing first means the
+   * animation is already running by the time the new page paints under it.
+   */
+  protected onLogoClick(): void {
+    this.ui.requestSignature();
   }
 
   protected isDropdownOpen(name: DropdownName): boolean {

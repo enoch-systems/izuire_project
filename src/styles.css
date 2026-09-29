@@ -435,6 +435,168 @@
     }
   }
 
+  /* ============ SIGNATURE LOADER ============ */
+  /* The mark signed by hand: a sheet of paper, the Z drawn stroke-first in the
+     brand orange with the nib riding the end of it, then the wordmark written
+     across in letters, then the real logo settling on top.
+
+     The Z is an SVG path rather than the bitmap because a path can be drawn.
+     `stroke-dasharray` set to the path's full length, then offset down to zero,
+     is what turns a stroke into a pen moving along it — and the nib is the same
+     path with a very short dash and a huge gap, so it appears at exactly the
+     point the pen is at. Same path, same duration, same easing: the nib cannot
+     drift off the line it is meant to be drawing.
+
+     Everything runs off one easing and one duration, and the letters are
+     staggered off a single `--i` custom property, so the whole thing reads as
+     one gesture rather than several effects that happen to overlap. */
+  .sig{
+    position:fixed; inset:0; z-index:2000;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--white);
+    animation:sig-veil .5s var(--ease);
+  }
+  .sig__sheet{
+    display:flex; align-items:center; gap:26px;
+    padding:0 28px;
+    animation:sig-sheet-in .7s var(--ease) both;
+  }
+  .sig__mark{
+    /* An SVG with a width but no height has no intrinsic height and collapses
+       to nothing, so the box is given the viewBox's own ratio explicitly. */
+    width:clamp(54px, 11vw, 84px);
+    aspect-ratio:1/1;
+    flex:none;
+    color:var(--orange);
+    overflow:visible;
+  }
+  /* The drawing stroke. The dash is the path's full length — 92 across, then
+     130.8 down, then 92 across, with the miter joins adding a little — measured
+     off the path rather than guessed, so the offset runs the line end to end
+     exactly once. Too short and the stroke would finish early; too long and the
+     nib would still be travelling when the line stopped. */
+  .sig__z{
+    stroke-dasharray:317;
+    stroke-dashoffset:317;
+    animation:sig-draw 1.05s cubic-bezier(.62,.04,.36,1) forwards;
+  }
+  /* A dot rather than a dash: the long gap pushes the visible bit to the head of
+     the same dash cycle the Z is running, so it lands on the moving pen tip. */
+  .sig__nib{
+    stroke-dasharray:0.01 317;
+    stroke-dashoffset:0;
+    stroke-linecap:round;
+    animation:sig-draw 1.05s cubic-bezier(.62,.04,.36,1) forwards,
+               sig-nib-pop 1.05s var(--ease);
+  }
+  @keyframes sig-draw{ to{ stroke-dashoffset:0; } }
+  /* The nib swells as it lands and lifts as it leaves, so it reads as a pen
+     touching down and coming off the paper. */
+  @keyframes sig-nib-pop{
+    0%{ opacity:0; stroke-width:2; }
+    12%{ opacity:1; stroke-width:15; }
+    78%{ opacity:1; stroke-width:15; }
+    100%{ opacity:0; stroke-width:4; }
+  }
+
+  /* The wordmark, written a letter at a time. The stagger is a per-letter delay
+     off one shared duration, so the hand keeps a steady pace across the word
+     instead of every letter running its own identical animation. */
+  .sig__word{ display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+  .sig__letters{
+    display:flex; align-items:baseline;
+    font-family:var(--font-d); font-weight:700;
+    font-size:clamp(1.5rem, 5.2vw, 2.6rem);
+    letter-spacing:.02em; line-height:1;
+    color:var(--ink);
+  }
+  .sig__letters span{
+    display:inline-block;
+    opacity:0;
+    /* Each letter starts a beat after the last, so the word is written rather
+       than revealed. `--i` is set per span in the template. */
+    animation:sig-letter .42s var(--ease) forwards;
+    animation-delay:calc(560ms + var(--i) * 78ms);
+  }
+  @keyframes sig-letter{
+    0%{ opacity:0; transform:translateY(-.22em) rotate(-7deg); filter:blur(3px); }
+    60%{ opacity:1; transform:translateY(0) rotate(1deg); filter:blur(0); }
+    100%{ opacity:1; transform:translateY(0) rotate(0); filter:blur(0); }
+  }
+  /* The flourish under the name: the stroke of a pen coming away. */
+  .sig__rule{
+    display:block; height:2px; width:100%;
+    background:linear-gradient(90deg, var(--orange), var(--orange-deep));
+    border-radius:2px;
+    transform-origin:left center;
+    transform:scaleX(0);
+    animation:sig-rule .55s cubic-bezier(.3,.7,.3,1) forwards;
+    animation-delay:1040ms;
+  }
+  @keyframes sig-rule{
+    0%{ transform:scaleX(0); opacity:0; }
+    30%{ opacity:1; }
+    100%{ transform:scaleX(1); opacity:1; }
+  }
+  /* The real file, laid over the drawing. It fades up rather than cuts in, so the
+     drawn mark and the printed one are briefly the same picture — the moment the
+     signing resolves into the real logo.
+
+     The drawing has to be struck out as this arrives. It spells the same name as
+     the file, so leaving both up gives the same letters twice: a doubled "I" and
+     a doubled "Z" that read as one smeared glyph. So the pen's own work is
+     replaced by the print, rather than two marks stacked on top of each other.
+     `multiply` drops the logo's white plate out against the paper, so the mark
+     reads as printed on the sheet rather than as a white rectangle over it. */
+  .sig__real{
+    position:absolute;
+    left:50%; top:50%;
+    transform:translate(-50%, -50%);
+    width:clamp(128px, 27vw, 224px);
+    height:auto;
+    opacity:0;
+    mix-blend-mode:multiply;
+    pointer-events:none;
+    animation:sig-settle .5s var(--ease) forwards;
+    animation-delay:1180ms;
+  }
+  /* The drawing clears over the same beat. The letters go first and the Z holds a
+     beat longer, so the flourish under the word is the last thing standing before
+     the printed mark replaces the lot. */
+  .sig--real .sig__letters{ animation:sig-clear .42s var(--ease) forwards; animation-delay:1200ms; }
+  .sig--real .sig__rule{ animation:sig-clear .3s var(--ease) forwards; animation-delay:1300ms; }
+  .sig--real .sig__mark{ animation:sig-clear .42s var(--ease) forwards; animation-delay:1250ms; }
+  @keyframes sig-clear{ to{ opacity:0; } }
+  /* The settle animates opacity only, so the centring transform above is not
+     clobbered mid-fade by a keyframe that touched `transform`. */
+  .sig__sheet{ position:relative; }
+  @keyframes sig-settle{ to{ opacity:1; } }
+
+  /* Ink is laid down in one pass; after it lands the sheet holds a beat, then
+     lifts. The hold is why it reads as a signature rather than a flash. */
+  @keyframes sig-sheet-in{
+    from{ opacity:0; transform:translateY(10px) scale(.96); }
+    to{ opacity:1; transform:translateY(0) scale(1); }
+  }
+  @keyframes sig-veil{ from{ opacity:0; } to{ opacity:1; } }
+  /* The settled state, just before teardown: a small lift, as if the page were
+     being pulled off the sheet. */
+  .sig--settled .sig__sheet{ animation:sig-lift .5s var(--ease) forwards; }
+  @keyframes sig-lift{
+    to{ opacity:0; transform:translateY(-16px) scale(1.04); filter:blur(6px); }
+  }
+
+  /* Reduced motion: the service already declines to play, so this is the belt to
+     that braces — if the overlay is ever on screen it resolves immediately
+     rather than animating. The real header logo is always there regardless. */
+  @media (prefers-reduced-motion: reduce){
+    .sig, .sig__sheet, .sig__z, .sig__nib, .sig__letters span, .sig__rule, .sig__real{
+      animation:none !important;
+      opacity:1; transform:none; filter:none; stroke-dashoffset:0;
+    }
+    .sig__nib{ display:none; }
+  }
+
   /* ============ HERO ============ */
   .hero{
     background:var(--white);
@@ -2755,7 +2917,7 @@
     font-size:1.05rem;
     font-size:clamp(.95rem, 3cqw + .55rem, 1.18rem);
     line-height:1.2; letter-spacing:-.01em; color:var(--ink);
-    /* A long price range breaks inside the panel instead of widening the card. */
+    /* A long price breaks inside the panel instead of widening the card. */
     min-width:0; overflow-wrap:anywhere;
   }
   .product-grid--featured .product-price .unit{

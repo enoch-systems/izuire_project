@@ -6,11 +6,12 @@ import { SiteHeader } from './components/site-header/site-header';
 import { SiteFooter } from './components/site-footer/site-footer';
 import { SearchOverlay } from './components/search-overlay/search-overlay';
 import { CartToast } from './components/cart-toast/cart-toast';
+import { SignatureLoader } from './components/signature-loader/signature-loader';
 import { MediaMuteService } from './services/media-mute.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SiteHeader, SiteFooter, SearchOverlay, CartToast],
+  imports: [RouterOutlet, SiteHeader, SiteFooter, SearchOverlay, CartToast, SignatureLoader],
   templateUrl: './app.html',
 })
 export class App {

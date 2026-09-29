@@ -9,6 +9,21 @@ export class UiService {
   readonly menuOpen = signal(false);
   readonly searchOpen = signal(false);
 
+  /**
+   * Bumped when the header logo is clicked, asking the signature animation to
+   * play again.
+   *
+   * A signal rather than a direct call into the loader, so the header does not
+   * have to reach for a component it does not own. The two are siblings at the
+   * app root with no parent-child relationship, so this is how they talk.
+   */
+  readonly signatureRequested = signal(0);
+
+  /** Ask for the signature to be played again. */
+  requestSignature(): void {
+    this.signatureRequested.update((n) => n + 1);
+  }
+
   openMenu(): void {
     this.menuOpen.set(true);
   }
