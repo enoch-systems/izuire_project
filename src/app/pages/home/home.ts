@@ -35,9 +35,10 @@ interface HeroStat {
  * 1 in the same frame with their transitions switched off, which is invisible
  * because the clone matches slide 1 exactly.
  *
- * Each of the eight category tiles loops a short Cloudinary clip. Only the tiles
- * inside the viewport play (see playCategoryClips) so the browser never decodes
- * eight videos at once and off-screen clips stay on their poster frame.
+ * Each of the eight category tiles loops a short Cloudinary clip, and the
+ * Shipping service card loops one too through the same #catMedia ref. Only the
+ * clips inside the viewport play (see playCategoryClips) so the browser never
+ * decodes every clip at once and off-screen ones stay on their poster frame.
  *
  * Category and product cards also bubble up one at a time as you scroll to them
  * (see revealCards). A card's resting style is its normal style and the "not
@@ -69,7 +70,8 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   protected readonly activeStat = computed(() => this.statSlide() % this.heroStats.length);
   protected readonly snapping = signal(false);
 
-  /** The eight looping category clips, played/paused from ngAfterViewInit. */
+  /** The looping category tile clips plus the Shipping card's, played/paused from
+   *  ngAfterViewInit. */
   private readonly catMedia = viewChildren<ElementRef<HTMLVideoElement>>('catMedia');
 
   /** This component's root element, so we can find the cards to reveal on scroll. */
@@ -169,9 +171,10 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Start each category clip only while its tile is on screen and pause it again
-   * once it scrolls away. Browsers without IntersectionObserver fall back to
-   * playing everything, which is the plain autoplay behavior.
+   * Start each clip only while its tile — or the Shipping service card, which
+   * shares the ref — is on screen and pause it again once it scrolls away.
+   * Browsers without IntersectionObserver fall back to playing everything, which
+   * is the plain autoplay behavior.
    */
   private playCategoryClips(): void {
     const videos = this.catMedia().map((ref) => ref.nativeElement);

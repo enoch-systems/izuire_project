@@ -122,12 +122,21 @@
         <h4>Marketplace</h4>
         <p>Browse trending stock across eight categories, with live pricing and MOQ.</p>
       </a>
-      <a class="service-card" routerLink="/shipping">
+      <!-- Shipping card: loops a Cloudinary clip of a shipment the way the category
+           tiles do, on the shared #catMedia ref so home.ts plays it only while the
+           card is on screen. Its poster still doubles as the reduced-motion
+           fallback in styles.css. -->
+      <a class="service-card service-card--media service-card--shipping" routerLink="/shipping">
+        <video #catMedia class="cat-media" muted loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/ship.jpg">
+          <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
+        </video>
         <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
         <h4>Shipping &amp; Logistics</h4>
         <p>Air and sea freight, CBM planning, customs coordination and delivery across Africa.</p>
       </a>
-      <a class="service-card" routerLink="/business-solutions">
+      <!-- Business Solutions card: the same photo backdrop as the Marketplace card,
+           still supplied by Cloudinary (ders-images/doc.jpg). -->
+      <a class="service-card service-card--media service-card--business-solutions" routerLink="/business-solutions">
         <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
         <h4>Business Solutions</h4>
         <p>Tailored support for new importers, retailers, wholesalers and corporate buyers.</p>
