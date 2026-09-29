@@ -2170,6 +2170,15 @@
     position:absolute; inset:0;
     width:100%; height:100%;
     object-fit:cover;
+    /* A slow push-in and drift. A blurred clip behind a scrim is quiet by nature, so
+       it is the movement of the frame itself that tells you it is playing - without
+       this, a heavily washed backdrop reads as a still texture. */
+    animation:bgDrift 26s ease-in-out infinite alternate;
+    will-change:transform;
+  }
+  @keyframes bgDrift{
+    from{ transform:scale(1.05) translate3d(-1.4%, -1%, 0); }
+    to{ transform:scale(1.14) translate3d(1.4%, 1%, 0); }
   }
   /* The scrim rides on the wrapper, so it is above the clip and below the copy. */
   .bg-media::after{
@@ -2178,13 +2187,13 @@
   }
   .trust-band{ overflow:hidden; }
   .trust-band .bg-media::after{
-    background:linear-gradient(180deg, rgba(17,17,17,.5) 0%, rgba(17,17,17,.72) 100%);
+    background:linear-gradient(180deg, rgba(17,17,17,.4) 0%, rgba(17,17,17,.62) 100%);
   }
-  .trust-band .bg-video{ opacity:.45; }
+  .trust-band .bg-video{ opacity:.6; }
   /* A white wash rather than a dark one: the closing words are ink on white, so the
      clip is faded towards the page rather than the page towards the clip. */
-  .cta-final .bg-media::after{ background:rgba(255,255,255,.8); }
-  .cta-final .bg-video{ opacity:.5; }
+  .cta-final .bg-media::after{ background:rgba(255,255,255,.7); }
+  .cta-final .bg-video{ opacity:.7; }
   /* Copy above the backdrop, always. The glow is raised to the same layer so the
      wash does not mute it. */
   .trust-band > .container,
@@ -2192,8 +2201,8 @@
   .cta-final__glow{ z-index:0; }
   /* Narrow screens carry more text per pixel, so the clips step back. */
   @media (max-width: 620px){
-    .trust-band .bg-video{ opacity:.36; }
-    .cta-final .bg-video{ opacity:.4; }
+    .trust-band .bg-video{ opacity:.45; }
+    .cta-final .bg-video{ opacity:.5; }
   }
   /* Less motion: no playback at all, and each backdrop becomes a still from its own
      clip - the same trade the category tiles make. */
