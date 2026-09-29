@@ -20,6 +20,50 @@ interface HeroStat {
   bg: 'bg-a' | 'bg-b' | 'bg-c' | 'bg-d' | 'bg-e' | 'bg-f' | 'bg-g';
 }
 
+/** One of the reasons listed under "Why Izuire". */
+interface WhyReason {
+  /** Two-digit index printed beside the heading. */
+  code: string;
+  title: string;
+  body: string;
+  /** `body` split into words, each carrying its own leading space. */
+  words: string[];
+}
+
+/** The reasons, in the order they are read down the page. */
+const REASONS: Omit<WhyReason, 'words'>[] = [
+  {
+    code: '01',
+    title: 'China Sourcing Network',
+    body: "Years inside Guangzhou's markets and factory networks, not a broker working from a spreadsheet.",
+  },
+  {
+    code: '02',
+    title: 'Supplier Verification',
+    body: 'Every supplier is checked before your money goes anywhere near them.',
+  },
+  {
+    code: '03',
+    title: 'Quality Control',
+    body: 'Inspected before shipping, with photo and video proof, every time.',
+  },
+  {
+    code: '04',
+    title: 'Transparent Process',
+    body: 'Clear pricing and order status, no radio silence between quote and delivery.',
+  },
+  {
+    code: '05',
+    title: 'Procurement Support',
+    body: 'From MOQ negotiation to custom packaging, support beyond just placing an order.',
+  },
+  {
+    code: '06',
+    title: 'Shipping Coordination',
+    body: "Freight, documentation and customs handled, you're not chasing three parties.",
+  },
+];
+
 /**
  * Home page. The testimonial slider reproduces the original behavior:
  * prev/next arrows, dots, and auto-advance every 6 seconds.
@@ -44,6 +88,10 @@ interface HeroStat {
  * join behind it charges up from the point before, so the section reads as a
  * signal travelling from "tell us what you need" to "shipped to your door" (see
  * watchSteps). The pulses on the points are pure CSS.
+ *
+ * The six reasons under "Why Izuire" are set as plain text rather than cards: each
+ * body copy is split into words and lights up word by word as it is read down the
+ * page (see readReasons).
  *
  * Category and product cards also bubble up one at a time as you scroll to them
  * (see revealCards). A card's resting style is its normal style and the "not
@@ -75,6 +123,14 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   protected readonly activeStat = computed(() => this.statSlide() % this.heroStats.length);
   protected readonly snapping = signal(false);
 
+  /** The six reasons, each body pre-split so the template can render one span per
+   *  word. The spaces ride along with the words, so the copy still reads - and
+   *  copies - as prose. */
+  protected readonly reasons: WhyReason[] = REASONS.map((reason) => ({
+    ...reason,
+    words: reason.body.split(' ').map((word, index) => (index === 0 ? word : ` ${word}`)),
+  }));
+
   /** The looping category tile clips plus the Sourcing and Shipping cards',
    *  played/paused from ngAfterViewInit. */
   private readonly catMedia = viewChildren<ElementRef<HTMLVideoElement>>('catMedia');
@@ -88,6 +144,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   private mediaObserver: IntersectionObserver | undefined;
   private revealObserver: IntersectionObserver | undefined;
   private stepObserver: IntersectionObserver | undefined;
+  private reasonObserver: IntersectionObserver | undefined;
 
   protected goTo(idx: number): void {
     this.current.set(((idx % this.dots.length) + this.dots.length) % this.dots.length);
@@ -119,17 +176,19 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     this.mediaObserver?.disconnect();
     this.revealObserver?.disconnect();
     this.stepObserver?.disconnect();
+    this.reasonObserver?.disconnect();
   }
 
   /**
    * Wire up the on-scroll behavior once the view exists: play the category clips
-   * that are on screen, bubble the cards up as they are reached, and light the
-   * process rail as it is scrolled through.
+   * that are on screen, bubble the cards up as they are reached, light the process
+   * rail as it is scrolled through, and read the reasons in.
    */
   ngAfterViewInit(): void {
     this.playCategoryClips();
     this.revealCards();
     this.watchSteps();
+    this.readReasons();
   }
 
   /**
@@ -230,6 +289,43 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
     for (const step of steps) {
       this.stepObserver.observe(step);
+    }
+  }
+
+  /**
+   * Read the six reasons in. Each reason is marked `.reading` the first time it is
+   * properly on screen, which starts the word-by-word light-up of its copy, lights
+   * its bubble and charges the piece of line below it (all in CSS).
+   *
+   * Nothing is primed here: the words only animate once `.reading` lands, so with
+   * scripting off - or with reduced motion, where the animation is switched off -
+   * the copy simply reads as ordinary text.
+   */
+  private readReasons(): void {
+    const reasons = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('.reason'));
+
+    if (reasons.length === 0 || typeof IntersectionObserver === 'undefined') {
+      return;
+    }
+
+    this.reasonObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) {
+            continue;
+          }
+          entry.target.classList.add('reading');
+          // One shot: scrolling back up should not replay the reading.
+          this.reasonObserver?.unobserve(entry.target);
+        }
+      },
+      // Most of the reason has to be on screen, so the reading starts when the
+      // copy is really being looked at rather than as it clips the edge.
+      { threshold: 0.65 },
+    );
+
+    for (const reason of reasons) {
+      this.reasonObserver.observe(reason);
     }
   }
 

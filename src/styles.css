@@ -863,6 +863,94 @@
 
   .steps-cta{margin-top:44px; text-align:center;}
 
+  /* ============ WHY IZUIRE (the reasons list) ============ */
+  /* Deliberately unboxed: the six reasons are set as text on a thin line, each with
+     a small bubble and a quiet index, and the body copy is split into words in the
+     component so it can be read in one word at a time as the reason is reached (see
+     readReasons). The hierarchy - big quiet index, weighty heading, calm copy - does
+     the framing that a card would otherwise do. */
+  .reasons{ margin-top:10px; max-width:780px; }
+  .reason{
+    position:relative;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    column-gap:20px;
+    padding:0 0 48px 46px;
+  }
+  .reason:last-child{ padding-bottom:0; }
+
+  /* The line the bubbles hang from. Its segment lights as the reason is read, so the
+     light follows the reader down the list. */
+  .reason-line{
+    position:absolute; left:9px; top:0; bottom:0;
+    width:1px; background:rgba(17,17,17,.10);
+    transition:background .9s var(--ease);
+  }
+  /* Nothing continues below the last bubble. */
+  .reason:last-child .reason-line{ display:none; }
+  .reason.reading .reason-line{
+    background:linear-gradient(180deg, var(--orange), rgba(245,130,31,.12));
+  }
+
+  .reason-dot{
+    position:absolute; left:3px; top:9px;
+    width:13px; height:13px; border-radius:50%;
+    background:var(--white);
+    border:1.5px solid rgba(17,17,17,.20);
+    /* The ring is painted in the section's own white, which breaks the line either
+       side of the bubble instead of running into it. */
+    box-shadow:0 0 0 3px var(--white);
+    transition:background .5s var(--ease), border-color .5s var(--ease), box-shadow .5s var(--ease);
+  }
+  .reason.reading .reason-dot{
+    background:var(--orange);
+    border-color:var(--orange);
+    box-shadow:0 0 0 3px var(--white), 0 0 12px rgba(245,130,31,.5);
+    animation:reasonPulse 3.6s var(--ease) infinite;
+  }
+  @keyframes reasonPulse{
+    0%, 100%{ box-shadow:0 0 0 3px var(--white), 0 0 10px rgba(245,130,31,.35); }
+    50%{ box-shadow:0 0 0 3px var(--white), 0 0 16px 3px rgba(245,130,31,.55); }
+  }
+
+  /* Three sizes carry the hierarchy: index, heading, copy. */
+  .reason-code{
+    grid-area:1 / 1;
+    font-family:var(--font-d); font-weight:700;
+    font-size:clamp(1.45rem, 2.3vw, 2.05rem);
+    line-height:1;
+    color:rgba(17,17,17,.15);
+    transition:color .7s var(--ease);
+  }
+  .reason.reading .reason-code{ color:var(--orange); }
+  .reason h3{
+    grid-area:1 / 2;
+    font-size:clamp(1.12rem, 1.5vw, 1.36rem);
+    margin-bottom:10px;
+  }
+  .reason-body{
+    grid-area:2 / 2;
+    font-size:1.02rem;
+    line-height:1.65;
+    color:var(--ink-60);
+    max-width:62ch;
+    text-wrap:pretty;
+  }
+  /* The read-in: every word steps from ghosted, through the accent, to its resting
+     colour, one behind the other. That is what makes the sentence look read rather
+     than faded in. The animation only exists once `.reading` lands, so with scripting
+     off - or with reduced motion, which switches animations off - the copy is plain
+     text at its normal colour. */
+  .reason.reading .word{
+    animation:wordRead .5s linear both;
+    animation-delay:calc(var(--w, 0) * 52ms);
+  }
+  @keyframes wordRead{
+    from{ color:rgba(17,17,17,.18); }
+    60%{ color:var(--orange-deep); }
+    to{ color:var(--ink-60); }
+  }
+
   /* ============ TRUST BAND ============ */
   .trust-band{
     background:var(--ink);
@@ -1830,5 +1918,17 @@
       box-shadow:0 0 0 var(--rail-ring) var(--paper);
     }
     .step-ping{ display:none; }
+  }
+
+  /* ============ THE REASONS LIST — MOBILE ============ */
+  /* The line moves closer to the edge and the type steps down, but the list stays
+     text on a line rather than turning into cards. */
+  @media (max-width: 620px){
+    .reason{ padding:0 0 34px 36px; column-gap:14px; }
+    .reason-code{ font-size:1.3rem; }
+    .reason h3{ font-size:1.06rem; margin-bottom:8px; }
+    .reason-body{ font-size:.96rem; line-height:1.6; }
+    .reason-line{ left:7px; }
+    .reason-dot{ left:1px; top:8px; }
   }
 

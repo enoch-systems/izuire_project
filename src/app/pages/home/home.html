@@ -298,13 +298,21 @@
     <div class="section-head">
       <div><span class="eyebrow">Why Izuire</span><h2>Built for buyers who've been burned before</h2></div>
     </div>
-    <div class="service-grid">
-      <div class="service-card"><div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg></div><h4>China Sourcing Network</h4><p>Years inside Guangzhou's markets and factory networks, not a broker working from a spreadsheet.</p></div>
-      <div class="service-card"><div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><h4>Supplier Verification</h4><p>Every supplier is checked before your money goes anywhere near them.</p></div>
-      <div class="service-card"><div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div><h4>Quality Control</h4><p>Inspected before shipping, with photo and video proof, every time.</p></div>
-      <div class="service-card"><div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><h4>Transparent Process</h4><p>Clear pricing and order status, no radio silence between quote and delivery.</p></div>
-      <div class="service-card"><div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div><h4>Procurement Support</h4><p>From MOQ negotiation to custom packaging, support beyond just placing an order.</p></div>
-      <div class="service-card"><div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div><h4>Shipping Coordination</h4><p>Freight, documentation and customs handled, you're not chasing three parties.</p></div>
+    <!-- No cards here on purpose: the six reasons are set as text on a thin line,
+         each with a small bubble and a quiet index. The copy lives in home.ts so
+         the body text can be split into words, which read in one after the other as
+         each reason is reached (see readReasons). With scripting off the words are
+         just ordinary text. -->
+    <div class="reasons">
+      @for (reason of reasons; track reason.code) {
+        <article class="reason">
+          <span class="reason-line" aria-hidden="true"></span>
+          <span class="reason-dot" aria-hidden="true"></span>
+          <span class="reason-code">{{ reason.code }}</span>
+          <h3>{{ reason.title }}</h3>
+          <p class="reason-body">@for (word of reason.words; track $index) {<span class="word" [style.--w]="$index">{{ word }}</span>}</p>
+        </article>
+      }
     </div>
   </div>
 </section>
