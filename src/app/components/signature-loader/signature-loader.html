@@ -3,7 +3,7 @@
      technology and takes no clicks: the real header logo behind it stays the
      thing anyone can actually reach. -->
 @if (playing()) {
-  <div class="sig" [class.sig--settled]="signed()" [class.sig--real]="swapping()" aria-hidden="true" [attr.data-run]="runId()">
+  <div class="sig" [class.sig--settled]="signed()" aria-hidden="true" [attr.data-run]="runId()">
     <div class="sig__sheet">
       <!-- The Z, drawn as a stroke so there is a path to follow. This is the
            wordmark's own geometry redrawn in the brand orange, which is what
@@ -25,11 +25,6 @@
         </span>
         <span class="sig__rule"></span>
       </div>
-
-      <!-- The real file, faded in over the drawing once the ink has landed, so
-           the mark that ends up on screen is the actual logo and not a
-           redrawing of it. -->
-      <img class="sig__real" [src]="logo" alt="">
     </div>
   </div>
 }

@@ -66,6 +66,23 @@ export const PRODUCTS: Product[] = [
 ];
 
 /**
+ * The category chips, in the order they are shown. The `id` is what a product's
+ * `cat` carries and `label` is the chip's own wording, so the filter row is
+ * described in one place: the markup used to carry eight hardcoded buttons whose
+ * labels had to be kept in step with the catalogue by hand.
+ */
+export const CATEGORIES: { id: string; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'electronics', label: 'Electronics' },
+  { id: 'okrika', label: 'Okrika / Thrift' },
+  { id: 'building', label: 'Building Materials' },
+  { id: 'hair', label: 'Hair & Wigs' },
+  { id: 'solar', label: 'Solar Equipment' },
+  { id: 'fashion', label: 'Fashion & Footwear' },
+  { id: 'kitchen', label: 'Kitchenware' },
+];
+
+/**
  * The four products the home page puts on show under "Featured products", in the
  * order they appear there. Read from the catalogue rather than restated, so the
  * cards and the marketplace can never drift apart on price or MOQ.

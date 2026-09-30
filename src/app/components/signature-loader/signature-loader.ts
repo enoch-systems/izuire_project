@@ -1,5 +1,4 @@
 import { Component, OnDestroy, effect, inject, signal, untracked } from '@angular/core';
-import { LOGO_SRC } from '../../logo';
 import { UiService } from '../../services/ui.service';
 
 /**
@@ -18,8 +17,16 @@ import { UiService } from '../../services/ui.service';
  * as ink on paper. A sheet rises, an SVG of the Z is drawn stroke-first in the
  * brand orange with a nib riding the end of the stroke, and the wordmark then
  * wipes in behind it, letter by letter, as if the rest of the signature were
- * being written. The real bitmap appears last and settles over the top, so the
- * mark that is left on screen is the actual logo file, not a redrawing of it.
+ * being written. The flourish is swept under the name and the drawing is the
+ * whole of it: the sheet holds on the finished signature, then lifts.
+ *
+ * It used to hand over to the real logo file at the end, which faded up over
+ * the ink and had the drawing struck out beneath it. That is gone - the mark
+ * arrived as black text out of nowhere on a sheet that had just been signed in
+ * orange, and since the file spells the same name as the drawing, the two sat
+ * on top of each other for the length of the fade as a doubled I and a doubled
+ * Z. Nothing was gained by it either: the overlay lifts a beat later, so no
+ * mark is left on screen, and the real logo is in the header throughout.
  *
  * The overlay is a full-page cover, so it is `aria-hidden` and takes no focus:
  * it is decoration, and the real header logo behind it is still the thing a
@@ -30,8 +37,6 @@ import { UiService } from '../../services/ui.service';
   templateUrl: './signature-loader.html',
 })
 export class SignatureLoader implements OnDestroy {
-  /** The wordmark, shown at the end so the finished mark is the real file. */
-  protected readonly logo = LOGO_SRC;
   /** Carries the logo click over to the signature animation. */
   private readonly ui = inject(UiService);
 
@@ -45,11 +50,6 @@ export class SignatureLoader implements OnDestroy {
   protected readonly playing = signal(false);
   /** True once the ink has landed, for the settled state. */
   protected readonly signed = signal(false);
-  /**
-   * True in the beat between the pen finishing and the real mark arriving, which
-   * is when the drawing is struck out and the printed logo fades up in its place.
-   */
-  protected readonly swapping = signal(false);
 
   /**
    * A click replay outranks the cold run: the loader is the first thing in the
@@ -74,8 +74,6 @@ export class SignatureLoader implements OnDestroy {
   private hideTimer: ReturnType<typeof setTimeout> | undefined;
   /** Fires a beat before the sheet is torn down, to land the "signed" state. */
   private settleTimer: ReturnType<typeof setTimeout> | undefined;
-  /** Fires at the hand-off, where the drawing gives way to the printed mark. */
-  private swapTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     // The cold run. Deferred by a tick so the first paint is the page, not the
@@ -96,25 +94,27 @@ export class SignatureLoader implements OnDestroy {
 
     clearTimeout(this.hideTimer);
     clearTimeout(this.settleTimer);
-    clearTimeout(this.swapTimer);
     this.signed.set(false);
-    this.swapping.set(false);
     this.playing.set(true);
     this.runId.update((n) => n + 1);
 
     // One timer per state, rather than an animationend listener: the sheet
     // carries several stacked animations and the first to finish would tear it
     // down mid-signature.
-    this.hideTimer = setTimeout(() => this.playing.set(false), immediate ? 2000 : 2600);
-    this.settleTimer = setTimeout(() => this.signed.set(true), immediate ? 1500 : 2100);
-    // The hand-off: the drawing clears and the printed mark takes its place.
-    this.swapTimer = setTimeout(() => this.swapping.set(true), immediate ? 1150 : 1250);
+    //
+    // Both are a beat later than they were, now that the drawing is the finale.
+    // The last letter lands at 1370ms and the flourish runs to 1590ms, and the
+    // sheet used to start lifting at 1500ms under cover of the printed mark
+    // arriving over the top of it. With nothing arriving over it the sheet has
+    // to hold on the finished signature first, or the flourish is cut off
+    // mid-stroke and the whole thing reads as a flash rather than a signature.
+    this.hideTimer = setTimeout(() => this.playing.set(false), immediate ? 2250 : 2850);
+    this.settleTimer = setTimeout(() => this.signed.set(true), immediate ? 1750 : 2350);
   }
 
   ngOnDestroy(): void {
     clearTimeout(this.hideTimer);
     clearTimeout(this.settleTimer);
-    clearTimeout(this.swapTimer);
   }
 
   private prefersReducedMotion(): boolean {

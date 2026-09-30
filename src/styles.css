@@ -479,7 +479,16 @@
   /* ============ SIGNATURE LOADER ============ */
   /* The mark signed by hand: a sheet of paper, the Z drawn stroke-first in the
      brand orange with the nib riding the end of it, then the wordmark written
-     across in letters, then the real logo settling on top.
+     across in letters, then the flourish swept out underneath.
+
+     The drawing is the whole of the animation. It used to hand over to the real
+     logo file at the end, which faded up over the ink while the ink was struck
+     out beneath it; that is gone. It read as black text arriving out of nowhere
+     on a sheet that had just been signed in orange, and since the file spells
+     the same name as the drawing, the two sat on top of each other for the
+     length of the fade as a doubled I and a doubled Z. There was nothing to
+     gain by it: the sheet lifts a beat later, so no mark is left on screen, and
+     the real logo is in the header the whole time.
 
      The Z is an SVG path rather than the bitmap because a path can be drawn.
      `stroke-dasharray` set to the path's full length, then offset down to zero,
@@ -579,39 +588,9 @@
     30%{ opacity:1; }
     100%{ transform:scaleX(1); opacity:1; }
   }
-  /* The real file, laid over the drawing. It fades up rather than cuts in, so the
-     drawn mark and the printed one are briefly the same picture — the moment the
-     signing resolves into the real logo.
-
-     The drawing has to be struck out as this arrives. It spells the same name as
-     the file, so leaving both up gives the same letters twice: a doubled "I" and
-     a doubled "Z" that read as one smeared glyph. So the pen's own work is
-     replaced by the print, rather than two marks stacked on top of each other.
-     `multiply` drops the logo's white plate out against the paper, so the mark
-     reads as printed on the sheet rather than as a white rectangle over it. */
-  .sig__real{
-    position:absolute;
-    left:50%; top:50%;
-    transform:translate(-50%, -50%);
-    width:clamp(128px, 27vw, 224px);
-    height:auto;
-    opacity:0;
-    mix-blend-mode:multiply;
-    pointer-events:none;
-    animation:sig-settle .5s var(--ease) forwards;
-    animation-delay:1180ms;
-  }
-  /* The drawing clears over the same beat. The letters go first and the Z holds a
-     beat longer, so the flourish under the word is the last thing standing before
-     the printed mark replaces the lot. */
-  .sig--real .sig__letters{ animation:sig-clear .42s var(--ease) forwards; animation-delay:1200ms; }
-  .sig--real .sig__rule{ animation:sig-clear .3s var(--ease) forwards; animation-delay:1300ms; }
-  .sig--real .sig__mark{ animation:sig-clear .42s var(--ease) forwards; animation-delay:1250ms; }
-  @keyframes sig-clear{ to{ opacity:0; } }
-  /* The settle animates opacity only, so the centring transform above is not
-     clobbered mid-fade by a keyframe that touched `transform`. */
-  .sig__sheet{ position:relative; }
-  @keyframes sig-settle{ to{ opacity:1; } }
+  /* No hand-off to the printed mark, so no strike-out and nothing to settle over
+     the drawing: the ink stays up until the sheet lifts. See the note at the top
+     of this block for why the hand-off went. */
 
   /* Ink is laid down in one pass; after it lands the sheet holds a beat, then
      lifts. The hold is why it reads as a signature rather than a flash. */
@@ -631,7 +610,7 @@
      that braces — if the overlay is ever on screen it resolves immediately
      rather than animating. The real header logo is always there regardless. */
   @media (prefers-reduced-motion: reduce){
-    .sig, .sig__sheet, .sig__z, .sig__nib, .sig__letters span, .sig__rule, .sig__real{
+    .sig, .sig__sheet, .sig__z, .sig__nib, .sig__letters span, .sig__rule{
       animation:none !important;
       opacity:1; transform:none; filter:none; stroke-dashoffset:0;
     }
@@ -1065,19 +1044,6 @@
   .cat-card--media span{color:var(--on-media-60);}
 
   /* ============ PRODUCTS ============ */
-  .currency-toggle{
-    display:inline-flex; align-items:center;
-    background:var(--paper); border:1px solid var(--line);
-    border-radius:20px; padding:3px;
-  }
-  .currency-toggle button{
-    padding:7px 16px; border-radius:16px;
-    font-family:var(--font-d); font-size:.78rem; font-weight:600;
-    color:var(--ink-40);
-    transition:background .22s var(--ease), color .22s var(--ease);
-  }
-  .currency-toggle button.active{background:var(--ink); color:var(--white);}
-
   .product-grid{
     display:grid;
     grid-template-columns:repeat(4, 1fr);
@@ -1128,6 +1094,67 @@
   .product-price .unit{font-family:var(--font-b); font-weight:400; font-size:.72rem; color:var(--ink-40);}
   .product-moq{font-size:.76rem; color:var(--ink-40);}
   .product-body .btn{margin-top:10px;}
+
+  /* ---------- The marketplace grid ---------- */
+  /* The same card as the featured rail, laid out for a four-across catalogue and
+     carrying what someone weighing two listings against each other needs: the
+     photo where there is one, the specification, and the price in the money they
+     picked. Scoped to `--market` so the featured rail keeps its own type scale
+     and its add-to-cart controls, and so the order of the card can be set here
+     without moving the home page. */
+  .product-grid--market{ margin-top:0; }
+  .product-grid--market.product-grid--featured{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  .product-grid--market .product-card{ border-radius:12px; }
+  .product-grid--market .product-body{ gap:10px; }
+  .product-grid--market.product-grid--featured .product-body{ gap:0; }
+  .product-grid--market.product-grid--featured .product-moq{ margin:-5px 0 12px; font-size:.7rem; color:var(--ink-40); }
+  body:has(.marketplace-page) app-site-footer{ display:none; }
+
+  /* Two lines then ellipsis on the title and one on the specification, so a row
+     of cards is a single height whatever the titles are and the prices line up
+     across it. Without the clamp the row's cards end at whatever length their
+     own text happens to be, which is exactly what makes a grid look unsettled.
+     The title also reserves both its lines: a one-line title beside a two-line
+     one would otherwise ride the whole card's content up by a line, and the
+     price panels - the thing being compared - would sit at two heights. */
+  .product-grid--market .product-title{
+    font-size:.92rem; line-height:1.32; font-weight:600; margin:0;
+    min-height:2.64em;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .product-grid--market .product-specs{
+    font-size:.74rem; line-height:1.4; color:var(--ink-60); margin:0;
+    display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+  /* The price leads, in a warm panel - the one place on the page that puts a wash
+     behind a figure. It is where the eye should land when two cards are being
+     compared, which is the whole job of this grid. */
+  .product-grid--market .product-price{
+    display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px;
+    margin:0; padding:10px 12px;
+    background:rgba(245,130,31,.09); border-radius:8px;
+    font-family:var(--font-d); font-weight:700; font-size:1.12rem;
+    line-height:1.2; letter-spacing:-.01em; color:var(--ink);
+    /* A converted figure carries both a sign and its decimals, so it is allowed
+       to break inside the panel rather than widen the card around it. */
+    min-width:0; overflow-wrap:anywhere;
+  }
+  .product-grid--market .product-price .unit{
+    font-family:var(--font-b); font-weight:400; font-size:.72rem; color:var(--ink-60);
+  }
+  /* The minimum belongs to the figure above it rather than standing as a line of
+     its own, so it sits tight under the panel. */
+  .product-grid--market .product-moq{ font-size:.72rem; color:var(--ink-40); margin-top:-4px; }
+
+  /* The card's own call to action, pushed to the bottom edge so the buttons line
+     up across a row. It fills orange on hover where the site's outline button
+     fills with ink: on a grid this size the card is the thing being chosen, so
+     the hover should read as the brand answering. */
+  .product-grid--market .product-body .btn{ width:100%; margin-top:auto; padding:11px 14px; }
+  .product-grid--market .product-body .btn:hover{
+    background:var(--orange); border-color:var(--orange); color:var(--white);
+  }
 
   /* ============ HOW IT WORKS (the process rail) ============ */
   .steps{
@@ -2204,22 +2231,159 @@
   .calc-result .cbm-lbl{font-size:.78rem; color:var(--ink-40); text-transform:uppercase; letter-spacing:.05em; margin-top:4px;}
   .calc-result p{font-size:.82rem; color:var(--ink-60); margin-top:14px;}
 
-  /* ============ FILTER CHIPS (Marketplace) ============ */
-  .filter-bar{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:36px;}
+  /* ============ MARKETPLACE — TOOLBAR, FILTERS ============ */
+  /* Two controls of different weight rather than two of the same: the search
+     takes the room it needs and the currency picker trails it as a labelled
+     field. The chips are their own line below, because a chip row set inline with
+     the controls reads as a third control rather than as the way through the
+     list. */
+  .marketplace-toolbar{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:16px 24px; flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .mk-search{
+    display:flex; align-items:center; gap:10px;
+    flex:1 1 300px; max-width:440px;
+    min-height:46px; padding:0 10px 0 14px;
+    background:var(--white); border:1px solid var(--line); border-radius:10px;
+    transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  /* The ring is drawn on the wrapper by :focus-within rather than on the input:
+     the visible edge belongs to the whole control, so the input's own outline
+     would light a box inside the box. */
+  .mk-search:focus-within{ border-color:var(--orange); box-shadow:0 0 0 3px rgba(245,130,31,.15); }
+  .mk-search svg{ width:16px; height:16px; flex:none; stroke:var(--ink-40); }
+  .mk-search input{
+    flex:1; min-width:0; border:none; background:none;
+    padding:12px 0; font-size:.88rem; color:var(--ink);
+  }
+  .mk-search input:focus{ outline:none; }
+  .mk-search input::placeholder{ color:var(--ink-40); }
+  /* The browser's own clear button is suppressed because the page draws its own:
+     the native one cannot be told what colour to be, so it would be the one
+     control on the page not following the mode. */
+  .mk-search input::-webkit-search-cancel-button,
+  .mk-search input::-webkit-search-decoration{ -webkit-appearance:none; appearance:none; }
+  .mk-search-clear{
+    display:flex; align-items:center; justify-content:center;
+    width:26px; height:26px; flex:none; border-radius:50%; color:var(--ink-40);
+    transition:background .2s var(--ease), color .2s var(--ease);
+  }
+  .mk-search-clear:hover{ background:var(--paper); color:var(--ink); }
+  .mk-search-clear svg{ width:12px; height:12px; stroke:currentColor; }
+
+  /* The currency picker, as a labelled select rather than the pair of pills this
+     used to be: there are eight currencies, and eight pills would either wrap in
+     the toolbar or need a scroller inside it. */
+  .mk-currency{ display:inline-flex; align-items:center; gap:10px; }
+  .mk-currency-label{
+    font-family:var(--font-d); font-size:.68rem; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-40);
+  }
+  .mk-currency-field{ position:relative; display:flex; align-items:center; }
+  .mk-currency-field select{
+    -webkit-appearance:none; appearance:none;
+    min-height:46px; padding:0 40px 0 15px;
+    background:var(--white); border:1px solid var(--line); border-radius:10px;
+    color:var(--ink); font-family:var(--font-d); font-size:.84rem; font-weight:600;
+    cursor:pointer;
+    transition:border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .mk-currency-field select:hover{ border-color:var(--line-strong); background:var(--paper); }
+  .mk-currency-field select:focus-visible{ outline:2px solid var(--orange-deep); outline-offset:2px; }
+  /* A sibling element rather than a background image, so it takes the ink of the
+     mode instead of needing a second copy for dark. It sits over the select's own
+     right padding and takes no pointer events, so a click on the chevron still
+     opens the list. */
+  .mk-currency-chevron{
+    position:absolute; right:14px; width:13px; height:13px;
+    stroke:var(--ink-60); pointer-events:none;
+  }
+
+  /* One line under the controls: what the search left, and - only when the
+     figures are converted - why they carry an ≈. */
+  .mk-meta{
+    display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px;
+    margin-bottom:20px; font-size:.78rem; color:var(--ink-40);
+  }
+  .mk-meta-count{
+    font-family:var(--font-d); font-weight:600; color:var(--ink-60);
+    font-variant-numeric:tabular-nums;
+  }
+  .mk-meta-note{ display:inline-flex; align-items:center; gap:7px; color:var(--ink-60); }
+  .mk-meta-note::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--orange); }
+
+  /* The category chips. Each carries the number of listings behind it, so a chip
+     that would land on an empty page says 0 before it is pressed. */
+  .filter-bar{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:32px;}
   .filter-chip{
-    padding:9px 18px; border-radius:20px; border:1px solid var(--line); background:var(--white);
+    display:inline-flex; align-items:center; gap:8px;
+    padding:9px 14px 9px 16px; border-radius:999px; border:1px solid var(--line); background:var(--white);
     font-family:var(--font-d); font-weight:500; font-size:.82rem; color:var(--ink-60);
     transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
   }
+  .filter-chip:hover{ border-color:var(--line-strong); color:var(--ink); }
   .filter-chip.active{background:var(--ink); color:var(--white); border-color:var(--ink);}
-  .marketplace-toolbar{display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; margin-bottom:24px;}
-  .mk-search{
-    display:flex; align-items:center; background:var(--paper); border:1px solid var(--line); border-radius:8px;
-    padding:0 14px; max-width:320px; flex:1;
+  /* The count is a wash of the chip's own foreground, so it stays part of the
+     chip when the chip inverts: on the active one the fill is the ink and the
+     label the surface, and this follows whichever way round they are. */
+  .filter-count{
+    padding:2px 7px; border-radius:999px;
+    background:var(--paper); color:var(--ink-40);
+    font-size:.68rem; font-weight:600; font-variant-numeric:tabular-nums;
+    transition:background .2s var(--ease), color .2s var(--ease);
   }
-  .mk-search input{flex:1; border:none; background:none; padding:11px 8px; font-size:.86rem;}
+  .filter-chip.active .filter-count{ background:rgba(255,255,255,.16); color:inherit; }
+  .mk-refine-row{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:20px;
+    margin:-10px 0 24px; padding:16px 0 18px; border-bottom:1px solid var(--line);
+  }
+  .mk-price-filter{ display:grid; gap:10px; min-width:0; }
+  .mk-refine-label{
+    display:flex; align-items:baseline; gap:8px;
+    font-family:var(--font-d); font-size:.7rem; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase; color:var(--ink-60);
+  }
+  .mk-refine-label span{ font-size:.64rem; font-weight:500; letter-spacing:.04em; color:var(--ink-40); }
+  .mk-price-options{ display:flex; flex-wrap:wrap; gap:7px; }
+  .mk-price-chip{
+    min-height:34px; padding:7px 11px; border:1px solid var(--line); border-radius:7px;
+    background:var(--white); color:var(--ink-60); font-family:var(--font-d);
+    font-size:.74rem; font-weight:600; white-space:nowrap;
+    transition:background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease);
+  }
+  .mk-price-chip:hover{ border-color:var(--orange); color:var(--ink); transform:translateY(-1px); }
+  .mk-price-chip.active{ background:var(--orange); border-color:var(--orange); color:#fff; }
+  .mk-price-chip:focus-visible,
+  .mk-sort-field select:focus-visible{ outline:2px solid var(--orange-deep); outline-offset:2px; }
+  .mk-sort{ display:grid; gap:8px; flex:none; }
+  .mk-sort-field{ position:relative; display:flex; align-items:center; }
+  .mk-sort-field select{
+    min-height:38px; min-width:174px; padding:0 34px 0 11px;
+    appearance:none; border:1px solid var(--line); border-radius:7px;
+    background:var(--white); color:var(--ink); font-family:var(--font-d);
+    font-size:.76rem; cursor:pointer;
+  }
+  .mk-sort-field select:hover{ border-color:var(--line-strong); }
+  .mk-sort-field svg{ position:absolute; right:11px; width:12px; height:12px; stroke:var(--ink-60); pointer-events:none; }
   .product-specs{font-size:.75rem; color:var(--ink-40); margin-top:-4px;}
-  .no-results{display:none; text-align:center; padding:60px 20px; color:var(--ink-40);}
+  /* Nothing matched. An icon, the line that says what happened, and the way out of
+     it - the same three parts the cart's empty state has, so an empty page looks
+     the same wherever on the site it is met. */
+  .no-results{display:none; text-align:center; padding:64px 20px; color:var(--ink-40);}
+  .no-results-icon{
+    display:flex; align-items:center; justify-content:center;
+    width:52px; height:52px; margin:0 auto 18px;
+    border:1px dashed var(--line); border-radius:50%;
+  }
+  .no-results-icon svg{ width:22px; height:22px; stroke:var(--ink-40); }
+  .no-results strong{
+    display:block; margin-bottom:8px;
+    font-family:var(--font-d); font-size:1.02rem; font-weight:600; color:var(--ink);
+  }
+  .no-results p{ max-width:420px; margin:0 auto; font-size:.88rem; line-height:1.6; color:var(--ink-60); }
+  .no-results a{ color:var(--orange-deep); border-bottom:1px dashed var(--orange-deep); }
 
   /* ============ SOLUTIONS CARDS ============ */
   .solution-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
@@ -2663,8 +2827,9 @@
     /* Marketplace */
     .marketplace-toolbar{ flex-direction:column; align-items:stretch; gap:14px; }
     .mk-search{ max-width:none; width:100%; }
+    .mk-currency{ width:100%; justify-content:space-between; }
     .filter-bar{ gap:8px; margin-bottom:22px; }
-    .filter-chip{ padding:9px 15px; font-size:.78rem; border-radius:18px; }
+    .filter-chip{ padding:9px 14px; font-size:.78rem; border-radius:999px; }
 
     /* Compare table → stacked cards */
     .compare-wrap{ overflow:visible; border:none; background:none; }
@@ -2779,14 +2944,40 @@
     .verified-badge{ top:6px; left:6px; padding:3px 6px; font-size:.5rem; border-radius:3px; }
     .verified-badge svg{ width:8px; height:8px; }
 
-    /* Toolbar: full-width search + segmented currency toggle */
-    .marketplace-toolbar{ gap:12px; }
-    .mk-search{ max-width:none; width:100%; min-height:46px; padding:0 12px; }
-    .mk-search svg{ width:15px; height:15px; flex-shrink:0; }
-    .mk-search input{ padding:13px 8px; font-size:.85rem; }
+    /* The marketplace card carries its own type scale (see the PRODUCTS block),
+       so the compact sizes are restated for it here: the scoped rules there are
+       more specific than the shared ones and would otherwise hold their desktop
+       sizes on a two-across phone. */
+    .product-grid--market .product-body{ padding:12px; gap:7px; }
+    .product-grid--market .product-title{ font-size:.8rem; line-height:1.28; }
+    .product-grid--market .product-specs{ font-size:.68rem; }
+    .product-grid--market .product-price{ padding:8px 10px; font-size:.9rem; border-radius:7px; }
+    .product-grid--market .product-price .unit{ font-size:.62rem; }
+    .product-grid--market .product-moq{ font-size:.66rem; margin-top:-2px; }
+    .product-grid--market .product-body .btn{ padding:9px 8px; font-size:.72rem; border-radius:6px; }
 
-    .currency-toggle{ width:100%; display:flex; padding:4px; }
-    .currency-toggle button{ flex:1; justify-content:center; padding:9px 10px; font-size:.74rem; white-space:nowrap; }
+    /* Toolbar: the search across the top, the currency field under it */
+    .marketplace-toolbar{ gap:12px; }
+    .mk-search{ flex:1 1 100%; max-width:none; min-height:48px; padding:0 10px 0 13px; }
+    .mk-search input{ padding:13px 0; font-size:.86rem; }
+    .mk-currency{ width:100%; justify-content:space-between; }
+    .mk-currency-field{ flex:1; }
+    .mk-currency-field select{ width:100%; font-size:.82rem; }
+    .mk-search{ min-height:40px; gap:8px; padding:0 8px 0 11px; border-radius:8px; }
+    .mk-search input{ padding:9px 0; font-size:.82rem; }
+    .mk-search svg{ width:14px; height:14px; }
+    .mk-search-clear{ width:24px; height:24px; }
+    .product-grid--market.product-grid--featured{ grid-template-columns:1fr; }
+    .product-grid--market.product-grid--featured .product-body{ gap:0; }
+    .product-grid--market.product-grid--featured .product-moq{ margin:-4px 0 10px; }
+    .mk-refine-row{ flex-direction:column; align-items:stretch; gap:14px; margin-top:-8px; }
+    .mk-price-options{
+      flex-wrap:nowrap; overflow-x:auto; padding:1px 1px 5px;
+      -webkit-overflow-scrolling:touch; scrollbar-width:none;
+    }
+    .mk-price-options::-webkit-scrollbar{ display:none; }
+    .mk-sort{ grid-template-columns:auto minmax(0,1fr); align-items:center; }
+    .mk-sort-field select{ width:100%; min-width:0; }
 
     /* Horizontally scrollable filter chips */
     .filter-bar{
@@ -2799,7 +2990,8 @@
       scrollbar-width:none;
     }
     .filter-bar::-webkit-scrollbar{ display:none; }
-    .filter-chip{ flex:none; padding:9px 14px; font-size:.76rem; border-radius:18px; }
+    .filter-chip{ flex:none; padding:8px 12px 8px 14px; gap:6px; font-size:.76rem; border-radius:999px; }
+    .filter-count{ font-size:.64rem; padding:1px 6px; }
     .no-results{ padding:36px 12px; }
   }
 
@@ -2815,7 +3007,15 @@
     .product-body h4{ font-size:.74rem; }
     .product-price{ font-size:.78rem; }
     .product-body .btn{ padding:8px 5px; font-size:.68rem; }
-    .currency-toggle button{ font-size:.7rem; padding:8px 8px; }
+    /* The marketplace card once more, a step below the shared compact sizes. */
+    .product-grid--market .product-body{ padding:10px; gap:6px; }
+    .product-grid--market .product-title{ font-size:.74rem; }
+    .product-grid--market .product-price{ padding:7px 9px; font-size:.8rem; }
+    .product-grid--market .product-moq{ font-size:.62rem; }
+    .product-grid--market .product-body .btn{ padding:8px 6px; font-size:.68rem; }
+    /* The label has done its work by the time the field is the width of the
+       phone: the option it shows names the currency and the country already. */
+    .mk-currency-label{ display:none; }
   }
 
   /* ============ SCROLL "BUBBLE UP" REVEAL ============ */
