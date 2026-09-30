@@ -1,11 +1,17 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CATEGORIES, PRODUCTS, Product } from './marketplace-data';
 import { CURRENCIES, Currency, convertFromNaira, formatMoney } from '../../services/currency';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 
-const PAGE_SIZE = 5;
+/**
+ * How many listings a page of the catalogue holds. Eight, rather than the five
+ * this used to be: a phone screen holds two rows of two comfortably and a
+ * desktop four-across holds two, so eight lands the grid near the fold on both
+ * and halves the number of taps a shopper needs to reach the twelfth listing.
+ */
+const PAGE_SIZE = 8;
 
 /**
  * Marketplace page: searchable stock, price/category filters, currency display,
@@ -32,6 +38,17 @@ export class Marketplace {
     { id: '50k-200k', label: '₦50k–₦200k', min: 50000, max: 200000 },
     { id: 'over-200k', label: 'Over ₦200k', min: 200000, max: Infinity },
   ];
+  /**
+   * The orders the refine sheet offers, described in the one place the sheet and
+   * the document title both read from. Sort was a `<select>` in the toolbar
+   * before; it is a list of rows in the sheet now, which is a taller target and
+   * reads without opening a native picker over the page.
+   */
+  protected readonly sortOrders = [
+    { id: 'featured', label: 'Featured' },
+    { id: 'price-low', label: 'Price: low to high' },
+    { id: 'price-high', label: 'Price: high to low' },
+  ];
   /** The money prices are shown in. Naira, because that is the price. */
   protected readonly currency = signal<Currency>(CURRENCIES[0]);
   protected readonly filter = signal('all');
@@ -42,6 +59,36 @@ export class Marketplace {
   private readonly qtyDrafts = signal<Record<string, number>>({});
   protected readonly cart = inject(CartService);
   private readonly flyToCart = inject(FlyToCartService);
+
+  /**
+   * Whether the refine sheet is up.
+   *
+   * The sheet is held here rather than in UiService alongside the search overlay
+   * and the legal modal, because it is the only one of the three that is opened
+   * from inside the page it refines: nobody can reach the marketplace filters
+   * from another route, so there is nothing for a shared service to share.
+   */
+  protected readonly sheetOpen = signal(false);
+
+  /**
+   * How much of the list is narrowed. The search is not counted — it has a field
+   * of its own showing what is in it, and a count beside it would say the same
+   * thing twice.
+   */
+  protected readonly activeCount = computed(
+    () => (this.filter() === 'all' ? 0 : 1) + (this.priceFilter() === 'all' ? 0 : 1),
+  );
+
+  constructor() {
+    // A sheet over a scrollable page means the page underneath keeps moving
+    // under a thumb that is meant to be choosing something. Held here as an
+    // effect rather than a pair of calls at each open and close, so the two can
+    // never be left disagreeing — and so leaving the page with the sheet up still
+    // hands the scrollbar back.
+    effect(() => {
+      document.body.style.overflow = this.sheetOpen() ? 'hidden' : '';
+    });
+  }
 
   /**
    * The listings on screen. Filtering drops cards from the list rather than
@@ -131,6 +178,54 @@ export class Marketplace {
 
   protected setSortOrder(order: string): void {
     this.sortOrder.set(order);
+    this.page.set(0);
+  }
+
+  /**
+   * Open the refine sheet, brought to the group that was asked for.
+   *
+   * Both toolbar buttons open the same panel — a shopper who taps Sort and
+   * finds the price bands first has to hunt for what they came for, so the
+   * group is scrolled into view. The scroll is set on the sheet body directly
+   * rather than with `scrollIntoView`, which would also walk the page behind
+   * the sheet and leave it somewhere it was not before.
+   */
+  protected openSheet(group: 'cat' | 'sort'): void {
+    this.sheetOpen.set(true);
+    const body = document.getElementById('mkSheetBody');
+    const target = document.getElementById(group === 'sort' ? 'mkSetSort' : 'mkSetCat');
+    if (body && target) body.scrollTop = target.offsetTop - 8;
+  }
+
+  protected closeSheet(): void {
+    this.sheetOpen.set(false);
+  }
+
+  /**
+   * The backdrop, the close button and Escape all end up here. Escape is
+   * handled on the document rather than the panel, because the panel is not
+   * focused when the sheet opens and a keypress needs somewhere to be heard.
+   */
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    if (this.sheetOpen()) this.closeSheet();
+  }
+
+  /** A press on the dimmed area, but not a press on the sheet itself. */
+  protected onSheetBackdrop(event: Event): void {
+    if (event.target === event.currentTarget) this.closeSheet();
+  }
+
+  /**
+   * Put every narrowing back to its default. The currency is left alone: it is a
+   * reading of the same prices rather than a narrowing of the list, so someone
+   * comparing in dollars and then clearing the filters should still be reading
+   * dollars.
+   */
+  protected resetTune(): void {
+    this.filter.set('all');
+    this.priceFilter.set('all');
+    this.sortOrder.set('featured');
     this.page.set(0);
   }
 

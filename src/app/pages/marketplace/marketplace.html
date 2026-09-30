@@ -1,23 +1,35 @@
 <main id="top" class="marketplace-page">
 
-<section class="page-hero">
-  <div class="container">
-    <div class="breadcrumb"><a routerLink="/">Home</a> / Marketplace</div>
-    <span class="eyebrow">Wholesale stock from China</span>
-    <h1>Stock worth comparing.</h1>
-    <p>Compare unit prices, minimums and verified listings, then add the quantity you need to your quote basket. Looking for something beyond this stock? <a routerLink="/quote" style="color:var(--orange-deep); border-bottom:1px dashed var(--orange-deep);">Send us a sourcing request</a>.</p>
-  </div>
-</section>
+  <!-- The head, cut down to a title and one line of orientation.
 
-<section class="section">
-  <div class="container">
-    <!-- Two controls of different weight. The search leads and takes the room it
-         needs; the currency picker trails it as a quiet labelled field rather
-         than as buttons that would have to compete with the search for the eye. -->
-    <div class="marketplace-toolbar">
+       This block used to be the site's full page-hero: breadcrumb, eyebrow, a
+       headline and a paragraph of copy. A shop does not open with a paragraph —
+       it opens with the things people came to look at. The copy that told them
+       how the page works is now a single line, and the search has moved up to
+       sit directly under it, pinned to the site header. -->
+  <header class="mk-head">
+    <div class="container">
+      <div class="mk-head-row">
+        <h1>Marketplace</h1>
+        <span class="mk-head-count">
+          {{ shown().length }}<span class="mk-head-count-of">/{{ products.length }}</span>
+        </span>
+      </div>
+      <p class="mk-head-note">Live wholesale stock out of China. Every price is in naira and every minimum is on the card.</p>
+    </div>
+  </header>
+
+  <!-- The shop bar: pinned under the site header for the whole length of the
+       catalogue, so the way through the list is never more than a swipe away.
+       It carries three things and nothing else — the search, which takes the
+       room it needs, and two buttons that open the refine sheet. The sort used
+       to be a third control in its own right; two selects side by side read as
+       a form, and a form is the opposite of a shop. -->
+  <div class="mk-bar" id="mkBar">
+    <div class="mk-bar-main container">
       <div class="mk-search">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="search" id="mkSearch" placeholder="Search listings — bales, panels, hair…" [value]="query()" (input)="onSearch($event)" aria-label="Search these listings">
+        <input type="search" id="mkSearch" placeholder="Search bales, panels, hair…" [value]="query()" (input)="onSearch($event)" aria-label="Search these listings">
         <!-- Its own clear button rather than the browser's, so the control looks
              the same in every engine and the icon can take the site's ink. -->
         @if (query()) {
@@ -27,150 +39,232 @@
         }
       </div>
 
-      <!-- A select rather than a row of pills, which is what this used to be:
-           there are eight currencies now, and eight pills would either wrap onto
-           a second line in the toolbar or need a scroller inside it. A select
-           also hands the choosing to the platform, which on a phone means the
-           native picker instead of a row of small tap targets.
-
-           The chevron is an element rather than a background image: a data-URI
-           bakes the stroke in at one colour and needs a copy per mode, which is
-           the tax the hero's category picker pays. This inherits the ink. -->
-      <label class="mk-currency">
-        <span class="mk-currency-label">Price currency</span>
-        <span class="mk-currency-field">
-          <select [value]="currency().code" (change)="setCurrency($any($event.target).value)" aria-label="Currency for prices">
-            @for (c of currencies; track c.code) {
-              <option [value]="c.code">{{ c.symbol }} {{ c.code }} · {{ c.country }}</option>
-            }
-          </select>
-          <svg class="mk-currency-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-        </span>
-      </label>
+      <!-- The two buttons are the same control opening the same panel; the one
+           that was pressed only decides which group the panel scrolls to. The
+           filter button carries a count of what is already narrowed, so the
+           state of the list is readable without opening anything. -->
+      <button type="button" class="mk-tune" (click)="openSheet('cat')" [class.is-on]="activeCount() > 0" aria-label="Filter listings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+        <span class="mk-tune-label">Filters</span>
+        @if (activeCount() > 0) {
+          <span class="mk-tune-n">{{ activeCount() }}</span>
+        }
+      </button>
+      <button type="button" class="mk-tune" (click)="openSheet('sort')" aria-label="Sort listings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M7 20l-3-3M17 20V4M17 4l3 3"/></svg>
+        <span class="mk-tune-label">Sort</span>
+      </button>
     </div>
 
-    <!-- What the two controls have done, in one line. The count is the answer to
-         the search; the note only appears when the figures are converted, so the
-         page explains the ≈ once rather than on every card. -->
-    <p class="mk-meta">
-      <span class="mk-meta-count">{{ shown().length }} of {{ products.length }} listings</span>
-      @if (converted()) {
-        <span class="mk-meta-note">Indicative rates · $1 = ₦1,350 · final quotes are in naira.</span>
-      }
-    </p>
-    <!-- Each chip carries the number of listings behind it, counted against the
-         search: a filter that would lead to an empty page says 0 before it is
-         pressed rather than after. -->
-    <div class="filter-bar" id="filterBar" role="group" aria-label="Filter by category">
-      @for (c of categories; track c.id) {
-        <button type="button" class="filter-chip" [class.active]="filter() === c.id" (click)="setFilter(c.id)">{{ c.label }}<span class="filter-count">{{ count(c.id) }}</span></button>
-      }
-    </div>
-    <div class="mk-refine-row">
-      <div class="mk-price-filter" role="group" aria-label="Filter by unit price in naira">
-        <span class="mk-refine-label">Budget <span>NGN / unit</span></span>
-        <div class="mk-price-options">
-          @for (band of priceBands; track band.id) {
-            <button type="button" class="mk-price-chip" [class.active]="priceFilter() === band.id" [attr.aria-pressed]="priceFilter() === band.id" (click)="setPriceFilter(band.id)">{{ band.label }}</button>
+    <!-- The categories, on their own rail under the search. They are the way
+         most people actually get through a catalogue, so they are given the
+         whole width rather than a share of a toolbar, and they scroll sideways
+         instead of wrapping onto a second line. -->
+    <div class="mk-bar-cats">
+      <div class="container">
+        <div class="filter-bar" id="filterBar" role="group" aria-label="Filter by category">
+          @for (c of categories; track c.id) {
+            <button type="button" class="filter-chip" [class.active]="filter() === c.id" [attr.aria-pressed]="filter() === c.id" (click)="setFilter(c.id)">{{ c.label }}<span class="filter-count">{{ count(c.id) }}</span></button>
           }
         </div>
       </div>
-      <label class="mk-sort">
-        <span class="mk-refine-label">Sort by</span>
-        <span class="mk-sort-field">
-          <select [value]="sortOrder()" (change)="setSortOrder($any($event.target).value)" aria-label="Sort listings">
-            <option value="featured">Featured</option>
-            <option value="price-low">Price: low to high</option>
-            <option value="price-high">Price: high to low</option>
-          </select>
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-        </span>
-      </label>
-    </div>
-    <div class="product-grid product-grid--market" id="productGrid">
-      @for (p of visible(); track p.id) {
-        <article class="product-card">
-          <div class="product-media" [class.product-media--photo]="p.image">
-            @if (p.image; as img) {
-              <!-- The listing's own photo where there is one, standing in for the
-                   line icon. Alt is empty because the title follows immediately
-                   below and already names the card. -->
-              <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
-            } @else {
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
-              @switch (p.icon) {
-                @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
-                @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
-                @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
-                @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
-                @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
-                @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
-                @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
-                @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
-                @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
-              }
-            </svg>
-            }
-            @if (p.verified) {
-              <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
-            }
-          </div>
-          <div class="product-body">
-            <h4 class="product-title">{{ p.title }}</h4>
-            <div class="product-specs">{{ p.specs }}</div>
-            <!-- The price leads in a panel of its own, with the minimum directly
-                 under it: the minimum is what that figure is subject to, so the
-                 two are read as one block rather than as two grey lines. -->
-            <div class="product-price"><span class="price-val">{{ price(p) }}</span> <span class="unit">{{ p.unit }}</span></div>
-            <div class="product-qty">
-              <button type="button" class="product-qty-step" (click)="stepQty(p.id, -1)" [disabled]="qtyFor(p.id) <= 1" [attr.aria-label]="'One fewer unit of ' + p.title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
-              </button>
-              <input class="product-qty-input" type="number" inputmode="numeric" [value]="qtyFor(p.id)" min="1" step="1" (input)="typeQty(p.id, $any($event.target).value)" [attr.aria-label]="'Units of ' + p.title">
-              <button type="button" class="product-qty-step" (click)="stepQty(p.id, 1)" [attr.aria-label]="'One more unit of ' + p.title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-              </button>
-              <span class="product-qty-unit" aria-hidden="true">units</span>
-            </div>
-            <div class="product-moq">{{ p.moq }}</div>
-            <button type="button" class="btn btn-primary product-add" (click)="addToCart(p, $event)" [class.is-added]="cart.addedId() === p.id" [attr.aria-label]="cart.addedId() === p.id ? p.title + ' added to cart' : 'Add ' + p.title + ' to cart'">
-              <span class="product-add-icons" aria-hidden="true">
-                <svg class="product-add-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                <svg class="product-add-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-              </span>
-              <span>{{ cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
-            </button>
-          </div>
-        </article>
-      }
-    </div>
-
-    @if (pageCount() > 1) {
-      <nav class="product-dots" aria-label="Marketplace pages">
-        <button type="button" class="product-dots-nav" (click)="stepPage(-1)" [disabled]="page() === 0" aria-label="Previous page">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div class="product-dots-track">
-          @for (index of pageNumbers(); track index) {
-            <button type="button" class="product-dot" [class.active]="page() === index" (click)="goToPage(index)" [attr.aria-current]="page() === index ? 'page' : null" [attr.aria-label]="'Page ' + (index + 1) + ' of ' + pageCount()"></button>
-          }
-        </div>
-        <button type="button" class="product-dots-nav" (click)="stepPage(1)" [disabled]="page() >= pageCount() - 1" aria-label="Next page">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-      </nav>
-    }
-
-    <!-- Nothing matched. An icon, the line that says what happened, and the way
-         out of it - the same three parts the cart's empty state uses. -->
-    <div class="no-results" id="noResults" [style.display]="noResults() ? 'block' : 'none'">
-      <span class="no-results-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </span>
-      <strong>Nothing matches that</strong>
-      <p>No listing carries that name. Most orders are sourced to request, so <a routerLink="/quote">tell us what you need</a> and we will price it.</p>
     </div>
   </div>
-</section>
 
+  <section class="section mk-body">
+    <div class="container">
+
+      <!-- What the controls have done, in one line. The count is the answer to
+           the search; the note only appears when the figures are converted, so the
+           page explains the ≈ once rather than on every card. -->
+      <p class="mk-meta">
+        <span class="mk-meta-count">{{ shown().length }} of {{ products.length }} listings</span>
+        @if (converted()) {
+          <span class="mk-meta-note">Indicative rates · $1 = ₦1,350 · final quotes are in naira.</span>
+        }
+        @if (activeCount() > 0) {
+          <button type="button" class="mk-meta-clear" (click)="resetTune()">Clear filters</button>
+        }
+      </p>
+
+      <div class="product-grid product-grid--market" id="productGrid">
+        @for (p of visible(); track p.id) {
+          <article class="product-card">
+            <div class="product-media" [class.product-media--photo]="p.image">
+              @if (p.image; as img) {
+                <!-- The listing's own photo where there is one, standing in for the
+                     line icon. Alt is empty because the title follows immediately
+                     below and already names the card. -->
+                <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+              } @else {
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                @switch (p.icon) {
+                  @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                  @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                  @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                  @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                  @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                  @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                  @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                  @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                  @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                }
+              </svg>
+              }
+              @if (p.verified) {
+                <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
+              }
+            </div>
+            <div class="product-body">
+              <h4 class="product-title">{{ p.title }}</h4>
+              <div class="product-specs">{{ p.specs }}</div>
+
+              <!-- The price leads, and it leads on its own: the wash that used to
+                   sit behind the figure is gone, because a box drawn round every
+                   price on the page is a form field, and this is a shop. The
+                   minimum follows as a pill, because it is a condition on that
+                   figure rather than a fact about the product. -->
+              <div class="product-price"><span class="price-val">{{ price(p) }}</span> <span class="unit">{{ p.unit }}</span></div>
+              <div class="product-moq">{{ p.moq }}</div>
+
+              <div class="product-qty">
+                <button type="button" class="product-qty-step" (click)="stepQty(p.id, -1)" [disabled]="qtyFor(p.id) <= 1" [attr.aria-label]="'One fewer unit of ' + p.title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+                </button>
+                <input class="product-qty-input" type="number" inputmode="numeric" [value]="qtyFor(p.id)" min="1" step="1" (input)="typeQty(p.id, $any($event.target).value)" [attr.aria-label]="'Units of ' + p.title">
+                <button type="button" class="product-qty-step" (click)="stepQty(p.id, 1)" [attr.aria-label]="'One more unit of ' + p.title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+                <span class="product-qty-unit" aria-hidden="true">units</span>
+              </div>
+
+              <button type="button" class="btn btn-primary product-add" (click)="addToCart(p, $event)" [class.is-added]="cart.addedId() === p.id" [attr.aria-label]="cart.addedId() === p.id ? p.title + ' added to cart' : 'Add ' + p.title + ' to cart'">
+                <span class="product-add-icons" aria-hidden="true">
+                  <svg class="product-add-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  <svg class="product-add-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                </span>
+                <span>{{ cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (pageCount() > 1) {
+        <nav class="product-dots" aria-label="Marketplace pages">
+          <button type="button" class="product-dots-nav" (click)="stepPage(-1)" [disabled]="page() === 0" aria-label="Previous page">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="product-dots-track">
+            @for (index of pageNumbers(); track index) {
+              <button type="button" class="product-dot" [class.active]="page() === index" (click)="goToPage(index)" [attr.aria-current]="page() === index ? 'page' : null" [attr.aria-label]="'Page ' + (index + 1) + ' of ' + pageCount()"></button>
+            }
+          </div>
+          <button type="button" class="product-dots-nav" (click)="stepPage(1)" [disabled]="page() >= pageCount() - 1" aria-label="Next page">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </nav>
+      }
+
+      <!-- Nothing matched. An icon, the line that says what happened, and the way
+           out of it - the same three parts the cart's empty state uses. -->
+      <div class="no-results" id="noResults" [style.display]="noResults() ? 'block' : 'none'">
+        <span class="no-results-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <strong>Nothing matches that</strong>
+        <p>No listing carries that name. Most orders are sourced to request, so <a routerLink="/quote">tell us what you need</a> and we will price it.</p>
+      </div>
+
+      <!-- The sourcing request, which used to be a sentence in the hero. It
+           belongs at the end of the list rather than in front of it: someone
+           arrives at this page to buy from the stock, and only the ones who
+           cannot find what they want need to be told they can ask for it. -->
+      <aside class="mk-foot">
+        <div class="mk-foot-copy">
+          <strong>Not seeing what you need?</strong>
+          <span>Most of what we ship is sourced to request rather than held as stock.</span>
+        </div>
+        <a routerLink="/quote" class="btn btn-dark">Send a sourcing request</a>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===== Refine sheet ===== -->
+  <!-- One panel for sorting, category, price and money, rather than four controls
+       spread down the page. It is a bottom sheet on a phone — the way a phone
+       app presents a choice like this, sliding up under the thumb — and a
+       centred dialog above that, following the shape the search overlay and the
+       legal modal already use on this site. -->
+  <div class="mk-sheet" [class.open]="sheetOpen()" role="dialog" aria-modal="true" aria-label="Filter and sort listings" [attr.aria-hidden]="!sheetOpen()" (click)="onSheetBackdrop($event)">
+    <div class="mk-sheet-panel">
+      <span class="mk-sheet-grip" aria-hidden="true"></span>
+
+      <div class="mk-sheet-top">
+        <h2>Refine</h2>
+        <button type="button" class="mk-sheet-x" (click)="closeSheet()" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mk-sheet-body" id="mkSheetBody">
+        <section class="mk-set" id="mkSetSort">
+          <h3 class="mk-set-head">Sort by</h3>
+          <div class="mk-rows" role="group" aria-label="Sort listings">
+            @for (o of sortOrders; track o.id) {
+              <button type="button" class="mk-row" [class.on]="sortOrder() === o.id" [attr.aria-pressed]="sortOrder() === o.id" (click)="setSortOrder(o.id)">
+                <span>{{ o.label }}</span>
+                <svg class="mk-row-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+              </button>
+            }
+          </div>
+        </section>
+
+        <section class="mk-set" id="mkSetCat">
+          <h3 class="mk-set-head">Category</h3>
+          <div class="mk-rows" role="group" aria-label="Filter by category">
+            @for (c of categories; track c.id) {
+              <button type="button" class="mk-row" [class.on]="filter() === c.id" [attr.aria-pressed]="filter() === c.id" (click)="setFilter(c.id)">
+                <span>{{ c.label }}</span>
+                <span class="mk-row-n">{{ count(c.id) }}</span>
+              </button>
+            }
+          </div>
+        </section>
+
+        <section class="mk-set" id="mkSetBudget">
+          <h3 class="mk-set-head">Unit price <span>NGN</span></h3>
+          <div class="mk-rows" role="group" aria-label="Filter by unit price in naira">
+            @for (band of priceBands; track band.id) {
+              <button type="button" class="mk-row" [class.on]="priceFilter() === band.id" [attr.aria-pressed]="priceFilter() === band.id" (click)="setPriceFilter(band.id)">
+                <span>{{ band.label }}</span>
+                <svg class="mk-row-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+              </button>
+            }
+          </div>
+        </section>
+
+        <section class="mk-set" id="mkSetMoney">
+          <h3 class="mk-set-head">Show prices in</h3>
+          <label class="mk-currency">
+            <span class="mk-currency-field">
+              <select [value]="currency().code" (change)="setCurrency($any($event.target).value)" aria-label="Currency for prices">
+                @for (c of currencies; track c.code) {
+                  <option [value]="c.code">{{ c.symbol }} {{ c.code }} · {{ c.country }}</option>
+                }
+              </select>
+              <svg class="mk-currency-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </label>
+        </section>
+      </div>
+
+      <div class="mk-sheet-foot">
+        <button type="button" class="mk-reset" (click)="resetTune()" [disabled]="activeCount() === 0">Reset</button>
+        <button type="button" class="btn btn-primary mk-apply" (click)="closeSheet()">
+          Show {{ shown().length }} {{ shown().length === 1 ? 'listing' : 'listings' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </main>
