@@ -83,6 +83,12 @@
   </div>
 
   <nav class="mobile-nav-links" aria-label="Mobile">
+    <!-- Home leads, above Marketplace. The drawer opened straight into the shop
+         with no way back to the top of the site except the mark at the head of
+         it, which is a logo rather than a destination and is easy to read past.
+         Marked `exact` because a link to `/` is a prefix of every route: without
+         it this row would light up orange on every page, not just the home. -->
+    <a (click)="closeMenu()" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><span>Home</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
     <a (click)="closeMenu()" routerLink="/marketplace" routerLinkActive="active"><span>Marketplace</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
 <a (click)="closeMenu()" routerLink="/marketplace" fragment="electronics"><span>Phone accessories</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
 <a (click)="closeMenu()" routerLink="/marketplace" fragment="okrika"><span>Okrika bales</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
