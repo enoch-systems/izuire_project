@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { LegalDocId } from './legal-content';
 
 /**
  * Shared UI state, reproducing the behavior of the original site's
@@ -8,6 +9,24 @@ import { Injectable, signal } from '@angular/core';
 export class UiService {
   readonly menuOpen = signal(false);
   readonly searchOpen = signal(false);
+
+  /**
+   * Which legal document the footer has asked to read, or null when the modal is
+   * shut. Null rather than a separate boolean so the open state and its contents
+   * cannot disagree: there is no window where the modal is up showing the last
+   * document, or hidden with one set.
+   */
+  readonly legalDoc = signal<LegalDocId | null>(null);
+
+  /** Open the modal on one document. */
+  openLegal(id: LegalDocId): void {
+    this.legalDoc.set(id);
+  }
+
+  /** Shut the modal. */
+  closeLegal(): void {
+    this.legalDoc.set(null);
+  }
 
   /**
    * Bumped when the header logo is clicked, asking the signature animation to

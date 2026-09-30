@@ -1,0 +1,62 @@
+<div class="legal-overlay" [class.open]="open()" (click)="onBackdrop($event)">
+  <div
+    class="legal-dialog"
+    #dialog
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'legalModalTitle'"
+    tabindex="-1"
+  >
+    <header class="legal-dialog__head">
+      <div>
+        <span class="eyebrow">Trust &amp; legal</span>
+        <h2 class="legal-dialog__title" id="legalModalTitle">{{ doc().title }}</h2>
+      </div>
+      <button type="button" class="legal-dialog__close" (click)="close()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </header>
+
+    <!-- Both policies in one dialog, so a reader who lands on Terms and wants
+         Privacy does not have to close and go looking for another trigger. The
+         label comes from the shared copy rather than being written here, so the
+         tab and the heading underneath it can never disagree. -->
+    <div class="legal-dialog__tabs" role="tablist" aria-label="Legal documents">
+      @for (d of switchable; track d.id) {
+        <button
+          type="button"
+          class="legal-tab"
+          role="tab"
+          [class.active]="active() === d.id"
+          [attr.aria-selected]="active() === d.id"
+          (click)="show(d.id)"
+        >{{ d.tab }}</button>
+      }
+    </div>
+
+    <div class="legal-dialog__body" #body>
+      <p class="legal-note"><strong>Draft placeholder content.</strong> {{ disclaimer }}</p>
+      @for (block of doc().blocks; track $index) {
+        @switch (block.kind) {
+          @case ('h3') {
+            <h3>{{ block.text }}</h3>
+          }
+          @case ('ul') {
+            <ul>
+              @for (item of items(block); track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          }
+          @default {
+            <p>@if (block.lead) { <strong>{{ block.lead }}</strong> }{{ block.text }}</p>
+          }
+        }
+      }
+      <a routerLink="/legal" class="legal-dialog__more" (click)="close()">
+        Read the full legal page
+        <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+  </div>
+</div>

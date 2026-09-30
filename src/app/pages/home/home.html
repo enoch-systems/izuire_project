@@ -404,14 +404,16 @@
 
      `autoplay` needs `muted`, which `[muted]` sets as a property -- see the note
      above the category tiles on why that is not a plain attribute. -->
-<section class="trust-band">
-  <!-- A blurred loop of ship.mp4 runs behind the figures, on the same in-view terms
-       as the category tiles. The scrim that keeps the text legible is the wrapper's
-       own ::after in styles.css, and the poster still takes over under
-       prefers-reduced-motion. -->
+<section class="trust-band" id="trust">
+  <!-- ship.mp4 runs behind the figures, on the same in-view terms as the category
+       tiles, and it is SHARP: the blur used to be baked into the Cloudinary URL as
+       e_blur:300, which made the footage read as a smear of movement rather than a
+       ship. The scrim that keeps the text legible is the wrapper's own ::after in
+       styles.css - it carries the contrast now that the clip behind it has detail
+       in it - and the poster still takes over under prefers-reduced-motion. -->
   <div class="bg-media" aria-hidden="true">
-    <video #bgMedia class="bg-video" autoplay [muted]="true" loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/ship.jpg">
-      <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_640,e_blur:300,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
+    <video #bgMedia class="bg-video" autoplay [muted]="true" loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_960/ders-videos/ship.jpg">
+      <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_640,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
     </video>
   </div>
   <div class="container">
@@ -439,22 +441,19 @@
       <div><span class="eyebrow">Under the IZUIRE umbrella</span><h2>Our sub-brands</h2></div>
       <p>Specialist storefronts for two of our fastest-moving categories.</p>
     </div>
-    <!-- No cards: two unboxed columns split by a hairline, each one a window onto its
-         own category. A still of the category sits behind the words, held right back
-         until the brand is hovered, when it opens up - so each storefront shows what
-         it actually sells without a box around it. The name still wipes on and the
-         copy still rises behind it as the section is scrolled to (see
-         revealCards), and the link's rule draws on hover. -->
+    <!-- No cards: two unboxed columns split by a hairline. Each column is type only -
+         the category still that used to sit behind the words is gone, so there is no
+         media layer left to hold back and the brand names carry the section on their
+         own. The name still wipes on and the copy still rises behind it as the section
+         is scrolled to (see revealCards), and the link's rule draws on hover. -->
     <div class="subbrand-rail">
       <a class="subbrand okrika" routerLink="/quote">
-        <span class="sb-media" aria-hidden="true"><img src="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_720/ders-videos/secondhandclothing.jpg" alt="" loading="lazy" width="720" height="480"></span>
         <span class="sb-kicker">Thrift &amp; Bales</span>
         <h3>IZUIRE Okrika</h3>
         <p>Graded secondhand clothing bales, sourced and sorted for resellers across Nigeria.</p>
         <span class="sb-link">Explore Okrika<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
       </a>
       <a class="subbrand haircubr" routerLink="/quote">
-        <span class="sb-media" aria-hidden="true"><img src="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_720/ders-videos/a2.jpg" alt="" loading="lazy" width="720" height="480"></span>
         <span class="sb-kicker">Hair &amp; Wigs</span>
         <h3>Haircubr</h3>
         <p>Raw and human hair bundles and units, built to give every woman confidence.</p>
@@ -500,20 +499,17 @@
      band when the section is reached, and the primary button catches a shine on
      hover. `reveal-soft` keeps the observer from ever hiding this section. -->
 <section class="section cta-final reveal-soft">
-  <!-- sourcing.mp4, blurred, sits under a white wash: the closing words keep the
-       contrast they had on a flat background while the page still moves behind them. -->
-  <div class="bg-media" aria-hidden="true">
-    <video #bgMedia class="bg-video" autoplay [muted]="true" loop playsinline preload="metadata" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/sourcing.jpg">
-      <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_640,e_blur:300,q_auto:low/ders-videos/sourcing.mp4" type="video/mp4">
-    </video>
-  </div>
+  <!-- No footage behind the ask. This used to loop sourcing.mp4, and then carried a
+       still of the same clip, both under a white wash; the backdrop is gone entirely
+       so the closing words keep the exact contrast they have everywhere else and
+       the page stops moving while someone reads them. The glow behind the block is
+       what gives the section its movement instead. -->
   <span class="cta-final__glow" aria-hidden="true"></span>
   <div class="container">
     <h2 class="cta-final__title">Ready to start sourcing?</h2>
     <p class="cta-final__copy">Tell us what you need and we'll come back with pricing, MOQ and lead time, usually within 24 hours.</p>
     <div class="cta-row cta-final__row">
       <a routerLink="/quote" class="btn btn-primary">Start Sourcing</a>
-      <a href="https://wa.me/2340000000000" target="_blank" rel="noopener" class="btn btn-outline">Chat on WhatsApp</a>
     </div>
   </div>
 </section>

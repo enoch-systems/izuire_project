@@ -70,6 +70,55 @@
   :root[data-theme="dark"] .logo-link img,
   :root[data-theme="dark"] .mobile-nav-top img{ filter:invert(1) hue-rotate(180deg); }
 
+  /* ============ DARK MODE — FLAT CARDS ============ */
+  /* On a near-black page a 1px hairline stops describing an edge and starts
+     describing a grid of boxes: --line is a shade above the surface, so every
+     card reads as a panel with a rim rather than as a surface with content on it.
+     The lift shadows have the same problem from the other side — a card rising
+     off a dark page wants to get *lighter*, not to grow a black halo that reads
+     as dirt.
+
+     So in dark mode these families drop their border and their shadow, and are
+     separated by the surface behind them instead: --paper, a step off --white,
+     which still reads as a card without a drawn edge. The orange accent carries
+     the interaction, so nothing is lost by removing the outline — the icon chip
+     still fills on hover.
+
+     Scoped to the card families rather than to every bordered thing on the
+     site: form fields and the search box keep their outlines, because those are
+     controls and a control with no edge is hard to aim at. */
+  :root[data-theme="dark"] .service-card,
+  :root[data-theme="dark"] .solution-card,
+  :root[data-theme="dark"] .cat-card,
+  :root[data-theme="dark"] .product-card{
+    border-color:transparent;
+    box-shadow:none;
+    background:var(--paper);
+  }
+  /* The lift is carried by the card moving, not by a shadow it no longer has. */
+  :root[data-theme="dark"] .service-card:hover,
+  :root[data-theme="dark"] .cat-card:hover,
+  :root[data-theme="dark"] .product-card:hover{
+    box-shadow:none;
+    background:var(--paper);
+    border-color:transparent;
+  }
+  /* The video-backed tiles are already a dark plate with a scrim over footage.
+     They keep it in both modes — a paper surface behind a dark scrim would show
+     through the corners and undo the isolation the media rules rely on. */
+  :root[data-theme="dark"] .cat-card--media,
+  :root[data-theme="dark"] .service-card--media{
+    background:#111111;
+  }
+  /* Controls keep their surface: the stepper on a product card and the header
+     buttons are things to aim at, not panels to read. */
+  :root[data-theme="dark"] .product-qty,
+  :root[data-theme="dark"] .cart-btn,
+  :root[data-theme="dark"] .header-icon-btn,
+  :root[data-theme="dark"] .header-search-btn{
+    background:var(--white);
+  }
+
   html{scroll-behavior:smooth;}
   body{
     font-family:var(--font-b);
@@ -121,14 +170,6 @@
   }
   .btn-primary:hover{background:var(--orange-deep); transform:translateY(-1px);}
   .btn-primary:active{transform:translateY(0);}
-  .btn-whatsapp{
-    background:var(--wa);
-    color:var(--white);
-    box-shadow:0 1px 0 rgba(0,0,0,.06);
-  }
-  .btn-whatsapp:hover{background:var(--wa-deep); transform:translateY(-1px);}
-  .btn-whatsapp:active{transform:translateY(0);}
-  .btn-whatsapp svg{width:15px; height:15px; flex-shrink:0;}
   .btn-dark{
     background:var(--ink);
     color:var(--white);
@@ -964,9 +1005,6 @@
     box-shadow:0 16px 36px rgba(17,17,17,.08);
     border-color:transparent;
   }
-  /* A card lifting off a dark page needs its shadow to grow, not shrink: an ink
-     alpha on a near-black surface is invisible. */
-  :root[data-theme="dark"] .cat-card:hover{ box-shadow:0 16px 36px rgba(0,0,0,.5); }
   .cat-icon{
     width:52px; height:52px;
     border-radius:50%;
@@ -1055,8 +1093,6 @@
     transition:box-shadow .25s var(--ease), transform .25s var(--ease);
   }
   .product-card:hover{box-shadow:0 18px 36px rgba(17,17,17,.09); transform:translateY(-3px);}
-  /* See .cat-card:hover — the lift shadow has to grow on a dark surface. */
-  :root[data-theme="dark"] .product-card:hover{ box-shadow:0 18px 36px rgba(0,0,0,.5); }
   .product-media{
     aspect-ratio:1/.82;
     background:var(--paper);
@@ -1348,12 +1384,12 @@
   }
 
   /* ============ TRUST BAND ============ */
-  /* One of the page's two deliberately dark surfaces. It stays dark in both
-     modes: a looping clip runs under a scrim built to darken what is behind it,
-     so lifting the band to a pale surface would leave white type and a scrim
-     fighting each other. */
-  :root[data-theme="dark"] .trust-band,
-  :root[data-theme="dark"] footer{ background:#0A0A08; }
+  /* The page's one deliberately dark surface. It stays dark in both modes: a
+     looping clip runs under a scrim built to darken what is behind it, so lifting
+     the band to a pale surface would leave white type and a scrim fighting each
+     other. The footer used to be pinned here beside it; it follows the theme now
+     (see FOOTER below), so only this band is left. */
+  :root[data-theme="dark"] .trust-band{ background:#0A0A08; }
   .trust-band{
     background:var(--ink);
     color:var(--on-media);
@@ -1415,11 +1451,10 @@
   }
 
   /* ============ SUB-BRANDS ============ */
-  /* No boxes, no panels, no rounded fills: two columns of type split by a hairline,
-     each one a window onto its own category. A still of the category sits behind the
-     words at a couple of percent of itself, blurred, and opens up when the brand is
-     hovered - the storefront showing what it actually sells, without a card around it.
-     The brand name is the loudest thing on the page here, not the picture. */
+  /* No boxes, no panels, no rounded fills: two columns of type split by a hairline.
+     The brand name is the loudest thing on the page here, and it is the only thing
+     there is: the category still that used to sit behind the words - blurred, held
+     back, and opened up on hover - is gone, so nothing paints behind the copy. */
   .subbrand-rail{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -1429,34 +1464,8 @@
     position:relative; overflow:hidden;
     display:block;
     padding:40px 44px 42px;
-    /* `isolation` keeps the still and the wash behind the words. */
-    isolation:isolate;
   }
   .subbrand + .subbrand{ border-left:1px solid var(--line); }
-  /* The window. */
-  .sb-media{
-    position:absolute; inset:0; z-index:-2;
-    overflow:hidden;
-  }
-  .sb-media img{
-    width:100%; height:100%; object-fit:cover;
-    /* Held back and out of focus at rest, which is what makes opening up read as an
-       event rather than as a picture that was always there. */
-    filter:blur(3px) saturate(.85);
-    opacity:.14; scale:1.02;
-    transition:opacity .6s var(--ease), scale .9s var(--ease), filter .6s var(--ease);
-  }
-  .subbrand:hover .sb-media img,
-  .subbrand:focus-visible .sb-media img{
-    opacity:.55; scale:1.09; filter:blur(0) saturate(1);
-  }
-  /* The wash: the words keep exactly the contrast they have everywhere else on the
-     page, and the still reads through it rather than fighting it. */
-  .subbrand::after{
-    content:"";
-    position:absolute; inset:0; z-index:-1;
-    background:linear-gradient(100deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.72) 100%);
-  }
   /* Three sizes again, this time led by the brand. */
   .sb-kicker{
     display:inline-flex; align-items:center; gap:9px;
@@ -1684,40 +1693,271 @@
   .cta-final__row .btn-primary:hover::after{ left:120%; }
 
   /* ============ FOOTER ============ */
-  footer{background:var(--ink); color:rgba(255,255,255,.7); padding:64px 0 0;}
+  /* The footer follows the theme, which it did not before: it was painted with
+     --ink and then pinned to near-black in dark mode, so the mode switch stopped
+     at its top edge and left a black slab under a white page. It is a surface
+     like any other now - the page's paper colour, which is a step off the white
+     page in light and a step up from the graphite page in dark - and every rule
+     below is written against the palette, so the two modes are one set of rules
+     rather than two. Nothing here names a colour.
+
+     Five ranks of type and one accent. The aliases exist so the rules read as a
+     hierarchy instead of as a list of tokens, and rank is carried by size,
+     weight and case before it is carried by colour: the column titles and the
+     fine print share the faint grey at opposite ends of the scale, and only the
+     body ranks differ in ink - strong for what a reader acts on, body for what
+     they read.
+
+     The accent is the one thing the modes disagree about. --orange-deep is the
+     tone that clears the contrast a small label needs against paper and --orange
+     is what reads against graphite, so the alias carries a value per mode and the
+     rules that use it never change. */
+  footer{
+    --f-line:var(--line);
+    --f-accent:var(--orange-deep);
+    --f-strong:var(--ink);
+    --f-body:var(--ink-60);
+    --f-faint:var(--ink-40);
+    /* The logo is composited against this surface rather than drawn on it, so it
+       gets its own blending group. Without one it would reach past the footer to
+       whatever happens to be painted behind it. */
+    isolation:isolate;
+    /* The join with the page. It used to be three pixels of brand colour across
+       the whole width, which is a lot of shouting at the end of every page; it is
+       a hairline now, like every other division in here. The footer is still a
+       different surface from the page - a step off white in light and a step up
+       from graphite in dark - but the step alone is too quiet to say where the
+       page stopped, so the edge is drawn. */
+    border-top:1px solid var(--f-line);
+    background:var(--paper);
+    color:var(--f-body);
+    padding:76px 0 0;
+  }
+  :root[data-theme="dark"] footer{ --f-accent:var(--orange); }
   .footer-grid{
     display:grid;
-    grid-template-columns:1.4fr 1fr 1fr 1.2fr;
-    gap:36px;
-    padding-bottom:48px;
-    border-bottom:1px solid rgba(255,255,255,.12);
+    /* The brand column carries the mark, the lead and the office, so it takes the
+       widest track; the three link groups are close to equal so none of them
+       reads as the destination. */
+    grid-template-columns:1.6fr .78fr .95fr 1.05fr;
+    gap:56px 44px;
+    padding-bottom:60px;
+    border-bottom:1px solid var(--f-line);
   }
-  .footer-logo img{height:26px; margin-bottom:16px; filter:brightness(0) invert(1);}
-  .footer-grid p{font-size:.84rem; line-height:1.65; max-width:280px;}
+  .footer-brand{
+    display:flex; flex-direction:column; align-items:flex-start;
+    /* One rhythm for the whole column, so the four things in it - mark, lead,
+       office, social - are spaced by the same step and only the hairline above
+       the address separates them. */
+    gap:22px;
+    padding-right:44px;
+    border-right:1px solid var(--f-line);
+  }
+  /* The mark, on the header's terms: the same file at the same 32px, in the same
+     link home, with nothing drawn around it. The PNG carries the wordmark as dark
+     ink on an opaque white plate (see logo.ts), which is right for the light
+     header and wrong anywhere else - a white sticker with the logo inside it. The
+     footer used to be dark in both modes, so one invert-and-screen answered it;
+     now that the footer follows the theme the plate has to be answered twice. On
+     paper it is multiplied into the surface: the plate flattens to the page and
+     the ink stays in front of it. In dark the image is inverted - the same filter
+     the header's mark takes - and screened, so the plate goes black and drops out
+     of the composite. Either way what shows is the wordmark itself, floating on
+     the footer the way the header's does on its bar. */
+  .footer-logo{ display:inline-flex; }
+  .footer-logo img{
+    height:32px; width:auto;
+    mix-blend-mode:multiply;
+    transition:opacity .25s var(--ease);
+  }
+  :root[data-theme="dark"] .footer-logo img{
+    filter:invert(1) hue-rotate(180deg);
+    mix-blend-mode:screen;
+  }
+  .footer-logo:hover img{ opacity:.8; }
+
+  /* The lead: the largest text in the footer and the only paragraph, so it is
+     read straight after the mark. The office is legal detail two ranks below it
+     - smaller, in the body grey, behind a hairline of its own - so it is present
+     without competing with the claim above it. */
+  .footer-lead{
+    font-size:.95rem; line-height:1.72; max-width:36ch;
+    color:var(--f-body);
+  }
+  .footer-office{
+    padding-top:20px; border-top:1px solid var(--f-line);
+    font-style:normal; max-width:38ch;
+    font-size:.79rem; line-height:1.7;
+    color:var(--f-body);
+  }
+  .footer-office__label{
+    display:block; margin-bottom:8px;
+    font-family:var(--font-d); font-size:.66rem; font-weight:600;
+    letter-spacing:.14em; text-transform:uppercase;
+    color:var(--f-faint);
+  }
+  /* The column titles are the top rank: the smallest type in the footer and the
+     only type tracked out this far, which is the site's label voice. A short rule
+     under each one does the dividing, so the three groups are separated rather
+     than boxed, and the rule takes the accent - the three of them and the footer
+     pill are the only place the brand colour appears below the mark. */
   .footer-col h5{
-    font-family:var(--font-d); color:var(--on-media); font-size:.82rem;
-    letter-spacing:.05em; text-transform:uppercase; margin-bottom:16px;
+    position:relative;
+    font-family:var(--font-d); color:var(--f-strong); font-size:.72rem; font-weight:600;
+    letter-spacing:.13em; text-transform:uppercase; margin-bottom:24px;padding-bottom:14px;
   }
-  .footer-col ul{display:flex; flex-direction:column; gap:11px;}
-  .footer-col a{font-size:.87rem; transition:color .2s var(--ease);}
-  .footer-col a:hover{color:var(--orange);}
-  .footer-social{display:flex; gap:10px; margin-top:18px;}
+  .footer-col h5::after{content:"";position:absolute;left:0;bottom:0;width:20px;height:2px;background:var(--f-accent);}
+  .footer-col ul{display:flex; flex-direction:column; gap:14px;}
+  .footer-col a{font-size:.89rem; line-height:1.5; color:var(--f-body); transition:color .2s var(--ease);}
+  .footer-col a:hover{color:var(--f-strong);}
+
+  /* Contact is a term/detail list, so each row states what it is before giving
+     it. The label is a tracked micro-caps line at the bottom of the type scale
+     and the value sits above it in full ink, so a reader's eye lands on the email
+     address and only reads "Email" if it needs to. The two values that can be
+     reached step up to the strong rank; the office line, which cannot, stays in
+     the body rank - legible, but not dressed as a link. */
+  .footer-contact{display:flex; flex-direction:column; gap:20px;}
+  .footer-contact dt{
+    font-family:var(--font-d); font-size:.66rem; font-weight:600;
+    letter-spacing:.14em; text-transform:uppercase;
+    color:var(--f-faint); margin-bottom:5px;
+  }
+  .footer-contact dd{font-size:.9rem; color:var(--f-body); line-height:1.55;}
+
+  /* The socials close the brand column. They are pushed to the bottom of it so
+     the four tracks of the grid finish on the same line rather than each ending
+     wherever its content ran out. The border is the stronger hairline: these are
+     controls to aim at, so they need an edge the dividers do not. */
+  .footer-social{display:flex; gap:10px; margin-top:auto; padding-top:12px;}
   .footer-social a{
-    width:36px; height:36px; border-radius:50%;
-    border:1px solid rgba(255,255,255,.2);
+    width:38px; height:38px; border-radius:6px;
+    border:1px solid var(--line-strong);
+    color:var(--f-body);
     display:flex; align-items:center; justify-content:center;
-    transition:background .2s var(--ease), border-color .2s var(--ease);
+    transition:background .2s var(--ease), border-color .2s var(--ease),
+               color .2s var(--ease), transform .22s var(--ease);
   }
-  .footer-social a:hover{background:var(--orange); border-color:var(--orange);}
-  .footer-social svg{width:16px; height:16px; stroke:rgba(255,255,255,.85); fill:none;}
-  .footer-whatsapp{
-    display:inline-flex; align-items:center; gap:10px;
-    margin-top:8px;
+  .footer-social svg{width:16px; height:16px; stroke:currentColor; fill:none;}
+  /* The buttons lift and fill rather than only changing colour, so a hover is
+     visible while the pointer is still travelling toward them. The icon takes
+     --white, which is the pairing the primary button uses on this orange - a
+     surface colour that flips, so the glyph stays legible in either mode. */
+  .footer-social a:hover{
+    background:var(--orange); border-color:var(--orange);
+    color:var(--white);
+    transform:translateY(-2px);
   }
+
+  /* The bottom bar is three things of different kinds: a legal line, a set of
+     legal links, and the brand line. They get their own tracks rather than being
+     strung together with separators, so the links stay a group you can hit and
+     the tagline is not competing with them for the same line. The bar sits at
+     the quietest size in the footer, but the company name steps back up out of
+     it, so the line still reads as a signature rather than as fine print. */
   .footer-bottom{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:22px 0; font-size:.78rem; color:rgba(255,255,255,.45);
-    flex-wrap:wrap; gap:10px;
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+    gap:20px;
+    padding:26px 0 30px; font-size:.78rem; color:var(--f-faint);
+  }
+  .footer-copy strong{ color:var(--f-strong); font-weight:600; }
+  .footer-legal{display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap;}
+  .footer-legal a{color:var(--f-body); transition:color .2s var(--ease);}
+  .footer-legal a:hover{color:var(--f-accent);}
+
+  /* Terms and Privacy open a dialog rather than a page, so they are pills and the
+     routes either side of them are not - the shape is what tells a reader which
+     is which. The pill gives them the affordance of a control: an edge you can
+     aim at, and a fill on hover that says "press me" without colour alone having
+     to do it. Same orange the brand uses everywhere else, so it reads as ours
+     rather than as a warning. */
+  .footer-legal__btn{
+    font-family:var(--font-b); font-size:.78rem; font-weight:600;
+    letter-spacing:.01em; line-height:1;
+    color:var(--f-accent);
+    padding:7px 14px; border-radius:999px;
+    border:1px solid rgba(245,130,31,.45);
+    background:rgba(245,130,31,.08);
+    cursor:pointer;
+    transition:background .22s var(--ease), border-color .22s var(--ease),
+               color .22s var(--ease), transform .22s var(--ease);
+  }
+  .footer-legal__btn:hover{
+    background:var(--orange); border-color:var(--orange);
+    color:var(--white);
+    transform:translateY(-1px);
+  }
+  .footer-legal__btn:active{ transform:translateY(0); }
+  .footer-legal__btn:focus-visible{ outline:2px solid var(--orange); outline-offset:2px; }
+
+  /* Column and contact links get an underline that draws in from the left, the
+     same gesture the sub-brand links use. It is what carries the hover now: the
+     links come up from body to strong on their own, and the accent rule drawing
+     under them is the brand answering rather than a colour swap. The two contact
+     values are already at strong, so for them the rule is the whole gesture. */
+  .footer-col a{position:relative; display:inline-block; padding-bottom:1px;}
+  .footer-col a::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-2px; height:1.5px;
+    background:var(--f-accent);
+    transform:scaleX(0); transform-origin:left center;
+    transition:transform .4s var(--ease);
+  }
+  .footer-col a:hover::after,
+  .footer-col a:focus-visible::after{ transform:scaleX(1); }
+  .footer-contact dd a{
+    position:relative; display:inline-block;
+    color:var(--f-strong);
+    transition:color .2s var(--ease);
+  }
+  .footer-contact dd a::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-1px; height:1.5px;
+    background:var(--f-accent);
+    transform:scaleX(0); transform-origin:left center;
+    transition:transform .4s var(--ease);
+  }
+  .footer-contact dd a:hover::after,
+  .footer-contact dd a:focus-visible::after{ transform:scaleX(1); }
+
+  /* The signature line, at the quiet end of the scale: tracked micro-caps so it
+     reads as a colophon rather than as a fifth navigation link. */
+  .footer-tagline{
+    text-align:right;
+    font-family:var(--font-d); font-size:.7rem; font-weight:500;
+    letter-spacing:.13em; text-transform:uppercase;
+    color:var(--f-faint);
+  }
+  /* The grid changes shape twice before it stacks. Neither step is a squeeze of
+     the desktop tracks: at each one the brand block takes the whole first row and
+     the link groups below it are given equal tracks, so the columns stay arranged
+     and the hairlines still run edge to edge instead of stopping short of a hole
+     where a track ran out of content. */
+  @media (max-width: 980px){
+    .footer-grid{ grid-template-columns:repeat(3, 1fr); gap:44px 32px; }
+    .footer-brand{
+      grid-column:1 / -1;
+      padding-right:0; padding-bottom:24px;
+      border-right:0; border-bottom:1px solid var(--f-line);
+    }
+    .footer-social{ margin-top:0; padding-top:8px; }
+  }
+  /* Stacked, the three tracks read in order and each centres, so the legal links
+     are still one tappable group rather than a row of scattered words. */
+  @media (max-width: 620px){
+    footer{padding-top:56px;}
+    .footer-grid{grid-template-columns:1fr 1fr;gap:38px 28px;padding-bottom:44px;}
+    .footer-brand,.footer-grid > .footer-col:last-child{grid-column:1 / -1;}
+    .footer-lead,.footer-office{max-width:54ch;}
+    /* With the brand block full width there is no shorter column beside it, so
+       the socials fall into place under the address instead of being pushed to
+       a column bottom that is no longer there. */
+    .footer-social{margin-top:0; padding-top:0;}
+    .footer-bottom{
+      grid-template-columns:1fr; justify-items:center; text-align:center;
+      gap:16px; padding:22px 0 26px;
+    }
+    .footer-tagline{text-align:center;}
   }
 
   /* ============ RESPONSIVE ============ */
@@ -1733,7 +1973,9 @@
     .subbrand-rail{grid-template-columns:1fr;}
     .subbrand + .subbrand{ border-left:none; border-top:1px solid var(--line); }
     .rfq-wrap{grid-template-columns:1fr;}
-    .footer-grid{grid-template-columns:1fr 1fr;}
+    /* The footer's own tablet track sits with the rest of the footer rules, above,
+       where the grid it reshapes is defined. Repeating it here would only fight
+       that block at the same width. */
   }
   @media (max-width: 620px){
     .badge-slider{ right:2px; bottom:4%; width:min(250px, 76%); }
@@ -1772,7 +2014,6 @@
     .product-grid{grid-template-columns:1fr 1fr;}
     .form-row{grid-template-columns:1fr;}
     .section-head{flex-direction:column; align-items:flex-start;}
-    .footer-grid{grid-template-columns:1fr;}
     .steps{grid-template-columns:1fr;}
     .trust-stats{grid-template-columns:1fr 1fr;}
     .header-inner{padding:12px 18px;}
@@ -1834,7 +2075,6 @@
     padding:28px 24px; transition:transform .25s var(--ease), box-shadow .25s var(--ease);
   }
   .service-card:hover{transform:translateY(-4px); box-shadow:0 16px 36px rgba(17,17,17,.08);}
-  :root[data-theme="dark"] .service-card:hover{ box-shadow:0 16px 36px rgba(0,0,0,.5); }
   .service-icon{
     width:48px; height:48px; border-radius:10px; background:var(--paper);
     display:flex; align-items:center; justify-content:center; margin-bottom:18px;
@@ -2063,6 +2303,145 @@
   .search-result-item .sr-cat{font-size:.72rem; color:var(--orange-deep); text-transform:uppercase; letter-spacing:.04em; font-weight:600;}
   .search-result-item .sr-desc{font-size:.8rem; color:var(--ink-60); margin-top:2px;}
   .search-empty{padding:30px; text-align:center; color:var(--ink-40); font-size:.86rem;}
+
+  /* ============ LEGAL MODAL ============ */
+  /* The Terms/Privacy dialog. Built on the search overlay's structure - a fixed
+     backdrop, a centred panel, an .open class driving the transition - so the two
+     overlays on the site behave identically: same backdrop blur, same fade, same
+     ESC and click-away. The panel is taller and scrollable because it holds prose
+     rather than a list of results. */
+  .legal-overlay{
+    position:fixed; inset:0; z-index:320;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px 20px;
+    background:rgba(17,17,17,.55);
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .3s var(--ease), visibility .3s;
+  }
+  .legal-overlay.open{ opacity:1; visibility:visible; pointer-events:auto; }
+  .legal-dialog{
+    position:relative;
+    width:100%; max-width:640px; max-height:min(84vh, 720px);
+    display:flex; flex-direction:column;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 30px 80px rgba(0,0,0,.3);
+    overflow:hidden;
+    transform:translateY(16px) scale(.97);
+    transition:transform .35s cubic-bezier(.22,.61,.36,1);
+  }
+  .legal-overlay.open .legal-dialog{ transform:translateY(0) scale(1); }
+  /* The panel takes focus on open so a keyboard reader is inside the dialog rather
+     than tabbing through the page behind it. It is a container, not a control, so
+     the ring it would otherwise draw is suppressed. */
+  .legal-dialog:focus{ outline:none; }
+
+  .legal-dialog__head{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
+    padding:24px 26px 18px;
+    border-bottom:1px solid var(--line);
+  }
+  .legal-dialog__head .eyebrow{ display:block; margin-bottom:6px; }
+  .legal-dialog__title{ font-size:1.4rem; }
+  .legal-dialog__close{
+    flex:none;
+    width:34px; height:34px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid transparent; background:transparent; color:var(--ink-40);
+    cursor:pointer;
+    transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+  }
+  .legal-dialog__close svg{ width:17px; height:17px; }
+  .legal-dialog__close:hover{
+    background:var(--paper); color:var(--ink); border-color:var(--line);
+  }
+
+  /* Terms and Privacy as a switcher inside the one dialog, so a reader who opens
+     Terms and wants Privacy does not have to close and hunt for another trigger.
+     The active tab is marked by weight and colour, not by a background, so it
+     still reads as the selected one in forced-colours mode. */
+  .legal-dialog__tabs{
+    display:flex; gap:6px;
+    padding:14px 26px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .legal-tab{
+    font-family:var(--font-b); font-size:.86rem; font-weight:500;
+    color:var(--ink-40);
+    padding:9px 2px 11px; margin-right:18px;
+    border:none; background:none; cursor:pointer;
+    position:relative;
+    transition:color .2s var(--ease);
+  }
+  .legal-tab::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:-1px; height:2px;
+    background:var(--orange);
+    transform:scaleX(0); transform-origin:left center;
+    transition:transform .35s var(--ease);
+  }
+  .legal-tab:hover{ color:var(--ink-60); }
+  .legal-tab.active{ color:var(--ink); font-weight:600; }
+  .legal-tab.active::after{ transform:scaleX(1); }
+
+  /* The only part that scrolls. The head and the switcher stay put, so the
+     document's identity is never scrolled off while you are reading it. */
+  .legal-dialog__body{
+    overflow-y:auto;
+    padding:22px 26px 26px;
+  }
+  .legal-dialog__body h3{
+    font-size:1.02rem; margin:20px 0 8px;
+  }
+  .legal-dialog__body h3:first-child{ margin-top:0; }
+  .legal-dialog__body p{ font-size:.92rem; line-height:1.7; color:var(--ink-60); }
+  .legal-dialog__body ul{ margin:8px 0; padding-left:20px; }
+  .legal-dialog__body li{ font-size:.92rem; line-height:1.7; color:var(--ink-60); }
+  .legal-dialog__body strong{ color:var(--ink); }
+  .legal-dialog__more{
+    display:inline-flex; align-items:center; gap:8px;
+    margin-top:22px;
+    font-family:var(--font-d); font-weight:600; font-size:.86rem;
+    color:var(--orange-deep);
+  }
+  .legal-dialog__more span{ transition:transform .25s var(--ease); }
+  .legal-dialog__more:hover{ color:var(--ink); }
+  .legal-dialog__more:hover span{ transform:translateX(3px); }
+
+  /* The modal is prose, and prose is what a phone is worst at: the gutters shrink
+     and the sheet rises from the bottom, so the measure stays readable instead of
+     being a narrow column of text floating in the middle of a wide screen. */
+  @media (max-width: 620px){
+    .legal-overlay{ padding:14px 12px; align-items:flex-end; }
+    .legal-dialog{ max-height:88vh; }
+    .legal-dialog__head{ padding:20px 18px 14px; }
+    .legal-dialog__title{ font-size:1.2rem; }
+    .legal-dialog__tabs{ padding:10px 18px 0; }
+    .legal-tab{ font-size:.8rem; margin-right:14px; }
+    .legal-dialog__body{ padding:18px; }
+  }
+
+  /* Less motion: the modal appears rather than rises, and the footer's hover
+     gestures become instant state changes. Nothing here hides content - the
+     underlines and the pill fill are the only things being taken away, and both
+     leave a visible resting state behind. */
+  @media (prefers-reduced-motion: reduce){
+    .legal-dialog,
+    .legal-overlay{ transition:opacity .2s linear; transform:none; }
+    .legal-overlay.open .legal-dialog{ transform:none; }
+    .legal-tab::after,
+    .footer-col a::after,
+    .footer-contact dd a::after{ transition:none; }
+    .footer-legal__btn,
+    .footer-social a{ transition:background .2s linear, border-color .2s linear, color .2s linear; }
+    .footer-legal__btn:hover,
+    .footer-social a:hover{ transform:none; }
+    .legal-dialog__more span{ transition:none; }
+  }
+
   .header-actions{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
   .header-search-btn{
     display:flex; align-items:center; gap:8px; height:40px; padding:0 8px 0 14px; flex:none;
@@ -2335,11 +2714,9 @@
     .calc-box{ padding:24px 20px; gap:22px; }
     .calc-result{ padding:20px 16px; }
 
-    /* Footer */
-    footer{ padding:44px 0 0; }
-    .footer-grid{ gap:30px; padding-bottom:34px; }
-    .footer-bottom{ flex-direction:column; text-align:center; gap:8px; padding:18px 0; }
-    .footer-whatsapp{ width:100%; justify-content:center; }
+    /* Footer: its own stacked rule sits with the footer rules above, where the
+       grid it collapses is defined. Duplicating it here would only fight that
+       block at the same width. */
 
     /* Search overlay */
     .search-overlay{ padding:24px 12px; align-items:flex-start; }
@@ -2367,7 +2744,7 @@
     .rfq-form{ padding:20px 16px; }
     .testi-slide p{ font-size:.98rem; }
     .footer-bottom{ font-size:.74rem; }
-    .footer-grid p{ font-size:.82rem; }
+    .footer-lead{ font-size:.9rem; }
   }
 
   @media (max-width: 380px){
@@ -2520,15 +2897,39 @@
     .step-ping{ display:none; }
   }
 
-  /* ============ SECTION BACKDROPS — TRUST BAND + CLOSING CTA ============ */
-  /* Two sections carry a looping clip behind them. They ride the same in-view playback
-     as the category tiles (see playCategoryClips), and each carries a scrim so the
-     text sits on the contrast it had on a flat background. The clips are blurred in
-     the URL: at this size that reads as texture rather than as footage, and it takes
-     ship.mp4 from 24 MB to 1.8 MB. */
+  /* ============ SECTION BACKDROP — TRUST BAND ============ */
+  /* One section carries a looping clip: the trust band, behind the figures. It rides
+     the same in-view playback as the category tiles (see playCategoryClips) and
+     carries a scrim so the white type sits on the contrast it had on a flat
+     background. The clip is sharp — the e_blur that used to be baked into the URL
+     made the footage read as a smear of movement rather than as a ship.
+
+     The closing CTA used to loop a clip the same way and no longer does: it is a
+     still on the section's own background now, so it has no .bg-media and needs
+     none of this. */
   .bg-media{
     position:absolute; inset:0;
     overflow:hidden; pointer-events:none;
+    /* Feathered top and bottom, so the clip dissolves into the band rather than
+       being cut off by it.
+
+       The mask goes on the wrapper, not the video. The video is scaled 1.05-1.14
+       by bgDrift and is therefore larger than the box it sits in, so a mask on the
+       video would scale with it and push its own fade up past the edge of the
+       section — leaving the hard cut this is meant to remove. Masking the wrapper
+       fades the finished composite in the section's own coordinates.
+
+       It masks the scrim along with the footage, which is the point: the two have
+       to fade together or the wash would float over a dissolving clip.
+
+       `-webkit-mask` is not redundant: without it Safari shows a hard edge. */
+    --feather:16%;
+    -webkit-mask-image:linear-gradient(180deg,
+      transparent 0%, #000 var(--feather),
+      #000 calc(100% - var(--feather)), transparent 100%);
+    mask-image:linear-gradient(180deg,
+      transparent 0%, #000 var(--feather),
+      #000 calc(100% - var(--feather)), transparent 100%);
   }
   .bg-video{
     position:absolute; inset:0;
@@ -2549,35 +2950,52 @@
     content:"";
     position:absolute; inset:0;
   }
-  .trust-band{ overflow:hidden; }
+  .trust-band{
+    overflow:hidden;
+    /* The band is the one dark island on the page, so its own top and bottom edges
+       cut hard against the white either side of it. The same feather the clip gets
+       is applied to the plate underneath, so the dark runs out into the page
+       instead of stopping at a line. */
+    -webkit-mask-image:linear-gradient(180deg,
+      transparent 0%, #000 var(--feather,16%),
+      #000 calc(100% - var(--feather,16%)), transparent 100%);
+    mask-image:linear-gradient(180deg,
+      transparent 0%, #000 var(--feather,16%),
+      #000 calc(100% - var(--feather,16%)), transparent 100%);
+  }
+  /* The scrim carries the contrast now the clip behind it is sharp. A blurred
+     backdrop had no detail for the figures to compete with, so .4-.62 was enough;
+     sharp footage has edges, wakes and highlights moving through it, and white
+     type over any of that drops below a readable contrast. Deepened to .58-.78
+     for the same reason the band itself is pinned dark: the copy has to hold at
+     every moment of the loop, not just the average frame. */
   .trust-band .bg-media::after{
-    background:linear-gradient(180deg, rgba(17,17,17,.4) 0%, rgba(17,17,17,.62) 100%);
+    background:linear-gradient(180deg, rgba(17,17,17,.58) 0%, rgba(17,17,17,.78) 100%);
   }
   .trust-band .bg-video{ opacity:.6; }
-  /* A white wash rather than a dark one: the closing words are ink on white, so the
-     clip is faded towards the page rather than the page towards the clip. */
-  .cta-final .bg-media::after{ background:rgba(255,255,255,.7); }
-  .cta-final .bg-video{ opacity:.7; }
-  /* Copy above the backdrop, always. The glow is raised to the same layer so the
-     wash does not mute it. */
+  /* The closing section carries no backdrop at all. It used to loop sourcing.mp4,
+     then fell back to a still of the same clip under a white wash; with the picture
+     gone there is nothing to feather and no scrim to hang, so both of those layers
+     went with it. The block now sits on the page's own paper, which is what the ink
+     type was already being washed back to. */
+  /* Copy above the glow, which is the only thing painting behind it now. The
+     container is positioned so the glow's own z-index:0 cannot lift it over the
+     words. */
   .trust-band > .container,
   .cta-final > .container{ position:relative; z-index:1; }
   .cta-final__glow{ z-index:0; }
-  /* Narrow screens carry more text per pixel, so the clips step back. */
+  /* Narrow screens carry more text per pixel, so the trust band's clip steps back.
+     The CTA has no clip to step back. */
   @media (max-width: 620px){
     .trust-band .bg-video{ opacity:.45; }
-    .cta-final .bg-video{ opacity:.5; }
   }
-  /* Less motion: no playback at all, and each backdrop becomes a still from its own
-     clip - the same trade the category tiles make. */
+  /* Less motion: no playback at all, and the trust band's backdrop becomes a still
+     from its own clip - the same trade the category tiles make. The CTA has no
+     backdrop to trade, so it needs nothing here. */
   @media (prefers-reduced-motion: reduce){
     .bg-video{ display:none; }
     .trust-band{
-      background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/ship.jpg");
-      background-size:cover; background-position:center;
-    }
-    .cta-final{
-      background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_640/ders-videos/sourcing.jpg");
+      background-image:url("https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_960/ders-videos/ship.jpg");
       background-size:cover; background-position:center;
     }
   }

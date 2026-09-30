@@ -311,8 +311,9 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
    *  played/paused from ngAfterViewInit. */
   private readonly catMedia = viewChildren<ElementRef<HTMLVideoElement>>('catMedia');
 
-  /** The two full-bleed section backdrops (trust band, closing CTA). They are played
-   *  and paused on the same terms as the tiles, by playCategoryClips. */
+  /** The trust band's full-bleed backdrop. It is played and paused on the same terms
+   *  as the tiles, by playCategoryClips. The closing CTA is a still and has no
+   *  element here. */
   private readonly bgMedia = viewChildren<ElementRef<HTMLVideoElement>>('bgMedia');
 
   /** This component's root element, so we can find the cards to reveal on scroll. */
