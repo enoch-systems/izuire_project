@@ -10,6 +10,11 @@
       <div class="nav-theme">
         <app-theme-toggle />
       </div>
+      <!-- Home leads the links, as it leads the drawer. The toggle stays above
+           it: that rule still marks the edge between the control and the
+           destinations. `exact` because a link to `/` is a prefix of every route,
+           so without it this row would read as current on the whole site. -->
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
       <a routerLink="/marketplace" routerLinkActive="active">Marketplace</a>
       <div class="nav-dropdown" [class.open]="isDropdownOpen('categories')">
         <button class="nav-dropdown-trigger" type="button" (click)="toggleDropdown('categories')" aria-haspopup="true" [attr.aria-expanded]="isDropdownOpen('categories')">Categories

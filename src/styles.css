@@ -235,6 +235,12 @@
     border-right:1px solid var(--line);
   }
   nav.main-nav{ display:flex; align-items:center; gap:28px; }
+  /* No link in this row is allowed to break onto a second line. "Business
+     Solutions" is the one that wants to, and when it does the row grows to
+     two lines and the whole header reads as a mistake. The links are short
+     enough that refusing the break costs nothing once the rhythm below has been
+     tightened. */
+  nav.main-nav a, .nav-dropdown-trigger{ white-space:nowrap; }
   nav.main-nav a{
     font-family:var(--font-d); font-weight:500;
     font-size:.93rem; letter-spacing:.005em;
@@ -2675,7 +2681,8 @@
     display:block; padding:9px 12px; border-radius:6px; font-size:.86rem; color:var(--ink-60); font-family:var(--font-b); font-weight:500;
   }
   .nav-dropdown-panel a:hover{background:var(--paper); color:var(--ink);}
-  @media (max-width: 980px){ .nav-dropdown{display:none;} }
+  /* The dropdowns live inside the desktop nav, so they leave with it. */
+  @media (max-width: 1080px){ .nav-dropdown{display:none;} }
 /* ---------- Search overlay: fade + scale in ---------- */
   .search-overlay{
     display:flex;
@@ -2716,9 +2723,11 @@
   .search-result-item:hover{ background:var(--paper); transform:translateX(3px); }
 
   /* ---------- Responsive refinements ---------- */
-  /* The desktop nav carries seven items now, so tighten its rhythm before it
-     is swapped for the hamburger and nothing wraps onto a second line. */
-  @media (min-width: 981px) and (max-width: 1240px){
+  /* The eight-item row needs more room than the container hands it between the
+     hamburger breakpoint and a full desktop, so the rhythm is tightened across
+     that whole band. The upper bound is where the relaxed row fits on its own,
+     measured rather than guessed: at 1366px it needs 1363px. */
+  @media (min-width: 1081px) and (max-width: 1366px){
     nav.main-nav{ gap:16px; }
     nav.main-nav a, .nav-dropdown-trigger{ font-size:.86rem; }
     /* The switch is the widest fixed thing in the nav, so it is the first to
@@ -2726,8 +2735,22 @@
     .nav-theme{ margin-right:0; padding-right:12px; }
     .theme-toggle-label{ display:none; }
     .theme-toggle{ padding:5px 6px; }
+    /* The header's own 24px gap, three times over, is worth more here than any
+       one link's padding. */
+    .header-inner{ gap:14px; }
+    /* The search trigger is a labelled pill with a keyboard hint, and it is the
+       only item in the row whose label is decoration rather than the thing
+       itself: the magnifier and the aria-label both survive. Below this width
+       the same trigger is already icon-only, so this is the same trade one
+       step earlier rather than a new one. */
+    .search-label, .header-search-btn kbd{ display:none; }
   }
-  @media (max-width: 980px){
+  /* The row needs 1055px to sit on one line, and the hamburger is a better
+     answer than a header that runs off the side of a 1000px screen. The swap
+     used to happen at 980px, which was already too early: the seven-item row
+     overflowed by 17px there. This is the header's own threshold and nothing
+     else keys off it. */
+  @media (max-width: 1080px){
     nav.main-nav{ display:none; }
     /* The icon-only search trigger takes over below this width, so the desktop
        cluster is hidden whole rather than left as an empty box between the logo
@@ -2757,8 +2780,14 @@
   .header-icon-btn:hover{ border-color:var(--line-strong); color:var(--orange-deep); }
   .header-icon-btn svg{ width:18px; height:18px; stroke:currentColor; }
 
-  @media (max-width: 980px){
+  /* The icon-only trigger stands in for the labelled pill wherever the desktop
+     cluster is hidden, so it appears on the same threshold the nav gives way
+     rather than at the old 980px, which would have left 981-1080px with a
+     hamburger and no way to search. */
+  @media (max-width: 1080px){
     .header-icon-btn{ display:inline-flex; }
+  }
+  @media (max-width: 980px){
     .section-head{ gap:14px; margin-bottom:34px; }
   }
 
@@ -3223,8 +3252,8 @@
    ===================================================== */
 
   /* Header trigger. Sits outside .header-actions on purpose: that cluster is
-     hidden below 980px, and the cart has to stay reachable there. It borrows
-     the visual language of .header-icon-btn. */
+     hidden along with the desktop nav, and the cart has to stay reachable there.
+     It borrows the visual language of .header-icon-btn. */
   .cart-btn{
     position:relative; flex-shrink:0;
     display:inline-flex; align-items:center; justify-content:center;
