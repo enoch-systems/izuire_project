@@ -86,29 +86,45 @@
 
      Scoped to the card families rather than to every bordered thing on the
      site: form fields and the search box keep their outlines, because those are
-     controls and a control with no edge is hard to aim at. */
+     controls and a control with no edge is hard to aim at.
+
+     `background-color`, never the `background` shorthand, on both this rule and the
+     :hover below it. Several of these cards paint their media on the
+     `background-image` longhand from a single-class modifier —
+     .service-card--marketplace, .service-card--business-solutions, and every
+     .cat-card--<name> / .service-card--<name> still under prefers-reduced-motion —
+     all at (0,1,0). A shorthand here resets that longhand to `none`, and at (0,3,0)
+     this rule outranks all of them, so every one of those stills vanished in dark
+     mode and the cards fell back to a flat plate. The longhand states only the
+     colour, which is all this rule is for. */
   :root[data-theme="dark"] .service-card,
   :root[data-theme="dark"] .solution-card,
   :root[data-theme="dark"] .cat-card,
   :root[data-theme="dark"] .product-card{
     border-color:transparent;
     box-shadow:none;
-    background:var(--paper);
+    background-color:var(--paper);
   }
   /* The lift is carried by the card moving, not by a shadow it no longer has. */
   :root[data-theme="dark"] .service-card:hover,
   :root[data-theme="dark"] .cat-card:hover,
   :root[data-theme="dark"] .product-card:hover{
     box-shadow:none;
-    background:var(--paper);
+    background-color:var(--paper);
     border-color:transparent;
   }
   /* The video-backed tiles are already a dark plate with a scrim over footage.
      They keep it in both modes — a paper surface behind a dark scrim would show
-     through the corners and undo the isolation the media rules rely on. */
+     through the corners and undo the isolation the media rules rely on.
+
+     :hover is listed here too, and deliberately. The :hover rule above is (0,4,0)
+     where this one is (0,3,0), so on its own this one would lose the moment a card
+     was hovered and the plate would step to --paper underneath the footage. */
   :root[data-theme="dark"] .cat-card--media,
-  :root[data-theme="dark"] .service-card--media{
-    background:#111111;
+  :root[data-theme="dark"] .service-card--media,
+  :root[data-theme="dark"] .cat-card--media:hover,
+  :root[data-theme="dark"] .service-card--media:hover{
+    background-color:#111111;
   }
   /* Controls keep their surface: the stepper on a product card and the header
      buttons are things to aim at, not panels to read. */
@@ -1509,8 +1525,14 @@
      looping clip runs under a scrim built to darken what is behind it, so lifting
      the band to a pale surface would leave white type and a scrim fighting each
      other. The footer used to be pinned here beside it; it follows the theme now
-     (see FOOTER below), so only this band is left. */
-  :root[data-theme="dark"] .trust-band{ background:#0A0A08; }
+     (see FOOTER below), so only this band is left.
+
+     `background-color`, for the same reason as the media cards above: under reduced
+     motion the band swaps its clip for a still written to the `background-image`
+     longhand (see the reduced-motion block further down). The shorthand would reset
+     that longhand to `none` at this rule's higher specificity, and the band would
+     lose its backdrop in dark mode. */
+  :root[data-theme="dark"] .trust-band{ background-color:#0A0A08; }
   .trust-band{
     background:var(--ink);
     color:var(--on-media);
@@ -2191,8 +2213,16 @@
     grid-auto-rows:1fr;
     gap:16px;
   }
+  /* `background-color`, not the shorthand, for the same reason the dark-mode card
+     rules above use the longhand: .service-card--marketplace,
+     .service-card--business-solutions and the reduced-motion
+     .service-card--sourcing / --shipping stills all paint a `background-image`, and
+     this rule is declared *after* those stills at the same (0,1,0) specificity —
+     so a shorthand here would reset every one of them back to `none`. The category
+     tiles are safe only because .cat-card's base rule happens to sit far earlier in
+     this file; this card family does not have that accident working for it. */
   .service-card{
-    background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
+    background-color:var(--white); border:1px solid var(--line); border-radius:var(--radius);
     padding:28px 24px; transition:transform .25s var(--ease), box-shadow .25s var(--ease);
   }
   .service-card:hover{transform:translateY(-4px); box-shadow:0 16px 36px rgba(17,17,17,.08);}
@@ -2217,8 +2247,19 @@
     isolation:isolate;
     /* Fixed dark in both modes, for the same reason as .cat-card--media: the copy
        over this card is --on-media and sits on a scrim, so the plate underneath
-       must not follow the page's ink colour. */
-    background:#111111 center/cover no-repeat;
+       must not follow the page's ink colour.
+
+       Written as longhands, not `background:#111111 center/cover no-repeat`. The
+       reduced-motion block above gives .service-card--sourcing and
+       .service-card--shipping a still on the `background-image` longhand, and it
+       sits *earlier* in this file at the same (0,1,0) specificity — so the
+       shorthand, arriving later, reset that still back to `none` and left those
+       two cards blank in both themes. (The category tiles escape this only because
+       .cat-card--media is declared *before* their reduced-motion stills.) */
+    background-color:#111111;
+    background-position:center;
+    background-size:cover;
+    background-repeat:no-repeat;
     border-color:transparent;
     min-height:200px;
     /* Icon pinned to the top, heading and copy pinned to the bottom, so the four
