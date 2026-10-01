@@ -90,43 +90,51 @@
       <div class="product-grid product-grid--market" id="productGrid">
         @for (p of visible(); track p.id) {
           <article class="product-card">
-            <div class="product-media" [class.product-media--photo]="p.image">
-              @if (p.image; as img) {
-                <!-- The listing's own photo where there is one, standing in for the
-                     line icon. Alt is empty because the title follows immediately
-                     below and already names the card. -->
-                <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
-              } @else {
-              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
-                @switch (p.icon) {
-                  @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
-                  @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
-                  @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
-                  @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
-                  @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
-                  @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
-                  @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
-                  @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
-                  @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+            <!-- The photo and the facts are the way into a listing: clicking them
+                 opens the product page. The quantity and add-to-cart controls
+                 below are the only part of the card that must not, so they live
+                 outside the link. -->
+            <a class="product-link" [routerLink]="['/product', p.id]">
+              <div class="product-media" [class.product-media--photo]="p.image">
+                @if (p.image; as img) {
+                  <!-- The listing's own photo where there is one, standing in for the
+                       line icon. Alt is empty because the title follows immediately
+                       below and already names the card. -->
+                  <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                } @else {
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                  @switch (p.icon) {
+                    @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                    @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                    @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                    @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                    @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                    @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                    @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                    @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                    @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                  }
+                </svg>
                 }
-              </svg>
-              }
-              @if (p.verified) {
-                <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
-              }
-            </div>
+                @if (p.verified) {
+                  <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
+                }
+              </div>
+              <div class="product-text">
+                <h4 class="product-title">{{ p.title }}</h4>
+                <div class="product-specs">{{ p.specs }}</div>
+
+                <!-- The price leads, and it leads on its own: the wash that used to
+                     sit behind the figure is gone, because a box drawn round every
+                     price on the page is a form field, and this is a shop. The
+                     minimum follows as a pill, because it is a condition on that
+                     figure rather than a fact about the product. -->
+                <div class="product-price"><span class="price-val">{{ price(p) }}</span> <span class="unit">{{ p.unit }}</span></div>
+                <div class="product-moq">{{ p.moq }}</div>
+              </div>
+            </a>
+
             <div class="product-body">
-              <h4 class="product-title">{{ p.title }}</h4>
-              <div class="product-specs">{{ p.specs }}</div>
-
-              <!-- The price leads, and it leads on its own: the wash that used to
-                   sit behind the figure is gone, because a box drawn round every
-                   price on the page is a form field, and this is a shop. The
-                   minimum follows as a pill, because it is a condition on that
-                   figure rather than a fact about the product. -->
-              <div class="product-price"><span class="price-val">{{ price(p) }}</span> <span class="unit">{{ p.unit }}</span></div>
-              <div class="product-moq">{{ p.moq }}</div>
-
               <div class="product-qty">
                 <button type="button" class="product-qty-step" (click)="stepQty(p.id, -1)" [disabled]="qtyFor(p.id) <= 1" [attr.aria-label]="'One fewer unit of ' + p.title">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>

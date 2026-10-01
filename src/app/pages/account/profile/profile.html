@@ -1,0 +1,181 @@
+<main id="top" class="account-page">
+  <app-account-gate label="your profile">
+
+    <section class="page-hero account-hero">
+      <div class="container">
+        <div class="breadcrumb"><a routerLink="/">Home</a> / Account / Profile</div>
+        <div class="account-hero-row">
+          <div>
+            <span class="eyebrow">Your details</span>
+            <h1>Profile</h1>
+            <p>Sign-up only asked for a name and an email. Add the rest here whenever you are ready.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <app-account-nav />
+
+    <section class="section account-body">
+      <div class="container">
+        @if (flash()) {
+          <p class="account-flash" role="status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+            {{ flash() }}
+          </p>
+        }
+
+        <div class="account-layout">
+          <div class="account-main">
+
+            <section class="account-card">
+              <header class="account-card-head">
+                <div>
+                  <h2>Personal details</h2>
+                  <p>How we address you and where order updates go.</p>
+                </div>
+              </header>
+              <form class="account-form" novalidate (ngSubmit)="savePersonal()">
+                <div class="form-row">
+                  <div class="field">
+                    <label for="apName">Full name</label>
+                    <input type="text" id="apName" name="apName" [(ngModel)]="name" placeholder="Your name">
+                  </div>
+                  <div class="field">
+                    <label for="apEmail">Email</label>
+                    <input type="email" id="apEmail" name="apEmail" [(ngModel)]="email" placeholder="you@example.com">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="field">
+                    <label for="apPhone">Phone / WhatsApp</label>
+                    <input type="tel" id="apPhone" name="apPhone" [(ngModel)]="phone" placeholder="e.g. 0803 000 0000">
+                  </div>
+                  <div class="field">
+                    <label for="apCompany">Business name</label>
+                    <input type="text" id="apCompany" name="apCompany" [(ngModel)]="company" placeholder="e.g. Demo Trading Ltd.">
+                  </div>
+                </div>
+                <div class="account-card-actions">
+                  <button type="submit" class="btn btn-primary">Save details</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="account-card">
+              <header class="account-card-head">
+                <div>
+                  <h2>Shipping address</h2>
+                  <p>Where your consignments land when they clear.</p>
+                </div>
+              </header>
+              <form class="account-form" novalidate (ngSubmit)="saveShipping()">
+                <div class="field">
+                  <label for="ship1">Address line 1</label>
+                  <input type="text" id="ship1" name="ship1" [(ngModel)]="shipping.line1" placeholder="Shop number, street, plaza">
+                </div>
+                <div class="field">
+                  <label for="ship2">Address line 2 <span class="opt">(optional)</span></label>
+                  <input type="text" id="ship2" name="ship2" [(ngModel)]="shipping.line2" placeholder="Market, landmark, additional directions">
+                </div>
+                <div class="form-row">
+                  <div class="field">
+                    <label for="shipCity">City</label>
+                    <input type="text" id="shipCity" name="shipCity" [(ngModel)]="shipping.city" placeholder="e.g. Onitsha">
+                  </div>
+                  <div class="field">
+                    <label for="shipState">State / Region</label>
+                    <input type="text" id="shipState" name="shipState" [(ngModel)]="shipping.state" placeholder="e.g. Anambra">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="field">
+                    <label for="shipCountry">Country</label>
+                    <input type="text" id="shipCountry" name="shipCountry" [(ngModel)]="shipping.country" placeholder="e.g. Nigeria">
+                  </div>
+                  <div class="field">
+                    <label for="shipZip">Postal code <span class="opt">(optional)</span></label>
+                    <input type="text" id="shipZip" name="shipZip" [(ngModel)]="shipping.zip" placeholder="e.g. 430211">
+                  </div>
+                </div>
+                <div class="account-card-actions">
+                  <button type="submit" class="btn btn-primary" [disabled]="!addressReady(shipping)">Save shipping address</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="account-card">
+              <header class="account-card-head">
+                <div>
+                  <h2>Billing address</h2>
+                  <p>Where invoices and receipts are issued.</p>
+                </div>
+              </header>
+              <form class="account-form" novalidate (ngSubmit)="saveBilling()">
+                <div class="field">
+                  <label for="bill1">Address line 1</label>
+                  <input type="text" id="bill1" name="bill1" [(ngModel)]="billing.line1" placeholder="Street, building, suite">
+                </div>
+                <div class="field">
+                  <label for="bill2">Address line 2 <span class="opt">(optional)</span></label>
+                  <input type="text" id="bill2" name="bill2" [(ngModel)]="billing.line2" placeholder="Additional directions">
+                </div>
+                <div class="form-row">
+                  <div class="field">
+                    <label for="billCity">City</label>
+                    <input type="text" id="billCity" name="billCity" [(ngModel)]="billing.city" placeholder="e.g. Lagos">
+                  </div>
+                  <div class="field">
+                    <label for="billState">State / Region</label>
+                    <input type="text" id="billState" name="billState" [(ngModel)]="billing.state" placeholder="e.g. Lagos">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="field">
+                    <label for="billCountry">Country</label>
+                    <input type="text" id="billCountry" name="billCountry" [(ngModel)]="billing.country" placeholder="e.g. Nigeria">
+                  </div>
+                  <div class="field">
+                    <label for="billZip">Postal code <span class="opt">(optional)</span></label>
+                    <input type="text" id="billZip" name="billZip" [(ngModel)]="billing.zip" placeholder="e.g. 100001">
+                  </div>
+                </div>
+                <div class="account-card-actions">
+                  <button type="submit" class="btn btn-primary" [disabled]="!addressReady(billing)">Save billing address</button>
+                </div>
+              </form>
+            </section>
+          </div>
+
+          <aside class="account-aside">
+            @if (auth.user(); as user) {
+              <div class="account-id-card">
+                <span class="account-id-avatar" aria-hidden="true">{{ (user.name || user.email).charAt(0).toUpperCase() }}</span>
+                <strong>{{ user.name || 'Izuire buyer' }}</strong>
+                <span class="account-id-email">{{ user.email }}</span>
+                @if (user.memberTier) {
+                  <span class="account-tier">{{ user.memberTier }} member</span>
+                }
+                <ul class="account-id-facts">
+                  @if (user.createdAt) {
+                    <li><span>Member since</span><strong>{{ user.createdAt }}</strong></li>
+                  }
+                  @if (user.phone) {
+                    <li><span>Phone</span><strong>{{ user.phone }}</strong></li>
+                  }
+                  @if (user.company) {
+                    <li><span>Business</span><strong>{{ user.company }}</strong></li>
+                  }
+                </ul>
+                <a routerLink="/account/payments" class="btn btn-outline account-id-btn">View your payments</a>
+              </div>
+            }
+            <p class="account-note account-note--aside">
+              These details are held in the demo session only — nothing is written to a database yet.
+            </p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </app-account-gate>
+</main>

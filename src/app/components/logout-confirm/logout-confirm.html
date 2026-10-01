@@ -1,0 +1,19 @@
+<div class="confirm-overlay" [class.open]="open()" (click)="onBackdrop($event)">
+  <div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="logoutTitle" aria-describedby="logoutBody">
+    <span class="confirm-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    </span>
+    <h2 id="logoutTitle">Log out, {{ firstName() }}?</h2>
+    <p id="logoutBody">
+      You'll need to sign in again to reach your payments, saved addresses and quotes.
+      Your cart stays on this device either way, so nothing in it is lost.
+    </p>
+    <div class="confirm-actions">
+      <button type="button" class="btn btn-outline" (click)="cancel()">Stay signed in</button>
+      <button type="button" class="btn btn-dark confirm-go" (click)="confirm()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Yes, log me out
+      </button>
+    </div>
+  </div>
+</div>

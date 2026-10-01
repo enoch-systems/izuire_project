@@ -7,6 +7,9 @@ export interface CartLine {
   id: string;
   title: string;
   icon: Product['icon'];
+  /** The product photo, snapshot with the rest of the line so the cart shows the
+   *  same shot the shopper clicked. Undefined for listings without a photo. */
+  image?: Product['image'];
   verified: boolean;
   /** Naira per unit, snapshotted from the product at the moment it was added. */
   unitPrice: number;
@@ -18,7 +21,7 @@ export interface CartLine {
 }
 
 /** Where the cart is kept between visits. Bump if `CartLine` ever changes shape. */
-const STORAGE_KEY = 'izuire.cart.v1';
+const STORAGE_KEY = 'izuire.cart.v2';
 
 /** Grouping done here rather than by `Intl` currency style, which some environments
  *  render as "NGN" instead of the naira sign. */
@@ -93,6 +96,7 @@ export class CartService {
         {
           id: product.id,
           title: product.title,
+          image: product.image,
           icon: product.icon,
           verified: product.verified,
           unitPrice: product.unitPrice,
@@ -144,6 +148,11 @@ export class CartService {
 
   clear(): void {
     this.lines.set([]);
+  }
+
+  /** Lock or release the page's background scroll for a cart-level modal. */
+  lockBodyScroll(locked: boolean): void {
+    document.body.style.overflow = locked ? 'hidden' : '';
   }
 
   /** Flash `addedId` so the card that was clicked can confirm it, then let it go. */

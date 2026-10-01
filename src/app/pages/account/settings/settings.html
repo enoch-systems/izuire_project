@@ -1,0 +1,130 @@
+<main id="top" class="account-page">
+  <app-account-gate label="your settings">
+
+    <section class="page-hero account-hero">
+      <div class="container">
+        <div class="breadcrumb"><a routerLink="/">Home</a> / Account / Settings</div>
+        <div class="account-hero-row">
+          <div>
+            <span class="eyebrow">Preferences</span>
+            <h1>Settings</h1>
+            <p>How the site looks, how we reach you, and the doors back into your details.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <app-account-nav />
+
+    <section class="section account-body">
+      <div class="container">
+        <div class="settings-grid">
+
+          <section class="account-card">
+            <header class="account-card-head">
+              <div>
+                <h2>Appearance</h2>
+                <p>The same switch the header carries, written out in full.</p>
+              </div>
+            </header>
+            <div class="settings-choice">
+              <button type="button" class="settings-theme" [class.active]="theme.theme() === 'light'" (click)="setTheme('light')" [attr.aria-pressed]="theme.theme() === 'light'">
+                <span class="settings-theme-preview settings-theme-preview--light" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>Light</strong>
+                <small>The way the site was built</small>
+              </button>
+              <button type="button" class="settings-theme" [class.active]="theme.theme() === 'dark'" (click)="setTheme('dark')" [attr.aria-pressed]="theme.theme() === 'dark'">
+                <span class="settings-theme-preview settings-theme-preview--dark" aria-hidden="true"><i></i><i></i><i></i></span>
+                <strong>Dark</strong>
+                <small>Easier at night</small>
+              </button>
+            </div>
+          </section>
+
+          <section class="account-card">
+            <header class="account-card-head">
+              <div>
+                <h2>Notifications</h2>
+                <p>What we send you about quotes, payments and shipments.</p>
+              </div>
+            </header>
+            <div class="settings-rows">
+              <div class="settings-row">
+                <div>
+                  <strong>Email updates</strong>
+                  <small>Quote replies, receipts and tracking numbers.</small>
+                </div>
+                <button type="button" class="settings-switch" [class.on]="emailUpdates()" role="switch" [attr.aria-checked]="emailUpdates()" (click)="toggle('email')" aria-label="Email updates">
+                  <span></span>
+                </button>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <strong>WhatsApp updates</strong>
+                  <small>The fastest way we reach buyers while an order moves.</small>
+                </div>
+                <button type="button" class="settings-switch" [class.on]="whatsappUpdates()" role="switch" [attr.aria-checked]="whatsappUpdates()" (click)="toggle('whatsapp')" aria-label="WhatsApp updates">
+                  <span></span>
+                </button>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <strong>Price drop alerts</strong>
+                  <small>When a line you watch gets cheaper at the market.</small>
+                </div>
+                <button type="button" class="settings-switch" [class.on]="priceAlerts()" role="switch" [attr.aria-checked]="priceAlerts()" (click)="toggle('alerts')" aria-label="Price drop alerts">
+                  <span></span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="account-card">
+            <header class="account-card-head">
+              <div>
+                <h2>Marketplace currency</h2>
+                <p>The figure listings open with. You can still flip it per page.</p>
+              </div>
+            </header>
+            <div class="settings-seg" role="group" aria-label="Preferred currency">
+              <button type="button" [class.active]="currency() === 'NGN'" (click)="setCurrency('NGN')" [attr.aria-pressed]="currency() === 'NGN'">₦ Naira</button>
+              <button type="button" [class.active]="currency() === 'RMB'" (click)="setCurrency('RMB')" [attr.aria-pressed]="currency() === 'RMB'">¥ Renminbi</button>
+            </div>
+            <p class="settings-hint">RMB prices are supplier quotes — the naira figure is the one you settle in.</p>
+          </section>
+
+          <section class="account-card">
+            <header class="account-card-head">
+              <div>
+                <h2>Account</h2>
+                <p>Jump to the rest, or end the session on this device.</p>
+              </div>
+            </header>
+            <div class="settings-links">
+              <a routerLink="/account/profile">
+                <span><strong>Profile</strong><small>Name, phone and addresses</small></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+              <a routerLink="/account/payments">
+                <span><strong>Payments</strong><small>Pending and successful orders</small></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+              <a routerLink="/account/password">
+                <span><strong>Change password</strong><small>Rotate it any time</small></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+              <button type="button" class="settings-signout" (click)="signOut()">
+                <span><strong>Log out</strong><small>Ask first, then end this session</small></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <p class="account-note">
+          Appearance is remembered between visits. The notification and currency switches are demo preferences — they reset when the page reloads.
+        </p>
+      </div>
+    </section>
+  </app-account-gate>
+</main>

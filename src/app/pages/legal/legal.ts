@@ -47,4 +47,15 @@ export class Legal {
   protected items(block: LegalBlock): string[] {
     return block.items ?? [];
   }
+
+  /** Count the ordinal position of an h3 block within its parent doc. */
+  protected sectionNum(docId: LegalDocId, blockIdx: number): string {
+    const doc = this.docs.find(d => d.id === docId);
+    if (!doc) return '01';
+    let n = 0;
+    for (let i = 0; i <= blockIdx && i < doc.blocks.length; i++) {
+      if (doc.blocks[i]?.kind === 'h3') n++;
+    }
+    return String(Math.max(n, 1)).padStart(2, '0');
+  }
 }

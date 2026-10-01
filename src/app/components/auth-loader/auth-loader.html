@@ -1,0 +1,45 @@
+<!-- The working overlay. It sits above every other surface (z-index in the
+     stylesheet) and carries no controls: there is nothing to press until the
+     mock call lands. `role="status"` reads the changing copy out, so a screen
+     reader hears the same progress a sighted reader sees. -->
+@if (face(); as face) {
+  <div
+    class="authload"
+    [class]="'authload--' + face.tone"
+    role="status"
+    aria-live="polite"
+    [attr.aria-label]="face.label"
+  >
+    <div class="authload__sheet">
+      <div class="authload__mark" aria-hidden="true">
+        <span class="authload__ring"></span>
+        <!-- One continuous stroke, drawn and redrawn while the call runs.
+             `pathLength="100"` normalises the path so the dash maths holds
+             whatever the curve measures; the nib follows the same curve with a
+             CSS motion path, so the tip and the ink can never drift apart. -->
+        <svg class="authload__ink" viewBox="0 0 120 120" fill="none">
+          <path
+            class="authload__line"
+            pathLength="100"
+            d="M20 86 C 26 40, 50 16, 62 34 C 74 52, 40 86, 58 92 C 76 98, 96 78, 98 54 C 100 32, 80 22, 68 34"
+          />
+          <circle class="authload__nib" r="6.5" cx="20" cy="86" />
+        </svg>
+      </div>
+
+      <p class="authload__label">
+        {{ face.label }}<span class="authload__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      </p>
+      <p class="authload__copy">{{ auth.loaderCopy() }}</p>
+
+      <div class="authload__bar" aria-hidden="true">
+        <span [style.width.%]="progress()"></span>
+      </div>
+
+      <p class="authload__secure">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+        Mock session — nothing leaves this device
+      </p>
+    </div>
+  </div>
+}

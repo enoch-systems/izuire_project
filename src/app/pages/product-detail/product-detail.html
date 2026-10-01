@@ -1,0 +1,170 @@
+<main id="top" class="product-detail-page">
+
+  @if (product(); as p) {
+    <!-- The product itself -->
+    <div class="container">
+      <nav class="pd-breadcrumb" aria-label="Breadcrumb">
+        <a routerLink="/">Home</a><span>/</span>
+        <a routerLink="/marketplace">Marketplace</a><span>/</span>
+        <span>{{ p.title }}</span>
+      </nav>
+
+      <div class="pd-layout">
+        <!-- Gallery -->
+        <div class="pd-gallery">
+          <div class="pd-media">
+            @if (activeImage(); as shot) {
+              <img [src]="shot.src" [alt]="p.title">
+            } @else {
+              <span class="pd-media-fallback">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                  @switch (p.icon) {
+                    @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                    @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                    @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                    @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                    @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                    @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                    @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                    @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                    @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                  }
+                </svg>
+              </span>
+            }
+            @if (p.verified) {
+              <span class="pd-verified"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified supplier</span>
+            }
+          </div>
+
+          <!-- Thumbnail strip -->
+          @if (thumbs().length > 1) {
+            <div class="pd-thumbs" role="tablist" aria-label="Product views">
+              @for (t of thumbs(); track t.shot.label) {
+                <button
+                  type="button"
+                  role="tab"
+                  class="pd-thumb"
+                  [class.active]="activeShot() === t.index"
+                  [attr.aria-selected]="activeShot() === t.index"
+                  (click)="setShot(t.index)"
+                  [attr.aria-label]="t.shot.label">
+                  <img [src]="t.shot.src" [alt]="p.title + ', ' + t.shot.label" loading="lazy">
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Purchase info -->
+        <div class="pd-info">
+          <span class="pd-eyebrow">{{ p.cat | titlecase }}</span>
+          <h1 class="pd-title">{{ p.title }}</h1>
+
+          <div class="pd-rating">
+            <span class="pd-stars" aria-hidden="true">
+              @for (star of [1,2,3,4,5]; track star) {
+                <svg viewBox="0 0 24 24" [class.filled]="star <= Math.round(rating().value)" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.6 1.4 6.9L12 17l-6.2 3.8 1.4-6.9L2 9.3l7-.8z"/></svg>
+              }
+            </span>
+            <span class="pd-rating-val">{{ rating().value.toFixed(1) }}</span>
+            <span class="pd-rating-sep">·</span>
+            <span class="pd-rating-count">{{ rating().count }} reviews</span>
+          </div>
+
+          <p class="pd-specs">{{ p.specs }}</p>
+
+          <div class="pd-price-row">
+            <span class="pd-price">{{ money(p.unitPrice) }}</span>
+            <span class="pd-unit">{{ p.unit }}</span>
+          </div>
+          <p class="pd-moq">{{ p.moq }}</p>
+
+          <div class="pd-divider"></div>
+
+          <div class="pd-qty-row">
+            <span class="pd-qty-label">Quantity</span>
+            <div class="pd-qty">
+              <button type="button" (click)="stepQty(-1)" [disabled]="qty() <= 1" aria-label="Fewer units">&minus;</button>
+              <input
+                #qtyInput
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                [value]="qty()"
+                (change)="typeQty($any($event.target).value)"
+                aria-label="Units of {{ p.title }}">
+              <button type="button" (click)="stepQty(1)" aria-label="More units">+</button>
+            </div>
+            <span class="pd-qty-step-tip">Steps in {{ p.minQty }}{{ p.unit }} units</span>
+          </div>
+
+          <div class="pd-actions">
+            <button type="button" class="btn btn-primary pd-buy" (click)="buyNow()">
+              Buy now
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+            <button type="button" class="btn btn-outline pd-add" (click)="addToCart()" [class.is-added]="cart.addedId() === p.id">
+              <span>{{ cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
+            </button>
+          </div>
+
+          <ul class="pd-perks">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v7M21 7v7M12 11v7"/></svg>Sourced, inspected &amp; quality-checked in China</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Every batch verified before it ships</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M15 18H9M7 4h10v3H7z"/></svg>Freight &amp; duties quoted in your checkout</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- You may also like -->
+    <section class="pd-also">
+      <div class="container">
+        <div class="pd-also-head">
+          <h2>You may also like</h2>
+          <a routerLink="/marketplace" class="pd-also-more">View all</a>
+        </div>
+        <div class="pd-also-grid">
+          @for (rel of alsoLike(); track rel.id) {
+            <article class="pd-also-card" (click)="openProduct(rel.id)">
+              <div class="pd-also-media">
+                @if (rel.image; as img) {
+                  <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" [alt]="rel.title" loading="lazy">
+                } @else {
+                  <span class="pd-also-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                      @switch (rel.icon) {
+                        @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                        @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                        @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                        @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                        @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                        @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                        @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                        @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                        @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                      }
+                    </svg>
+                  </span>
+                }
+              </div>
+              <div class="pd-also-body">
+                <h3>{{ rel.title }}</h3>
+                <div class="pd-also-price">
+                  <span>{{ money(rel.unitPrice) }}</span>
+                  <span class="pd-also-unit">{{ rel.unit }}</span>
+                </div>
+                <button type="button" class="btn btn-outline pd-also-add" (click)="$event.stopPropagation(); addRelated(rel)" [class.is-added]="cart.addedId() === rel.id">
+                  {{ cart.addedId() === rel.id ? 'Added' : 'Add to cart' }}
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+</main>

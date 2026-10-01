@@ -1,0 +1,113 @@
+<main id="top" class="account-page">
+  <app-account-gate label="your payments">
+
+    <section class="page-hero account-hero">
+      <div class="container">
+        <div class="breadcrumb"><a routerLink="/">Home</a> / Account / Payments</div>
+        <div class="account-hero-row">
+          <div>
+            <span class="eyebrow">Money &amp; orders</span>
+            <h1>Payments</h1>
+            <p>Every order with a payment attached — deposits, balances and what is still clearing.</p>
+          </div>
+          @if (auth.user(); as user) {
+            <span class="account-hero-id">{{ user.name || user.email }}</span>
+          }
+        </div>
+      </div>
+    </section>
+
+    <app-account-nav />
+
+    <section class="section account-body">
+      <div class="container">
+
+        <!-- The three figures that answer the question people come here with. -->
+        <div class="pay-summary">
+          <div class="pay-card">
+            <span class="pay-card-label">Paid to date</span>
+            <strong class="pay-card-value">{{ money(paid()) }}</strong>
+            <span class="pay-card-note">{{ successfulCount() }} successful {{ successfulCount() === 1 ? 'payment' : 'payments' }}</span>
+          </div>
+          <div class="pay-card pay-card--pending">
+            <span class="pay-card-label">Awaiting payment</span>
+            <strong class="pay-card-value">{{ money(awaiting()) }}</strong>
+            <span class="pay-card-note">{{ pendingCount() }} {{ pendingCount() === 1 ? 'order needs' : 'orders need' }} attention</span>
+          </div>
+          <div class="pay-card">
+            <span class="pay-card-label">Orders</span>
+            <strong class="pay-card-value">{{ auth.transactions().length }}</strong>
+            <span class="pay-card-note">All time, from this account</span>
+          </div>
+        </div>
+
+        <div class="pay-tabs" role="tablist" aria-label="Filter transactions">
+          @for (t of tabs; track t.id) {
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="tab() === t.id"
+              [class.active]="tab() === t.id"
+              (click)="setTab(t.id)"
+            >
+              {{ t.label }}
+              <span>{{ count(t.id) }}</span>
+            </button>
+          }
+        </div>
+
+        @if (rows().length) {
+          <div class="pay-list">
+            @for (tx of rows(); track tx.id) {
+              <article class="pay-row" [class.open]="openRow() === tx.id">
+                <div class="pay-row-main">
+                  <span class="pay-status" [class]="'pay-status--' + tx.status">{{ status(tx) }}</span>
+                  <div class="pay-row-id">
+                    <strong>{{ tx.title }}</strong>
+                    <span>{{ tx.id }} · {{ tx.date }}</span>
+                  </div>
+                  <div class="pay-row-amount">
+                    <strong>{{ money(tx.amount) }}</strong>
+                    <span>{{ tx.currency }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="pay-row-toggle"
+                    (click)="toggle(tx.id)"
+                    [attr.aria-expanded]="openRow() === tx.id"
+                    [attr.aria-label]="(openRow() === tx.id ? 'Hide' : 'Show') + ' details for ' + tx.id"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                </div>
+
+                <p class="pay-row-items">{{ tx.items }}</p>
+
+                @if (openRow() === tx.id) {
+                  <div class="pay-row-detail">
+                    <div><span>Method</span><strong>{{ tx.method }}</strong></div>
+                    @if (tx.reference) { <div><span>Reference</span><strong>{{ tx.reference }}</strong></div> }
+                    @if (tx.tracking) { <div><span>Tracking</span><strong>{{ tx.tracking }}</strong></div> }
+                    @if (tx.eta) { <div><span>Status note</span><strong>{{ tx.eta }}</strong></div> }
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="pay-empty">
+            <span class="pay-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
+            </span>
+            <h2>Nothing here yet</h2>
+            <p>No {{ tab() === 'all' ? '' : tab() }} transactions on this account. New orders appear here as soon as a payment is attached.</p>
+          </div>
+        }
+
+        <p class="account-note">
+          Demo account — payments, references and tracking numbers are seeded mock data, not a real ledger.
+        </p>
+      </div>
+    </section>
+  </app-account-gate>
+</main>

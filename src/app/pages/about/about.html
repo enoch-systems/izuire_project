@@ -1,45 +1,76 @@
 <main id="top">
 
 <section class="page-hero">
-  <div class="container">
+  <div class="container page-hero-inner">
     <div class="breadcrumb"><a routerLink="/">Home</a> / About</div>
     <span class="eyebrow">Who we are</span>
     <h1>About Izuire</h1>
-    <p>IZUIRE is the bridge between Chinese manufacturers and African buyers, built to make sourcing simpler, safer and more transparent.</p>
+    <p>IZUIRE is the bridge between Chinese manufacturers and African buyers — built to make sourcing simpler, safer and more transparent for people who have historically had to guess at who they're dealing with.</p>
+    <div class="hero-step-counter">
+      <span>01</span>
+      <span class="bar"></span>
+      <span>05 Chapters from the gap we saw to the network we're building</span>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="about-grid">
-      <div>
-        <span class="eyebrow">Our story</span>
-        <h2 style="margin:14px 0 18px; font-size:1.9rem;">Built from the trade gap we saw firsthand</h2>
-        <p>Izuire Co. Ltd. was founded to close a gap that shows up again and again for African importers: finding reliable Chinese suppliers, verifying quality before money changes hands, and getting goods home without losing money in the process.</p>
-        <p>Operating out of Guangzhou with strong roots in Onitsha, Nigeria, Izuire sits physically where the sourcing happens, inside the markets and factory networks of one of the world's largest manufacturing hubs, while staying close to the realities of the African businesses it serves.</p>
-        <p>Izuire Co. Ltd. is registered with Nigeria's Corporate Affairs Commission (CAC), with its scope covering importation, exportation, and general trading of consumer goods and merchandise.</p>
-      </div>
-      <div class="mv-grid">
-        <div class="mv-card">
-          <h4>Mission</h4>
-          <p>To give African buyers direct, trustworthy access to Chinese manufacturers, with sourcing, quality control and logistics handled end-to-end.</p>
+    <div class="story-head">
+      <span class="eyebrow">Our story</span>
+      <h2>Built from the trade gap we saw firsthand</h2>
+      <p>We didn't start with a fancy pitch deck. We started with a problem every African importer runs into eventually — and decided to fix it by sitting where the problem lives.</p>
+    </div>
+
+    <div class="story-timeline">
+      @for (s of story; track s.tag) {
+        <div class="story-node">
+          <div class="story-dot"></div>
+          <div class="story-card">
+            <span class="story-tag">{{ s.year }} · {{ s.tag }}</span>
+            <h4>{{ s.title }}</h4>
+            <p>{{ s.body }}</p>
+          </div>
         </div>
-        <div class="mv-card">
-          <h4>Vision</h4>
-          <p>To be the most trusted bridge for China-to-Africa trade, known for transparency where the industry has historically had none.</p>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section on-paper">
+  <div class="container">
+    <div class="cluster-head">
+      <span class="eyebrow">Mission, vision &amp; what we stand for</span>
+      <h2>The three things that guide every order</h2>
+      <p>Three pillars the whole team signs off on. If a decision doesn't fit one of these, we don't do it.</p>
+    </div>
+
+    <div class="values-grid">
+      @for (v of values; track v.n) {
+        <div class="value-item">
+          <span class="value-num">{{ v.n }} / Pillar</span>
+          <div class="value-icon" [innerHTML]="v.icon"></div>
+          <h4>{{ v.name }}</h4>
+          <p>{{ v.body }}</p>
         </div>
-        <div class="mv-card" style="grid-column:1/-1;">
-          <h4>What makes us different</h4>
-          <p>A team physically based in Guangzhou, direct supplier relationships built over years in the market, and a straightforward process, no middlemen stacking markups you can't see.</p>
-        </div>
-      </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cluster-head">
+      <span class="eyebrow">Founder</span>
+      <h2>A note from the person who built this</h2>
+      <p>Izuire was built by someone who has done the sourcing firsthand — not by someone reading about it in a case study.</p>
     </div>
 
     <div class="founder-card">
       <div class="founder-avatar">N</div>
       <div>
         <h4>Nnamdi &middot; Founder, Izuire Co. Ltd.</h4>
-        <p>Nnamdi built Izuire from years spent navigating Guangzhou's markets and factory networks directly, with deep ties back home in Onitsha and Nigeria's Southeast. He leads Izuire's sourcing strategy and its growing content and education work around China-Africa trade.</p>
+        <p>Nnamdi built Izuire from years spent navigating Guangzhou's markets and factory networks directly, with deep ties back home in Onitsha and Nigeria's Southeast. He leads Izuire's sourcing strategy and its growing content and education work around China-Africa trade. If you've asked a question on our WhatsApp line, you've probably already spoken with him.</p>
       </div>
     </div>
   </div>
@@ -47,37 +78,33 @@
 
 <section class="section on-paper">
   <div class="container">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Where we operate</span>
-        <h2>China &amp; Nigeria presence</h2>
-      </div>
+    <div class="cluster-head">
+      <span class="eyebrow">Where we operate</span>
+      <h2>China &amp; Nigeria presence</h2>
+      <p>Physically on the ground at both ends of the supply chain, so nothing falls between two continents.</p>
     </div>
-    <div class="service-grid">
-      <div class="service-card">
-        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg></div>
-        <h4>Guangzhou, China</h4>
-        <p>Our operational base, where sourcing, negotiation and quality inspection happen, close to the factories and wholesale markets themselves.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></div>
-        <h4>Onitsha, Nigeria</h4>
-        <p>Our registered office, Shop No. GFQ 53, Happy Baby Line, Young Shall Grow Plaza, Main Market, Onitsha, Anambra State.</p>
-      </div>
-      <div class="service-card">
-        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg></div>
-        <h4>Serving Africa</h4>
-        <p>While our roots are in Nigeria, our sourcing and logistics network is built to serve importers across the wider African market.</p>
-      </div>
+
+    <div class="values-grid">
+      @for (p of presence; track p.n) {
+        <div class="value-item">
+          <span class="value-num">{{ p.n }} / Location</span>
+          <div class="value-icon" [innerHTML]="p.icon"></div>
+          <h4>{{ p.name }}</h4>
+          <p>{{ p.body }}</p>
+        </div>
+      }
     </div>
   </div>
 </section>
 
-<section class="section">
-  <div class="container" style="text-align:center;">
-    <h2 style="font-size:1.8rem; margin-bottom:16px;">Ready to start sourcing?</h2>
-    <p style="color:var(--ink-60); max-width:460px; margin:0 auto 28px;">Tell us what you need and we'll get you a quote within 24 hours.</p>
-    <a routerLink="/quote" class="btn btn-primary">Start Sourcing</a>
+<section class="band-section band-orange">
+  <div class="container">
+    <div class="band-inner">
+      <span class="band-eyebrow">Ready when you are</span>
+      <h2>Ready to start sourcing?</h2>
+      <p>Tell us what you need and we'll get you a real quote, from a real supplier, within 24 to 48 hours.</p>
+      <a routerLink="/quote" class="btn btn-primary">Start Sourcing</a>
+    </div>
   </div>
 </section>
 

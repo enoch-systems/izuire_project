@@ -1,21 +1,187 @@
 <div class="search-overlay" id="searchOverlay" [class.open]="open()" (click)="onBackdrop($event)">
-  <div class="search-panel">
+  <div class="search-panel" role="dialog" aria-modal="true" aria-label="Search Izuire">
+
     <div class="search-panel-input">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="searchInput" #searchInput [value]="query()" (input)="onInput($event)" placeholder="Search products, guides, suppliers..." autocomplete="off">
-      <button class="search-panel-close" id="searchCloseBtn" type="button" (click)="close()">ESC</button>
+      <svg class="spi-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input
+        #searchInput
+        id="searchInput"
+        type="text"
+        [value]="query()"
+        (input)="onInput($event)"
+        placeholder="Search products, suppliers and guides…"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search Izuire"
+      >
+      @if (query()) {
+        <button type="button" class="search-panel-clear" (click)="clear()" aria-label="Clear search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      }
+      <button class="search-panel-close" id="searchCloseBtn" type="button" (click)="close()" aria-label="Close search">ESC</button>
     </div>
+
     <div class="search-results" id="searchResults">
-        @for (item of results(); track item.title) {
-          <a class="search-result-item" [routerLink]="item.route" [fragment]="item.fragment">
-            <div class="sr-cat">{{ item.cat }}</div>
-            <div class="sr-title">{{ item.title }}</div>
-            <div class="sr-desc">{{ item.desc }}</div>
-          </a>
-        } @empty {
-          <div class="search-empty">No results. Try a category like "shipping" or "hair".</div>
+      @if (!query().trim()) {
+        <!-- Nothing typed yet, so the panel answers the question people usually
+             arrive with: what is worth looking at. -->
+        <section class="search-block">
+          <div class="search-block-head">
+            <h3 class="search-block-title">Recommended for you</h3>
+            <span class="search-block-hint">Wholesale lines moving this week</span>
+          </div>
+          <div class="search-rec-row">
+            @for (p of recommended; track p.id) {
+              <a class="search-rec" [routerLink]="['/product', p.id]" (click)="close()">
+                <span class="search-rec-media" [class.is-photo]="p.image">
+                  @if (p.image; as img) {
+                    <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                      @switch (p.icon) {
+                        @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                        @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                        @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                        @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                        @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                        @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                        @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                        @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                        @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                      }
+                    </svg>
+                  }
+                  @if (p.verified) {
+                    <span class="search-rec-verified" aria-label="Verified supplier">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                    </span>
+                  }
+                </span>
+                <span class="search-rec-body">
+                  <strong>{{ p.title }}</strong>
+                  <small>{{ p.ngn }} <em>{{ p.unit }}</em></small>
+                </span>
+              </a>
+            }
+          </div>
+        </section>
+
+        <section class="search-block">
+          <h3 class="search-block-title">Popular searches</h3>
+          <div class="search-chips">
+            @for (term of popular; track term) {
+              <button type="button" class="search-chip" (click)="useChip(term)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                {{ term }}
+              </button>
+            }
+          </div>
+        </section>
+
+        <section class="search-block">
+          <h3 class="search-block-title">Go straight there</h3>
+          <div class="search-quick">
+            @for (link of quickLinks; track link.title) {
+              <a [routerLink]="link.route" [fragment]="link.fragment" (click)="close()">
+                <span>
+                  <strong>{{ link.title }}</strong>
+                  <small>{{ link.desc }}</small>
+                </span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              </a>
+            }
+          </div>
+        </section>
+      } @else if (groups().length) {
+        <!-- Query results: catalogue rows first, then the site pages they
+             match, each block named by where it comes from. -->
+        @for (group of groups(); track group.label) {
+          <section class="search-group">
+            <div class="search-group-head">
+              <span>{{ group.label }}</span>
+              <span class="search-group-count">{{ group.hits.length }}</span>
+            </div>
+            @for (hit of group.hits; track hit.key) {
+              <a
+                class="search-hit"
+                [class.active]="hit.index === active()"
+                [routerLink]="hit.route"
+                [fragment]="hit.fragment"
+                (click)="close()"
+                (mouseenter)="active.set(hit.index)"
+              >
+                <span class="search-hit-media" [class.is-photo]="hit.image">
+                  @if (hit.image; as img) {
+                    <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                  } @else if (hit.icon) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                      @switch (hit.icon) {
+                        @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                        @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                        @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                        @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                        @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                        @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                        @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                        @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                        @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                      }
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                  }
+                </span>
+
+                <span class="search-hit-body">
+                  <span class="search-hit-title">
+                    @for (part of hit.titleParts; track $index) {
+                      @if (part.hit) { <mark>{{ part.text }}</mark> } @else { <span>{{ part.text }}</span> }
+                    }
+                  </span>
+                  <span class="search-hit-desc">
+                    @for (part of hit.descParts; track $index) {
+                      @if (part.hit) { <mark>{{ part.text }}</mark> } @else { <span>{{ part.text }}</span> }
+                    }
+                  </span>
+                </span>
+
+                <!-- A product carries its price on the right; a site page carries
+                     nothing, because the group heading above already says which
+                     part of the site it came from. -->
+                @if (hit.price) {
+                  <span class="search-hit-price">{{ hit.price }}<small>{{ hit.meta }}</small></span>
+                }
+                <span class="search-hit-go" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </span>
+              </a>
+            }
+          </section>
         }
-      </div>
+      } @else {
+        <div class="search-empty">
+          <span class="search-empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="8" x2="14" y2="14"/></svg>
+          </span>
+          <h3>No matches for &ldquo;{{ query() }}&rdquo;</h3>
+          <p>Try a shorter word, or start from one of these:</p>
+          <div class="search-chips search-chips--center">
+            @for (term of fallbacks; track term) {
+              <button type="button" class="search-chip" (click)="useChip(term)">{{ term }}</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="search-foot">
+      <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> to move</span>
+      <span><kbd>&crarr;</kbd> to open</span>
+      <span><kbd>esc</kbd> to close</span>
+      <span class="search-foot-note">Products, services and guides</span>
+    </div>
   </div>
 </div>
+
 

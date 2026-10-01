@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 import { FEATURED, Product, PRODUCTS } from '../marketplace/marketplace-data';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
+import { AuthService } from '../../services/auth.service';
 
 /** One slide of the hero stat carousel (a card plus its backdrop design). */
 interface HeroStat {
@@ -252,6 +253,8 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   protected readonly cart = inject(CartService);
   /** Sends the clicked product's picture into the header cart and raises the toast. */
   private readonly flyToCart = inject(FlyToCartService);
+  /** Drives the hero's join / log-in call and the signed-in greeting. */
+  protected readonly auth = inject(AuthService);
 
   /**
    * Add a featured product at the quantity its card is showing, then fly its
@@ -266,6 +269,16 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     // service only ever reads a rect off it.
     const card = (event.currentTarget as HTMLElement | null)?.closest<HTMLElement>('.product-card');
     if (card) this.flyToCart.flyFrom(card, product);
+  }
+
+  /** Open the sign-up screen straight from the hero ("Get started"). */
+  protected openSignup(): void {
+    this.auth.openSignup();
+  }
+
+  /** Open the login screen from the hero's secondary call. */
+  protected openAuth(): void {
+    this.auth.openAuth();
   }
 
   /**

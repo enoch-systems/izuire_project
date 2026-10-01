@@ -1,0 +1,24 @@
+@if (auth.user()) {
+  <ng-content />
+} @else {
+  <section class="section account-gate">
+    <div class="container">
+      <div class="gate-card">
+        <span class="gate-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/><path d="M12 15v2"/></svg>
+        </span>
+        <span class="eyebrow">Account</span>
+        <h1>Sign in to see {{ label() }}</h1>
+        <p>
+          This side of Izuire belongs to signed-in buyers — payments, addresses and
+          quotes are all tied to one account. Your cart is saved on this device either way.
+        </p>
+        <div class="gate-actions">
+          <button type="button" class="btn btn-primary" (click)="openAuth()">Log in</button>
+          <button type="button" class="btn btn-outline" (click)="openSignup()">Create an account</button>
+        </div>
+        <p class="gate-hint">Demo access: <strong>user1&#64;gmail.com</strong> / <strong>123456</strong></p>
+      </div>
+    </div>
+  </section>
+}

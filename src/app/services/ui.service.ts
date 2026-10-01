@@ -9,6 +9,13 @@ import { LegalDocId } from './legal-content';
 export class UiService {
   readonly menuOpen = signal(false);
   readonly searchOpen = signal(false);
+  /**
+   * What the search should open with. Set by whichever field opened the
+   * overlay — the header bar, the marketplace bar, a shortcut — so the panel
+   * comes up holding the words the reader already typed instead of asking for
+   * them twice.
+   */
+  readonly searchSeed = signal('');
 
   /**
    * Which legal document the footer has asked to read, or null when the modal is
@@ -51,7 +58,8 @@ export class UiService {
     this.menuOpen.set(false);
   }
 
-  openSearch(): void {
+  openSearch(seed = ''): void {
+    this.searchSeed.set(seed);
     this.searchOpen.set(true);
   }
 

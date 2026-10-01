@@ -3,19 +3,20 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UiService } from '../../services/ui.service';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
+import { AuthService } from '../../services/auth.service';
 import { ThemeToggle } from '../theme-toggle/theme-toggle';
 import { LOGO_SRC } from '../../logo';
 
-/** Desktop nav dropdowns. Only one may be open at a time. */
-type DropdownName = 'categories' | 'resources';
+/** Desktop dropdowns. Only one may be open at a time. */
+type DropdownName = 'services' | 'company' | 'account';
 
 /**
  * Site header + mobile navigation.
  * Desktop: sticky glass header with active-route highlighting, animated
- * underlines, hover/click dropdowns (Categories and Resources), and a
- * polished search trigger.
+ * underlines, hover/click dropdowns (Services and Company), and a polished
+ * search trigger.
  * Mobile: hamburger that morphs to an X, a scrim + slide-in drawer with
- * staggered chevron links, active-route states and an end-to-end CTA.
+ * collapsible sections and a theme switch at the head.
  */
 @Component({
   selector: 'app-site-header',
@@ -33,6 +34,8 @@ export class SiteHeader implements OnDestroy {
   protected readonly logo = LOGO_SRC;
   /** Drives the header's cart badge. */
   protected readonly cart = inject(CartService);
+  /** Drives the login / get-started button and the signed-in state. */
+  protected readonly auth = inject(AuthService);
   /** Bumped when a product's picture lands in this button. */
   private readonly fly = inject(FlyToCartService);
   /**
@@ -46,6 +49,8 @@ export class SiteHeader implements OnDestroy {
   protected readonly scrolled = signal(false);
   /** Name of the open desktop dropdown, or null when they are all closed. */
   protected readonly openDropdown = signal<DropdownName | null>(null);
+  /** Which mobile drawer sections are expanded. */
+  protected readonly openGroup = signal<{ services: boolean; company: boolean }>({ services: false, company: false });
 
   constructor() {
     // Lock body scroll while the mobile drawer is open.
@@ -83,6 +88,37 @@ export class SiteHeader implements OnDestroy {
     this.ui.openSearch();
   }
 
+  /** Open the auth modal on login from the desktop button. */
+  protected openAuth(): void {
+    this.auth.openAuth();
+  }
+
+  /** Open the sign-up screen from the "Get started" call in the drawer. */
+  protected openSignup(): void {
+    this.auth.openSignup();
+  }
+
+  /**
+   * Ask before signing out. The dialog itself lives at the app root and reads
+   * AuthService state, so this closes whatever surface the click came from and
+   * lets the confirm step take over from there.
+   */
+  protected startLogout(): void {
+    this.openDropdown.set(null);
+    this.ui.closeMenu();
+    this.auth.startLogoutConfirm();
+  }
+
+  /** First letter of whoever is signed in, for the account avatar. */
+  protected initial(name: string | undefined, fallback: string): string {
+    return (name || fallback).charAt(0).toUpperCase();
+  }
+
+  /** First word of the name, or the email if the profile has no name yet. */
+  protected firstName(name: string | undefined, email: string): string {
+    return (name || email).trim().split(' ')[0];
+  }
+
   /**
    * Signing the mark again when the logo is clicked.
    *
@@ -108,6 +144,11 @@ export class SiteHeader implements OnDestroy {
     this.openDropdown.set(null);
   }
 
+  /** Toggles a mobile drawer section open or shut. */
+  protected toggleGroup(group: 'services' | 'company'): void {
+    this.openGroup.update((current) => ({ ...current, [group]: !current[group] }));
+  }
+
   protected onWindowScroll(): void {
     this.scrolled.set(window.scrollY > 8);
   }
@@ -121,6 +162,8 @@ export class SiteHeader implements OnDestroy {
   protected onDocumentClick(event: Event): void {
     if (!this.openDropdown()) return;
     const target = event.target as HTMLElement | null;
-    if (target && !target.closest('.nav-dropdown')) this.openDropdown.set(null);
+    if (target && !target.closest('.nav-dropdown') && !target.closest('.account-menu')) {
+      this.openDropdown.set(null);
+    }
   }
 }

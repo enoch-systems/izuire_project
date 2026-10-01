@@ -1,74 +1,82 @@
 <main id="top">
 
 <section class="page-hero">
-  <div class="container">
+  <div class="container page-hero-inner">
     <div class="breadcrumb"><a routerLink="/">Home</a> / Business Solutions</div>
     <span class="eyebrow">Sourcing, matched to your business</span>
     <h1>Business Solutions</h1>
-    <p>Whether this is your first import or your five-hundredth, the way we work adapts to where your business is.</p>
+    <p>Whether this is your first import or your five-hundredth, the way we work adapts to where your business is today and where you want it to be next quarter.</p>
+    <div class="hero-step-counter">
+      <span>01</span>
+      <span class="bar"></span>
+      <span>06 Profiles — pick the one that fits you</span>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="solution-grid">
-      
-      <div class="solution-card">
-        <span class="eyebrow">Built for</span>
-        <h3>New Importers</h3>
-        <p>Sourcing from China for the first time? We handle the parts that trip up first-timers, supplier vetting, quality control and customs, so your first order goes smoothly.</p>
-        <ul><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Guided first-order walkthrough</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Lower-risk MOQs where possible</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Full quality inspection before shipping</li></ul>
-        <a routerLink="/quote" class="btn btn-outline btn-sm">Get Started</a>
+    <div class="cluster-head">
+      <span class="eyebrow">Who are you buying for?</span>
+      <h2>Six ways we work — matched to how you operate</h2>
+      <p>Instead of one-size-fits-all service cards, pick the profile that best describes your business. The plan on the right updates to show what we focus on for businesses like yours.</p>
+    </div>
+
+    <div class="path-wrap">
+      <div class="path-nav">
+        <div class="path-nav-head">
+          <span class="eyebrow">Select a profile</span>
+          <h4>Tell us who you are</h4>
+        </div>
+        @for (p of paths; track p.key) {
+          <button
+            class="path-btn"
+            [class.active]="active() === p.key"
+            (click)="setActive(p.key)"
+            type="button"
+          >
+            <span class="path-btn-dot">{{ p.n }}</span>
+            <span>{{ p.label }}</span>
+          </button>
+        }
       </div>
 
-      <div class="solution-card">
-        <span class="eyebrow">Built for</span>
-        <h3>Existing Businesses</h3>
-        <p>Already importing, but want more reliability or better pricing? We plug into your existing supply chain or replace the weak links in it.</p>
-        <ul><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Supplier re-vetting &amp; backup sourcing</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Price benchmarking against market rates</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Consistent quality standards enforced</li></ul>
-        <a routerLink="/quote" class="btn btn-outline btn-sm">Get Started</a>
-      </div>
-
-      <div class="solution-card">
-        <span class="eyebrow">Built for</span>
-        <h3>Retailers</h3>
-        <p>Smaller, more frequent orders across varied categories, sourced and consolidated so you're not managing five suppliers at once.</p>
-        <ul><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Mixed-category consolidation</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Flexible order sizes</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Fast-moving category expertise (thrift, hair, electronics)</li></ul>
-        <a routerLink="/quote" class="btn btn-outline btn-sm">Get Started</a>
-      </div>
-
-      <div class="solution-card">
-        <span class="eyebrow">Built for</span>
-        <h3>Wholesalers</h3>
-        <p>Larger recurring orders where price consistency and reliable timelines matter more than anything else.</p>
-        <ul><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Negotiated recurring pricing</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Priority production scheduling</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Dedicated order monitoring</li></ul>
-        <a routerLink="/quote" class="btn btn-outline btn-sm">Get Started</a>
-      </div>
-
-      <div class="solution-card">
-        <span class="eyebrow">Built for</span>
-        <h3>Corporate Buyers</h3>
-        <p>Structured procurement for organizations, with documentation, reporting and accountability built into the process.</p>
-        <ul><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Formal proforma invoicing</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Compliance-ready documentation</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Single point of contact for procurement</li></ul>
-        <a routerLink="/quote" class="btn btn-outline btn-sm">Get Started</a>
-      </div>
-
-      <div class="solution-card">
-        <span class="eyebrow">Built for</span>
-        <h3>Bulk Procurement</h3>
-        <p>High-volume orders where CBM optimization and freight strategy directly affect your margins.</p>
-        <ul><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Freight strategy (air vs. sea) by volume</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Factory-direct negotiation at scale</li><li><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Full container &amp; consolidation options</li></ul>
-        <a routerLink="/quote" class="btn btn-outline btn-sm">Get Started</a>
-      </div>
+      @for (p of paths; track p.key) {
+        <div class="path-panel" [class.active]="active() === p.key">
+          <div class="path-panel-head">
+            <span class="eyebrow">{{ p.eyebrow }}</span>
+            <h3>{{ p.title }}</h3>
+          </div>
+          <p>{{ p.lead }}</p>
+          <ul class="path-features">
+            @for (f of p.features; track f) {
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                <span>{{ f }}</span>
+              </li>
+            }
+          </ul>
+          <div class="flow-actions">
+            <a routerLink="/quote" class="btn btn-primary">Get Started</a>
+            <a routerLink="/contact" class="flow-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+              Talk to us first
+            </a>
+          </div>
+        </div>
+      }
     </div>
   </div>
 </section>
 
-<section class="section on-paper" style="text-align:center;">
+<section class="band-section band-orange">
   <div class="container">
-    <h2 style="font-size:1.8rem; margin-bottom:16px;">Not sure which fits?</h2>
-    <p style="color:var(--ink-60); max-width:460px; margin:0 auto 28px;">Tell us about your business and order needs, we'll point you the right direction.</p>
-    <a routerLink="/quote" class="btn btn-primary">Request a Quote</a>
+    <div class="band-inner">
+      <span class="band-eyebrow">Not sure which fits?</span>
+      <h2>Tell us about your business</h2>
+      <p>A 2-minute description of what you sell and how often you re-stock is usually all it takes for us to point you to the right plan — and the right quote.</p>
+      <a routerLink="/quote" class="btn btn-primary">Request a Quote</a>
+    </div>
   </div>
 </section>
 

@@ -1,21 +1,5 @@
 <main id="top">
 
-<!-- ============ SEARCH STRIP ============ -->
-<section class="search-band" aria-label="Search products">
-  <div class="container">
-    <form class="hero-search" (submit)="$event.preventDefault()">
-      <select aria-label="Category">
-        <option>All Categories</option>
-        <option>Electronics</option>
-        <option>Thrift &amp; Fashion</option>
-        <option>Building Materials</option>
-        <option>Hair &amp; Wigs</option>
-        <option>Solar Equipment</option>
-      </select>
-    </form>
-  </div>
-</section>
-
 <!-- ============ HERO ============ -->
 <section class="hero">
   <div class="container">
@@ -24,16 +8,6 @@
         <span class="eyebrow hero-slide">China &rarr; Africa Sourcing</span>
         <h1 class="hero-slide">Your Trusted Bridge<br>from China to <em>Africa</em>.</h1>
         <p class="hero-sub hero-slide">IZUIRE sources, inspects and ships products for African importers, from Guangzhou's factories and markets straight to your door in Nigeria and beyond.</p>
-        <form class="hero-search hero-slide" (submit)="$event.preventDefault()">
-          <select aria-label="Category">
-            <option>All Categories</option>
-            <option>Electronics</option>
-            <option>Thrift &amp; Fashion</option>
-            <option>Building Materials</option>
-            <option>Hair &amp; Wigs</option>
-            <option>Solar Equipment</option>
-          </select>
-        </form>
         <div class="hero-tags hero-slide">
           <span>Popular:</span>
           <a routerLink="/marketplace">Phone accessories</a>
@@ -43,6 +17,14 @@
         </div>
         <div class="cta-row hero-slide">
           <a routerLink="/quote" class="btn btn-primary">Start Sourcing</a>
+          @if (auth.user(); as user) {
+            <a routerLink="/account/profile" class="btn btn-ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+              Welcome back, {{ (user.name || user.email).split(' ')[0] }}
+            </a>
+          } @else {
+            <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started<span class="hero-join-sep">or</span>Log in</button>
+          }
         </div>
       </div>
       <div class="hero-visual hero-slide" aria-hidden="true">
@@ -251,44 +233,41 @@
             <div class="product-grid product-grid--featured">
               @for (p of group; track p.id) {
                 <article class="product-card">
-                  <div class="product-media" [class.product-media--photo]="p.image">
-                    @if (p.image; as img) {
-                      <!-- Where a listing has a real photo it stands in for the icon.
-                           Alt is empty because the product title follows immediately
-                           below and already names the card. -->
-                      <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
-                    } @else {
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
-                      @switch (p.icon) {
-                        @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
-                        @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
-                        @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
-                        @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
-                        @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
-                        @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
-                        @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
-                        @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
-                        @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                  <a class="product-link product-link--media" [routerLink]="['/product', p.id]" [attr.aria-label]="'Open ' + p.title">
+                    <div class="product-media" [class.product-media--photo]="p.image">
+                      @if (p.image; as img) {
+                        <!-- Where a listing has a real photo it stands in for the icon.
+                             Alt is empty because the product title follows immediately
+                             below and already names the card. -->
+                        <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                      } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
+                        @switch (p.icon) {
+                          @case ('screen') { <rect x="7" y="2" width="10" height="20" rx="2"/> }
+                          @case ('earbuds') { <circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/> }
+                          @case ('bale') { <path d="M6 3h12l3 5-9 13L3 8z"/> }
+                          @case ('building') { <path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/> }
+                          @case ('hair') { <path d="M12 3c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z"/> }
+                          @case ('sun') { <circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/> }
+                          @case ('battery') { <rect x="3" y="8" width="16" height="8" rx="1"/><rect x="19" y="10" width="2" height="4"/> }
+                          @case ('sandal') { <path d="M4 10l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z"/> }
+                          @case ('pot') { <path d="M3 7h18M6 7v13a1 1 0 001 1h10a1 1 0 001-1V7M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/> }
+                        }
+                      </svg>
                       }
-                    </svg>
-                    }
-                    @if (p.verified) {
-                      <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
-                    }
-                  </div>
+                      @if (p.verified) {
+                        <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
+                      }
+                    </div>
+                  </a>
                   <div class="product-body">
-                    <h4 class="product-title">{{ p.title }}</h4>
+                    <a class="product-title-link" [routerLink]="['/product', p.id]"><h4 class="product-title">{{ p.title }}</h4></a>
                     <div class="product-specs">{{ p.specs }}</div>
                     <div class="product-price">
                       <span class="price-val">{{ p.ngn }}</span>
                       <span class="unit">{{ p.unit }}</span>
                     </div>
-                    <!-- Units. The card starts on a single unit and the count is set
-                         here rather than stated as an "MOQ: 50 units" note, so the
-                         shopper picks a number and adds exactly that many. The
-                         price beside it is the unit price and does not move with
-                         this — the basket total is worked out on the cart page. -->
-                    <div class="product-qty">
+                      <div class="product-qty">
                       <button type="button" class="product-qty-step" (click)="stepQty(p.id, -1)" [disabled]="qtyFor(p.id) <= 1" [attr.aria-label]="'One fewer unit of ' + p.title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
                       </button>

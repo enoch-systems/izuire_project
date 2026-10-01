@@ -11,6 +11,11 @@ import { Shipping } from './pages/shipping/shipping';
 import { Sourcing } from './pages/sourcing/sourcing';
 import { Marketplace } from './pages/marketplace/marketplace';
 import { Cart } from './pages/cart/cart';
+import { ProductDetail } from './pages/product-detail/product-detail';
+import { AccountProfile } from './pages/account/profile/profile';
+import { Payments } from './pages/account/payments/payments';
+import { AccountSettings } from './pages/account/settings/settings';
+import { AccountPassword } from './pages/account/password/password';
 
 /**
  * One route per original HTML page, with the same titles and meta
@@ -92,6 +97,40 @@ export const routes: Routes = [
     component: Cart,
     title: 'Your Cart — Izuire',
     data: { desc: 'Review the products you have added, adjust quantities to your minimums, and send the basket through for a quote.' },
+  },
+  {
+    path: 'product/:id',
+    component: ProductDetail,
+    title: 'Product — Izuire',
+    data: { desc: 'Product details, photos, pricing and minimums for this Izuire listing.' },
+  },
+  /* The signed-in side. Each page gates itself with the account prompt rather
+     than a route guard, so a shared link still explains what it is and offers
+     the way in instead of bouncing the visitor home. */
+  { path: 'account', redirectTo: 'account/profile', pathMatch: 'full' },
+  {
+    path: 'account/profile',
+    component: AccountProfile,
+    title: 'Profile — Your Account | Izuire',
+    data: { desc: 'Your Izuire profile: name, contact details, shipping address and billing address.' },
+  },
+  {
+    path: 'account/payments',
+    component: Payments,
+    title: 'Payments — Pending & Successful Orders | Izuire',
+    data: { desc: 'Your Izuire payment history: pending transactions, successful payments, references and tracking.' },
+  },
+  {
+    path: 'account/settings',
+    component: AccountSettings,
+    title: 'Settings — Your Account | Izuire',
+    data: { desc: 'Appearance, notifications and marketplace currency preferences for your Izuire account.' },
+  },
+  {
+    path: 'account/password',
+    component: AccountPassword,
+    title: 'Change Password — Your Account | Izuire',
+    data: { desc: 'Change the password on your Izuire account.' },
   },
   { path: '**', redirectTo: '' },
 ];

@@ -1,19 +1,29 @@
 <main id="top">
 
 <section class="page-hero">
-  <div class="container">
+  <div class="container page-hero-inner">
     <div class="breadcrumb"><a routerLink="/">Home</a> / Legal</div>
     <span class="eyebrow">Trust &amp; legal</span>
     <h1>Terms, Policies &amp; Responsibilities</h1>
-    <p>The terms that govern how we work together.</p>
+    <p>The terms that govern how we work together — transparent, in plain language, nothing hidden in 40-point fine print.</p>
+    <div class="hero-step-counter">
+      <span>01</span>
+      <span class="bar"></span>
+      <span>04 Documents · Jump to the section that applies</span>
+    </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="legal-note">
-      <strong>Draft placeholder content.</strong> {{ disclaimer }}
+    <div class="legal-hero">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      <div>
+        <h3>Important — please read this first</h3>
+        <p><strong>Draft placeholder content.</strong> {{ disclaimer }}</p>
+      </div>
     </div>
+
     <div class="tabs" id="legalTabs">
       @for (doc of docs; track doc.id) {
         <button
@@ -28,16 +38,17 @@
     </div>
 
     <div class="legal-body">
-      <!-- Rendered from the shared copy rather than written out here, so this page
-           and the footer's modal cannot drift apart. The ids stay on the panels:
-           /legal#privacy is linked from the search index and from elsewhere. -->
       @for (doc of docs; track doc.id) {
         <div class="tab-panel" [class.active]="active() === doc.id" [id]="doc.id" role="tabpanel">
-          <h3>{{ doc.title }}</h3>
-          @for (block of doc.blocks; track $index) {
+          <h3 style="padding-bottom:18px; border-bottom:1px solid var(--line); margin-bottom:28px;">{{ doc.title }}</h3>
+
+          @for (block of doc.blocks; track block.text + block.kind; let bi = $index) {
             @switch (block.kind) {
               @case ('h3') {
-                <h3>{{ block.text }}</h3>
+                <div class="legal-section-head">
+                  <span class="legal-section-num">{{ sectionNum(doc.id, bi) }}</span>
+                  <h3>{{ block.text }}</h3>
+                </div>
               }
               @case ('ul') {
                 <ul>
