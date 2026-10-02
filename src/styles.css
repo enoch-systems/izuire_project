@@ -6,6 +6,14 @@
     --blue-deep:#1D4ED8;
     --wa:#25D366;
     --wa-deep:#0E7A3E;
+    /* The verified mark's green, kept as its own pair rather than borrowing
+       --wa: that one is the WhatsApp button's fill, so it only ever carries white
+       on top of it, and as words on a dark page it goes muddy. This one is the
+       text-and-edge green, and it steps lighter with the mode (see the dark
+       block) so a 10px label still reads rather than greying out. */
+    --verify:#0E7A3E;
+    --verify-tint:rgba(14,122,62,.09);
+    --verify-line:rgba(14,122,62,.30);
     --ink:#111111;
     --white:#FFFFFF;
     --paper:#F8F8F6;
@@ -64,6 +72,13 @@
     --glass: rgba(18,18,14,.82);
     --glass-scrolled: rgba(18,18,14,.94);
     --line-strong: rgba(244,242,237,.28);
+    /* The one accent that does step with the mode, and for the same reason
+       --line-strong exists: it is the only accent that carries words rather than
+       sitting beneath them. #0E7A3E on a near-black page is a 3.4:1 grey-green,
+       so the mark lifts to a mint that holds better than 9:1. */
+    --verify:#3DD68C;
+    --verify-tint:rgba(61,214,140,.13);
+    --verify-line:rgba(61,214,140,.32);
     color-scheme:dark;
   }
   /* The wordmark plate. Inverting it keeps the mark legible in both modes. */
@@ -428,16 +443,24 @@
   /* Mobile drawer */
   .mobile-nav{
     position:fixed; top:0; right:0; bottom:0; left:auto;
-    /* The narrow end of the drawer. At 280px the side padding and link size come
-       down with it, so "Business Solutions" still sits on one line beside its
-       chevron; 84vw keeps it proportional on the smallest phones. */
-    width:min(280px, 84vw); z-index:210;
+    /* The drawer reads as an app sheet rather than as a sliver the page left
+       over, so it takes a proper width; 86vw keeps it proportional on the
+       smallest phones, where "Business Solutions" still sits on one line beside
+       its chevron. */
+    width:min(320px, 86vw); z-index:210;
     background:var(--white);
     transform:translateX(102%);
     transition:transform .4s var(--ease);
-    padding:20px 20px 24px; overflow:hidden;
+    /* The bottom pad carries the home-bar inset, so the last row is never sat
+       under the gesture area on a phone. */
+    padding:20px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    overflow:hidden;
     display:flex; flex-direction:column;
     box-shadow:-24px 0 60px rgba(17,17,17,.18);
+    /* A drawer is touched rather than clicked: no grey flash on tap, and no
+       waiting on a double-tap that is never coming. */
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
   }
   .mobile-nav.open{ transform:translateX(0); }
   .mobile-nav-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
@@ -3471,30 +3494,36 @@
   }
   .mobile-nav-user-login svg{ width:17px; height:17px; }
   .mobile-nav-user-login:hover{ border-color:var(--orange-deep); color:var(--orange-deep); background:var(--paper); }
+  /* When signed in, the head of the drawer becomes an identity block, in the
+     shape a phone app gives it: avatar, then the name with its verified mark on
+     one line and the address under them. Name and address truncate rather than
+     wrap, so a long one cannot turn the header into a paragraph and push the
+     destinations off the bottom of the drawer. */
+  .mobile-nav-user:has(.mobile-nav-user-avatar){
+    display:flex; align-items:center; gap:12px;
+    padding:2px 2px 18px;
+  }
   .mobile-nav-user-avatar{
-    width:42px; height:42px; flex:none; display:flex; align-items:center; justify-content:center;
+    width:46px; height:46px; flex:none;
+    display:flex; align-items:center; justify-content:center;
     border-radius:50%;
     background:linear-gradient(135deg, var(--orange), var(--orange-deep));
-    color:var(--white); font-family:var(--font-d); font-weight:700; font-size:1.05rem;
+    color:var(--white); font-family:var(--font-d); font-weight:700; font-size:1.1rem;
   }
   .mobile-nav-user-meta{
     flex:1; min-width:0;
-    display:flex; flex-direction:column; gap:2px;
+    display:flex; flex-direction:column; gap:3px;
   }
-  .mobile-nav-user-meta strong{ font-family:var(--font-d); font-size:.94rem; color:var(--ink); }
-  .mobile-nav-user-meta span{ font-family:var(--font-b); font-size:.76rem; color:var(--ink-40); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .mobile-nav-user-out{
-    width:38px; height:38px; flex:none;
-    display:flex; align-items:center; justify-content:center;
-    border:1px solid var(--line); border-radius:9px; background:none;
-    color:var(--ink-40); cursor:pointer;
-    transition:border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease);
+  /* Name and chip share the line; only the name gives way when the two of them
+     together are wider than the drawer. */
+  .mobile-nav-user-name{ display:flex; align-items:center; gap:8px; min-width:0; }
+  .mobile-nav-user-name strong{
+    min-width:0; font-family:var(--font-d); font-weight:600; font-size:.95rem; color:var(--ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  .mobile-nav-user-out svg{ width:18px; height:18px; }
-  .mobile-nav-user-out:hover{ border-color:var(--orange-deep); color:var(--orange-deep); background:var(--paper); }
-  /* When signed in the user chip needs the row layout restored. */
-  .mobile-nav-user:has(.mobile-nav-user-avatar){
-    display:flex; align-items:center; gap:12px; padding-top:8px;
+  .mobile-nav-user-email{
+    font-family:var(--font-b); font-size:.76rem; color:var(--ink-40);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
 
   @media (max-width: 620px){
@@ -6414,13 +6443,28 @@
   .account-menu-avatar--lg{ width:42px; height:42px; font-size:1rem; }
   .account-menu-id{ min-width:0; display:flex; flex-direction:column; gap:2px; }
   .account-menu-id strong{ font-family:var(--font-d); font-size:.95rem; }
-  .account-menu-id > span{ font-size:.78rem; color:var(--ink-60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .account-tier{
-    align-self:flex-start; margin-top:4px;
-    font-size:.64rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
-    color:var(--orange-deep); background:rgba(245,130,31,.11);
-    border:1px solid rgba(245,130,31,.28); border-radius:999px; padding:3px 9px;
+  .account-menu-email{ font-size:.78rem; color:var(--ink-60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* The verified mark: green, with a tick, so a tier reads as something that was
+     checked rather than as one more category label. One chip with three homes —
+     the header panel, the profile card and the drawer — so the account looks the
+     same wherever it is shown, and flipping a tier's colour means editing one
+     rule rather than hunting three. */
+  .account-verified{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:var(--font-d); font-weight:600;
+    font-size:.62rem; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--verify); background:var(--verify-tint);
+    border:1px solid var(--verify-line); border-radius:999px;
+    padding:3px 9px 3px 7px; white-space:nowrap;
   }
+  .account-verified svg{
+    width:11px; height:11px; flex:none;
+    fill:none; stroke:currentColor;
+    stroke-width:3.2; stroke-linecap:round; stroke-linejoin:round;
+  }
+  /* The header panel stacks its lines, so the chip must neither be stretched by
+     that column nor crowd the address above it. */
+  .account-menu-id .account-verified{ align-self:flex-start; margin-top:5px; }
   .account-menu-links{ display:flex; flex-direction:column; padding:8px 4px; }
   .account-menu-links a{ display:flex; align-items:flex-start; gap:12px; padding:10px; border-radius:10px; transition:background .18s var(--ease); }
   .account-menu-links a:hover{ background:var(--paper); }
@@ -6440,11 +6484,9 @@
   .account-menu-out:hover{ color:#C0392B; }
 
   /* --- The signed-in block in the mobile drawer --- */
-  .mobile-nav-user-tier{
-    flex:none; font-size:.62rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
-    color:var(--orange-deep); background:rgba(245,130,31,.11);
-    border:1px solid rgba(245,130,31,.28); border-radius:999px; padding:3px 8px;
-  }
+  /* Its tick is the shared .account-verified above, so the drawer, the header
+     panel and the profile card mark the account the same way. A tier that stays
+     quiet in the narrow drawer: just the word, beside the name. */
   .mobile-nav-account{
     display:flex; flex-direction:column;
     margin:0 -20px; padding:4px 20px 10px;

@@ -154,7 +154,10 @@
                 <strong>{{ user.name || 'Izuire buyer' }}</strong>
                 <span class="account-id-email">{{ user.email }}</span>
                 @if (user.memberTier) {
-                  <span class="account-tier">{{ user.memberTier }} member</span>
+                  <span class="account-verified">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                    {{ user.memberTier }} member
+                  </span>
                 }
                 <ul class="account-id-facts">
                   @if (user.createdAt) {

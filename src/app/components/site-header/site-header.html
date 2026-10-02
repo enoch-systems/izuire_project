@@ -59,9 +59,12 @@
               <span class="account-menu-avatar account-menu-avatar--lg" aria-hidden="true">{{ initial(user.name, user.email) }}</span>
               <div class="account-menu-id">
                 <strong>{{ user.name || user.email }}</strong>
-                <span>{{ user.email }}</span>
+                <span class="account-menu-email">{{ user.email }}</span>
                 @if (user.memberTier) {
-                  <span class="account-tier">{{ user.memberTier }} member</span>
+                  <span class="account-verified">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                    {{ user.memberTier }} member
+                  </span>
                 }
               </div>
             </div>
@@ -160,18 +163,23 @@
 
   <!-- The account entry sits at the head of the drawer so the one action every
        visitor needs is ready when the drawer opens. Logged out it offers a single
-       primary "Get started" with a quiet Log in beneath; signed in it shows the
-       shopper's initial, name and a log-out, doubling as a small account panel. -->
+       primary "Get started" with a quiet Log in beneath; signed in it becomes the
+       identity header for the destinations below it. -->
   @if (auth.user(); as user) {
     <div class="mobile-nav-user">
       <span class="mobile-nav-user-avatar" aria-hidden="true">{{ initial(user.name, user.email) }}</span>
       <div class="mobile-nav-user-meta">
-        <strong>Welcome, {{ firstName(user.name, user.email) }}</strong>
-        <span>{{ user.email }}</span>
+        <span class="mobile-nav-user-name">
+          <strong>{{ user.name || 'Izuire buyer' }}</strong>
+          @if (user.memberTier) {
+            <span class="account-verified">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+              {{ user.memberTier }}
+            </span>
+          }
+        </span>
+        <span class="mobile-nav-user-email">{{ user.email }}</span>
       </div>
-      @if (user.memberTier) {
-        <span class="mobile-nav-user-tier">{{ user.memberTier }}</span>
-      }
     </div>
 
     <!-- The signed-in destinations sit ahead of the ordinary links: what an
