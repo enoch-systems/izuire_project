@@ -2,10 +2,10 @@
 
 <section class="page-hero">
   <div class="container page-hero-inner">
-    <div class="breadcrumb"><a routerLink="/">Home</a> / Contact</div>
+    <app-breadcrumb />
     <span class="eyebrow">Get in touch</span>
     <h1>Contact Izuire</h1>
-    <p>Questions about an order, a product, or how sourcing works — reach us however's easiest for you. You'll get a real person, usually within minutes on WhatsApp.</p>
+    <p>Questions about an order, a product, or how sourcing works, reach us however's easiest for you. You'll get a real person, usually within minutes on WhatsApp.</p>
     <div class="hero-step-counter">
       <span>01</span>
       <span class="bar"></span>
@@ -18,7 +18,7 @@
   <div class="container">
     <div class="cluster-head">
       <span class="eyebrow">How to reach us</span>
-      <h2>Four paths in — pick the fastest for your question</h2>
+      <h2>Four paths in, pick the fastest for your question</h2>
       <p>WhatsApp gets the fastest reply, but every channel below is monitored by the same team. If one doesn't fit, try the next.</p>
     </div>
 
@@ -94,8 +94,8 @@
   <div class="container">
     <div class="cluster-head">
       <span class="eyebrow">Send a message</span>
-      <h2>Fill this out &mdash; we pick it up from there</h2>
-      <p>Prefer to have us call you? Fill in the details and choose how we send it — WhatsApp or Email. We pick up every message.</p>
+      <h2>Fill this out, we pick it up from there</h2>
+      <p>Prefer to have us call you? Fill in the details and choose how we send it, WhatsApp or Email. We pick up every message.</p>
     </div>
 
     <div class="path-wrap" style="max-width:860px; margin:0 auto;">
@@ -122,7 +122,7 @@
           </div>
           <div class="field" id="field-message" [class.has-error]="submitted() && messageInvalid()">
             <label for="cMessage">Message <span class="req">*</span></label>
-            <textarea id="cMessage" name="cMessage" [(ngModel)]="cMessage" rows="6" placeholder="How can we help? Product, quantity, timeline — whatever you have so far."></textarea>
+            <textarea id="cMessage" name="cMessage" [(ngModel)]="cMessage" rows="6" placeholder="How can we help? Product, quantity, timeline, whatever you have so far."></textarea>
             <div class="field-error">Please enter a message.</div>
           </div>
           <div class="form-actions">

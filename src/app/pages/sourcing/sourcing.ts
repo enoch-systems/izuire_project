@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 
 const mkWords = (text: string): string[] =>
   text.trim().split(/\s+/);
 
 @Component({
   selector: 'app-sourcing',
-  imports: [RouterLink],
+  imports: [RouterLink, Breadcrumb],
   templateUrl: './sourcing.html',
 })
 export class Sourcing {
@@ -82,37 +83,37 @@ export class Sourcing {
   readonly steps = [
     {
       n: '01',
-      chapter: 'Chapter 01 — Brief',
+      chapter: 'Chapter 01, Brief',
       title: 'You tell us what you need',
-      body: mkWords('Product, quantity, spec, target price — send as much or as little detail as you have. A photo, an AliExpress link, a hand-drawn sketch, whatever you\'ve got. We\'ll fill in the blanks.'),
-      perk: 'Tip: Share a reference image or competitor link — it cuts discovery time in half.',
+      body: mkWords('Product, quantity, spec, target price, send as much or as little detail as you have. A photo, an AliExpress link, a hand-drawn sketch, whatever you\'ve got. We\'ll fill in the blanks.'),
+      perk: 'Tip: Share a reference image or competitor link, it cuts discovery time in half.',
     },
     {
       n: '02',
-      chapter: 'Chapter 02 — Source',
+      chapter: 'Chapter 02, Source',
       title: 'We source the market & send you a quote',
       body: mkWords('We pull options from our vetted supplier network, compare pricing and lead times, and come back with a clear quote: unit price, MOQ, production time, and the trade-offs between suppliers.'),
       perk: 'You get 2–3 supplier options minimum, not just one locked-in choice.',
     },
     {
       n: '03',
-      chapter: 'Chapter 03 — Approve',
+      chapter: 'Chapter 03, Approve',
       title: 'You approve & we lock production',
       body: mkWords('Confirm the quote, the supplier, and the terms. We handle deposit payment, spec sheets, sample requests and production kick-off so nothing moves without your sign-off.'),
-      perk: 'Samples available on 90% of orders — test before you commit to bulk.',
+      perk: 'Samples available on 90% of orders, test before you commit to bulk.',
     },
     {
       n: '04',
-      chapter: 'Chapter 04 — Inspect',
+      chapter: 'Chapter 04, Inspect',
       title: 'Quality check & inspection sign-off',
       body: mkWords('Production doesn\'t finish and ship without a physical check. Our QC team inspects against the agreed spec, sends photo + video proof, and only clears the order when you\'re happy.'),
-      perk: 'Defects found at this stage get fixed on the factory floor — not discovered in your warehouse.',
+      perk: 'Defects found at this stage get fixed on the factory floor, not discovered in your warehouse.',
     },
     {
       n: '05',
-      chapter: 'Chapter 05 — Deliver',
+      chapter: 'Chapter 05, Deliver',
       title: 'We consolidate & ship to your door',
-      body: mkWords('The order is consolidated, packed, booked on the best air/sea option for your timeline, and tracked door-to-door. Customs docs, freight, and local delivery — all handled end-to-end.'),
+      body: mkWords('The order is consolidated, packed, booked on the best air/sea option for your timeline, and tracked door-to-door. Customs docs, freight, and local delivery, all handled end-to-end.'),
       perk: 'Shipping passes through at our group rates, typically 15–30% below what you\'d book alone.',
     },
   ];

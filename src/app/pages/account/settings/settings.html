@@ -3,7 +3,7 @@
 
     <section class="page-hero account-hero">
       <div class="container">
-        <div class="breadcrumb"><a routerLink="/">Home</a> / Account / Settings</div>
+        <app-breadcrumb />
         <div class="account-hero-row">
           <div>
             <span class="eyebrow">Preferences</span>
@@ -90,7 +90,7 @@
               <button type="button" [class.active]="currency() === 'NGN'" (click)="setCurrency('NGN')" [attr.aria-pressed]="currency() === 'NGN'">₦ Naira</button>
               <button type="button" [class.active]="currency() === 'RMB'" (click)="setCurrency('RMB')" [attr.aria-pressed]="currency() === 'RMB'">¥ Renminbi</button>
             </div>
-            <p class="settings-hint">RMB prices are supplier quotes — the naira figure is the one you settle in.</p>
+            <p class="settings-hint">RMB prices are supplier quotes, the naira figure is the one you settle in.</p>
           </section>
 
           <section class="account-card">
@@ -122,7 +122,7 @@
         </div>
 
         <p class="account-note">
-          Appearance is remembered between visits. The notification and currency switches are demo preferences — they reset when the page reloads.
+          Appearance is remembered between visits. The notification and currency switches are demo preferences, they reset when the page reloads.
         </p>
       </div>
     </section>

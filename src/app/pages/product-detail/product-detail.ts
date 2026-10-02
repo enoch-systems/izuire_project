@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Product, PRODUCTS } from '../marketplace/marketplace-data';
+import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 import { CartService, naira } from '../../services/cart.service';
 
 /** A single view then the shopper can flip through in the gallery. */
@@ -50,7 +51,7 @@ function deriveGallery(product: Product): GalleryShot[] {
  */
 @Component({
   selector: 'app-product-detail',
-  imports: [TitleCasePipe, RouterLink],
+  imports: [TitleCasePipe, RouterLink, Breadcrumb],
   templateUrl: './product-detail.html',
 })
 export class ProductDetail {

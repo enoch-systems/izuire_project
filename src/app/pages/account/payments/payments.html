@@ -3,12 +3,12 @@
 
     <section class="page-hero account-hero">
       <div class="container">
-        <div class="breadcrumb"><a routerLink="/">Home</a> / Account / Payments</div>
+        <app-breadcrumb />
         <div class="account-hero-row">
           <div>
             <span class="eyebrow">Money &amp; orders</span>
             <h1>Payments</h1>
-            <p>Every order with a payment attached — deposits, balances and what is still clearing.</p>
+            <p>Every order with a payment attached, deposits, balances and what is still clearing.</p>
           </div>
           @if (auth.user(); as user) {
             <span class="account-hero-id">{{ user.name || user.email }}</span>
@@ -105,7 +105,7 @@
         }
 
         <p class="account-note">
-          Demo account — payments, references and tracking numbers are seeded mock data, not a real ledger.
+          Demo account, payments, references and tracking numbers are seeded mock data, not a real ledger.
         </p>
       </div>
     </section>

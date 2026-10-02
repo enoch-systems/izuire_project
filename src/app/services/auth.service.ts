@@ -104,7 +104,7 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   {
     id: 'IZU-2026-0884',
     date: '08 Sep 2026 · 14:40',
-    title: 'Sourcing deposit — Okrika bales',
+    title: 'Sourcing deposit, Okrika bales',
     items: '12× Grade A Okrika women\'s bales',
     amount: 210000,
     currency: 'NGN',
@@ -130,19 +130,19 @@ const MOCK_TRANSACTIONS: Transaction[] = [
   {
     id: 'IZU-2026-0977',
     date: '30 Sep 2026 · 17:22',
-    title: 'Solar panel bulk order — 40% deposit',
+    title: 'Solar panel bulk order, 40% deposit',
     items: '50× 550W Mono solar panels',
     amount: 320000,
     currency: 'NGN',
     status: 'pending',
     method: 'Bank transfer · awaiting balance',
     reference: 'INV-IU-0977',
-    eta: 'Production — ships 12 Oct 2026',
+    eta: 'Production, ships 12 Oct 2026',
   },
   {
     id: 'IZU-2026-0981',
     date: '01 Oct 2026 · 08:47',
-    title: 'Building materials — CIF quote accepted',
+    title: 'Building materials, CIF quote accepted',
     items: '20ft container · Tiles, cement mixers, plumbing',
     amount: 1240000,
     currency: 'NGN',
@@ -394,7 +394,7 @@ export class AuthService {
       'Signing you in…',
       'Pulling up your orders and saved quotes…',
       'Syncing payments and delivery updates…',
-      'Almost there — setting up your dashboard…',
+      'Almost there, setting up your dashboard…',
     ];
     this.stageCopy(lines, LOGIN_DELAY);
   }
@@ -404,7 +404,7 @@ export class AuthService {
       'Creating your Izuire account…',
       'Stamping a member tier on your profile…',
       'Wiring up your first quote inbox…',
-      'One moment — opening the doors…',
+      'One moment, opening the doors…',
     ];
     this.stageCopy(lines, SIGNUP_DELAY);
   }

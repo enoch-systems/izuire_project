@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AccountGate } from '../../../components/account-gate/account-gate';
 import { AccountNav } from '../../../components/account-nav/account-nav';
+import { Breadcrumb } from '../../../components/breadcrumb/breadcrumb';
 import { AuthService } from '../../../services/auth.service';
 import { Theme, ThemeService } from '../../../services/theme.service';
 
@@ -16,7 +17,7 @@ import { Theme, ThemeService } from '../../../services/theme.service';
  */
 @Component({
   selector: 'app-account-settings',
-  imports: [RouterLink, AccountGate, AccountNav],
+  imports: [RouterLink, AccountGate, AccountNav, Breadcrumb],
   templateUrl: './settings.html',
 })
 export class AccountSettings {

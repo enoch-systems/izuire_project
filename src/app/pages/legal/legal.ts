@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 import {
   LEGAL_DISCLAIMER,
   LEGAL_DOC_IDS,
@@ -18,7 +19,7 @@ import {
  */
 @Component({
   selector: 'app-legal',
-  imports: [RouterLink],
+  imports: [Breadcrumb],
   templateUrl: './legal.html',
 })
 export class Legal {

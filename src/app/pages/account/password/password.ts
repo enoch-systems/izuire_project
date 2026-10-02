@@ -1,8 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { AccountGate } from '../../../components/account-gate/account-gate';
 import { AccountNav } from '../../../components/account-nav/account-nav';
+import { Breadcrumb } from '../../../components/breadcrumb/breadcrumb';
 import { AuthService } from '../../../services/auth.service';
 
 /** What each strength step is called. Index 0 is "nothing typed yet". */
@@ -19,7 +19,7 @@ const STRENGTH_LABELS = ['', 'Weak', 'Fair', 'Good', 'Strong'];
  */
 @Component({
   selector: 'app-account-password',
-  imports: [FormsModule, RouterLink, AccountGate, AccountNav],
+  imports: [FormsModule, AccountGate, AccountNav, Breadcrumb],
   templateUrl: './password.html',
 })
 export class AccountPassword {

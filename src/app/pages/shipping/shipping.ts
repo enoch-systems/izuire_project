@@ -1,11 +1,12 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 
 const mkWords = (t: string): string[] => t.trim().split(/\s+/);
 
 @Component({
   selector: 'app-shipping',
-  imports: [RouterLink],
+  imports: [RouterLink, Breadcrumb],
   templateUrl: './shipping.html',
 })
 export class Shipping {
@@ -30,28 +31,28 @@ export class Shipping {
   readonly steps = [
     {
       n: '01',
-      chapter: 'Step 01 — Consolidate',
+      chapter: 'Step 01, Consolidate',
       title: 'Packing & consolidation at our Guangzhou warehouse',
       body: mkWords('Your order is inspected, packed, and consolidated with the right commercial invoice, packing list and shipping documentation at our Guangzhou warehouse. We consolidate multiple suppliers into one shipment where it saves you money.'),
       perk: 'Combining orders from 2+ suppliers into one container typically saves 25–40% on per-unit freight.',
     },
     {
       n: '02',
-      chapter: 'Step 02 — Book',
+      chapter: 'Step 02, Book',
       title: 'Freight booking on the right route for your timeline',
-      body: mkWords('We book air or sea freight based on your timeline, budget and shipment volume. No "one size fits all" — we compare routes, lines, and current capacity to get the best option for that specific week.'),
+      body: mkWords('We book air or sea freight based on your timeline, budget and shipment volume. No "one size fits all", we compare routes, lines, and current capacity to get the best option for that specific week.'),
       perk: 'Freight rates change weekly. We quote the live rate, not a stale catalogue price from 6 months ago.',
     },
     {
       n: '03',
-      chapter: 'Step 03 — Clear',
+      chapter: 'Step 03, Clear',
       title: 'Import documentation & customs clearance on arrival',
       body: mkWords('SONCAP, form M, PAAR, duty assessments, and customs coordination on arrival. We work with licensed clearing agents we\'ve used for years so the paperwork matches the cargo and nothing gets stuck at the port over an avoidable issue.'),
       perk: 'Documentation mismatches are the #1 cause of clearance delays. We catch them before the ship sails, not when it docks.',
     },
     {
       n: '04',
-      chapter: 'Step 04 — Deliver',
+      chapter: 'Step 04, Deliver',
       title: 'Last-mile delivery to your destination city',
       body: mkWords('Once cleared, your cargo is trucked to Lagos, Onitsha, Abuja, or wherever you are in Nigeria or beyond. You get tracking updates at each leg, so you know when to expect delivery instead of guessing.'),
       perk: 'Door-to-door delivery to Onitsha and the Southeast uses established overland routes we run every week.',
@@ -99,7 +100,7 @@ export class Shipping {
     {
       n: '03',
       name: 'Africa Wide',
-      body: 'Shipping beyond Nigeria is available to most major West and Central African destinations — tell us your destination and we\'ll confirm logistics and pricing.',
+      body: 'Shipping beyond Nigeria is available to most major West and Central African destinations, tell us your destination and we\'ll confirm logistics and pricing.',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>',
     },
   ];

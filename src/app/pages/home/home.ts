@@ -74,6 +74,16 @@ const TRUST_STATS: TrustStat[] = [
   { value: 1000, suffix: '+', label: 'Orders fulfilled to Africa' },
 ];
 
+/** How long one pass of the trust band's count-up takes. */
+const TRUST_COUNT_MS = 1500;
+/**
+ * The band re-counts on this loop, measured from the *start* of a pass rather than
+ * from the end of the last one. So the figures hold at their real values for the
+ * remainder of the cycle instead of sitting at zero, and the gap between the
+ * landing and the rewind is however much of the cycle the count did not use.
+ */
+const TRUST_CYCLE_MS = 7000;
+
 /** One customer story in the testimonials slider. */
 interface Testimonial {
   quote: string;
@@ -149,8 +159,10 @@ for (let i = 0; i < PRODUCTS.length; i += PAGE_SIZE) {
  *
  * The trust band below counts its figures up from zero when the band is scrolled to,
  * each one starting a beat after the one before it, with a bar filling under each
- * number and the three sign-off badges settling in once the count has landed (see
- * watchTrust and tween).
+ * number and the three sign-off badges settling in once the count has landed. It then
+ * rewinds and counts again on a seven-second loop for as long as the band is on
+ * screen, so the figures read as a claim still being made rather than a number that
+ * ran once and stopped (see watchTrust and tween).
  *
  * Category and product cards also bubble up one at a time as you scroll to them
  * (see revealCards). A card's resting style is its normal style and the "not
@@ -343,6 +355,10 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
    *  both can be stopped when the view goes away. */
   private cancelCount: (() => void) | undefined;
   private cancelTrust: (() => void) | undefined;
+  /** Handle for the wait between one trust-band count landing and the next rewind.
+   *  Its presence is what says the loop is running, so the observer can be asked
+   *  again on every threshold crossing without stacking up a second loop. */
+  private trustLoop: ReturnType<typeof setTimeout> | undefined;
   private trustObserver: IntersectionObserver | undefined;
 
   protected goTo(idx: number): void {
@@ -378,7 +394,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     this.reasonObserver?.disconnect();
     this.trustObserver?.disconnect();
     this.cancelCount?.();
-    this.cancelTrust?.();
+    this.stopTrustLoop();
   }
 
   /**
@@ -578,10 +594,18 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Count the trust band up as it is scrolled to. The figures run from zero to their
+   * Count the trust band up as it is scrolled to, then keep re-counting it on a
+   * loop for as long as the band is on screen. The figures run from zero to their
    * real values, staggered across the band, and the three sign-off badges below
-   * settle in sequence once the count has landed. Nothing is primed until the band is
-   * actually reached, so without scripting the band renders finished.
+   * settle in sequence once the count has landed — both of them again on every
+   * pass, so the band reads as a claim still being made rather than a figure that
+   * ran once and stopped.
+   *
+   * The loop is tied to the viewport rather than left on a bare interval: it starts
+   * when the band is reached and stops on the way out, so nothing keeps counting
+   * off-camera or holds a timer open behind a tab nobody is looking at. Nothing is
+   * primed until the band is first reached, so without scripting the band still
+   * renders finished.
    */
   private watchTrust(): void {
     const band = this.host.nativeElement.querySelector<HTMLElement>('.trust-band');
@@ -592,25 +616,79 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
     this.trustObserver = new IntersectionObserver(
       (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) {
-          return;
+        if (entries.some((entry) => entry.isIntersecting)) {
+          this.runTrustLoop(band);
+        } else {
+          this.stopTrustLoop();
         }
-        // One shot: the count should not replay on every pass.
-        this.trustObserver?.disconnect();
-
-        band.classList.add('armed');
-        this.trustProgress.set(0);
-        this.cancelTrust = this.tween(0, 1, 1500, (value) => {
-          this.trustProgress.set(value);
-          if (value >= 1) {
-            band.classList.add('counted');
-          }
-        });
       },
       { threshold: 0.45 },
     );
 
     this.trustObserver.observe(band);
+  }
+
+  /**
+   * Count once, then queue the next pass. Re-entrant by design: the observer calls
+   * this on every crossing, and a loop already waiting on its timer is left alone
+   * so a re-scroll cannot start a second one running beside it.
+   */
+  private runTrustLoop(band: HTMLElement): void {
+    if (this.trustLoop !== undefined) {
+      return;
+    }
+
+    const cycle = (): void => {
+      // Less motion asks for no playback, and a rewind each cycle would flash the
+      // band from its real figures back to zero every seven seconds. It is left
+      // finished instead, which is the same thing tween() would do on its own.
+      if (this.lessMotion()) {
+        this.trustProgress.set(1);
+        return;
+      }
+
+      // Off `counted` before the rewind, so the badges replay their settle on each
+      // pass. Left on, they would hold the first run's end state forever.
+      band.classList.remove('counted');
+      band.classList.add('armed');
+      this.trustProgress.set(0);
+
+      this.cancelTrust = this.tween(0, 1, TRUST_COUNT_MS, (value) => {
+        this.trustProgress.set(value);
+        if (value >= 1) {
+          band.classList.add('counted');
+        }
+      });
+
+      this.trustLoop = setTimeout(() => {
+        this.trustLoop = undefined;
+        cycle();
+      }, TRUST_CYCLE_MS);
+    };
+
+    cycle();
+  }
+
+  /**
+   * Stop looping and leave the band showing its real figures, so a band that was
+   * caught mid-count does not freeze on a half-told claim. Called when the band
+   * leaves the screen and again when the view goes away.
+   */
+  private stopTrustLoop(): void {
+    clearTimeout(this.trustLoop);
+    this.trustLoop = undefined;
+    this.cancelTrust?.();
+    this.trustProgress.set(1);
+  }
+
+  /**
+   * True when the visitor has asked for less motion. One definition, because the
+   * trust band's loop and tween() both have to answer it the same way.
+   */
+  private lessMotion(): boolean {
+    return (
+      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
   }
 
   /**
@@ -620,9 +698,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
    * straight away. Returns a cancel function.
    */
   private tween(from: number, to: number, duration: number, apply: (value: number) => void): () => void {
-    const lessMotion =
-      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (lessMotion) {
+    if (this.lessMotion()) {
       apply(to);
       return () => undefined;
     }

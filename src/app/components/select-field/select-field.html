@@ -1,0 +1,51 @@
+<!-- The trigger is a combobox rather than a button so the arrows, Enter and
+     Escape are ours to answer: a real button would fire its own click on the
+     same keypress and fight this handler. -->
+<div class="sselect" [class.is-open]="open()" [class.is-set]="!!value()" [class.has-error]="error()">
+  <div
+    class="sselect__trigger"
+    role="combobox"
+    tabindex="0"
+    aria-haspopup="listbox"
+    [attr.id]="fieldId()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="fieldId() + '-panel'"
+    [attr.aria-activedescendant]="open() && active() >= 0 ? fieldId() + '-opt-' + active() : null"
+    (click)="toggle()"
+    (keydown)="onKeydown($event)"
+    (blur)="onBlur()">
+    <span class="sselect__value">{{ labelFor(value()) }}</span>
+    <span class="sselect__caret" aria-hidden="true">
+      <svg viewBox="0 0 12 8" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5 6 6.5l5-5"/></svg>
+    </span>
+  </div>
+  <label class="sselect__label" [attr.for]="fieldId()">{{ label() }}@if (required()) {<span class="req"> *</span>}</label>
+
+  <!-- Folded away with the same 0fr → 1fr trick the optional step uses, so the
+       panel opens to whatever height it needs with nothing measured in script.
+       `inert` keeps the closed list out of the tab order and off the reader. -->
+  <div class="sselect__panel" [attr.inert]="open() ? null : ''">
+    <div class="sselect__panel-inner">
+      <ul class="sselect__list" role="listbox" [attr.id]="fieldId() + '-panel'" [attr.aria-label]="label()">
+        @for (option of options(); track option.value; let i = $index) {
+          <li
+            class="sselect__opt"
+            role="option"
+            [attr.id]="fieldId() + '-opt-' + i"
+            [attr.aria-selected]="option.value === value()"
+            [class.is-active]="i === active()"
+            [class.is-chosen]="option.value === value()"
+            (click)="choose(option.value)"
+            (mouseenter)="active.set(i)">
+            <span class="sselect__opt-label">{{ option.label }}</span>
+            <span class="sselect__opt-tick" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </span>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="field-error">{{ errorText() }}</div>
+</div>

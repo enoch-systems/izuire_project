@@ -1,5 +1,6 @@
 import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 import { CATEGORIES, PRODUCTS, Product } from './marketplace-data';
 import { CURRENCIES, Currency, convertFromNaira, formatMoney } from '../../services/currency';
 import { CartService } from '../../services/cart.service';
@@ -23,7 +24,7 @@ const PAGE_SIZE = 8;
  */
 @Component({
   selector: 'app-marketplace',
-  imports: [RouterLink],
+  imports: [RouterLink, Breadcrumb],
   templateUrl: './marketplace.html',
 })
 export class Marketplace {

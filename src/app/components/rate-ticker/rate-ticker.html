@@ -1,0 +1,30 @@
+<!-- The rate strip. The label names the money every figure beside it is quoted
+     against, and it is held out of the travel rather than riding along, so it is
+     still there to read when the rates have moved past it. The rates themselves
+     run in the track. -->
+<aside class="rate-ticker" aria-label="Today's indicative rates, quoted to one US dollar">
+  <p class="rate-ticker__base">
+    <span class="rate-ticker__pulse" aria-hidden="true"></span>
+    1 USD =
+  </p>
+
+  <div class="rate-ticker__viewport">
+    <div class="rate-ticker__track">
+      @for (copy of copies; track copy) {
+        <!-- The second pass exists only to give the loop something to travel
+             into, so it is kept out of the accessibility tree: the rates are
+             announced once, not twice. -->
+        <div class="rate-ticker__set" [attr.aria-hidden]="copy ? 'true' : null">
+          <span class="rate-ticker__when">Today · {{ today }}</span>
+          @for (rate of rates; track rate.code) {
+            <span class="rate-ticker__item" [attr.title]="rate.country + ' · 1 USD = ' + rate.figure">
+              <img class="rate-ticker__flag" [src]="flagSrc(rate.iso)" alt="" />
+              <span class="rate-ticker__code">{{ rate.code }}</span>
+              <span class="rate-ticker__figure">{{ rate.figure }}</span>
+            </span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</aside>

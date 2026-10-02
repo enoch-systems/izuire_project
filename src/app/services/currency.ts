@@ -10,15 +10,20 @@
  * actually quoted is the naira one - which is why `formatMoney` is never called
  * for them without the `≈` the page puts in front of it.
  *
- * Foreign currency display rates are derived from USD. The NGN/USD anchor is
- * fixed here at the requested indicative rate; the other cross-rates are kept
- * together below so they can be updated without changing the conversion code.
+ * Every rate on the site lives in the single table further down this file.
+ * Editing that table is the whole of the job when the rates move: the prices the
+ * marketplace converts and the figures the rate ticker quotes are both read from
+ * it, so the two cannot drift apart.
  */
 export interface Currency {
   /** ISO code, e.g. 'NGN'. Shown beside the symbol so the money is unambiguous. */
   code: string;
   /** The country a reader picks it by. */
   country: string;
+  /** ISO country code for the flag that stands beside it in the rate ticker.
+   *  The euro is the one that belongs to a currency rather than a country, so it
+   *  carries `eu`, the flag that stands in for it. */
+  iso: string;
   /** What goes in front of the figure. */
   symbol: string;
   /** Decimal places to show. Whole units for the currencies whose small change
@@ -32,29 +37,61 @@ export interface Currency {
 }
 
 /**
- * Prices are stored in naira. Each foreign-currency rate is calculated from its
- * USD cross-rate and the single NGN/USD anchor, keeping conversions consistent.
+ * THE RATES: one table, and the only place a rate is ever edited.
+ *
+ * Each line is how many units of that currency one US dollar buys, at today's
+ * indicative rate. Everything that shows money works from this table, so a price
+ * on the marketplace and a figure in the rate ticker can never disagree.
+ *
+ * Two lines carry weight:
+ *
+ *   NGN is the anchor. The catalogue is priced in naira, so this line is what
+ *   decides what everything costs, and it is the first rate the ticker quotes.
+ *
+ *   USD is the base and stays at 1. Every other line is quoted against it, so
+ *   changing it would change nothing.
+ *
+ * These are fixed indicative figures. There is no backend and no live feed
+ * behind them, so they only move when someone edits this table.
  */
-const NAIRA_PER_USD = 1350;
-const USD_PER_UNIT: Record<string, number> = {
-  USD: 1,
-  GBP: 1960 / 1550,
-  EUR: 1690 / 1550,
-  GHS: 105 / 1550,
-  KES: 12 / 1550,
-  ZAR: 88 / 1550,
-  CNY: 1 / 7.2,
+const UNITS_PER_USD: Record<string, number> = {
+  USD: 1, // the base: leave this line alone
+  NGN: 1350, // naira to the dollar, the anchor the catalogue is priced in
+  CNY: 7.2, // Chinese yuan (RMB)
+  GBP: 0.7908, // British pound
+  EUR: 0.9172, // euro
+  ZAR: 17.6136, // South African rand
+  KRW: 1382, // South Korean won
+  GHS: 14.7619, // Ghanaian cedi
+  JPY: 156.8, // Japanese yen
 };
 
+/** Naira to one US dollar, read off the table so the anchor lives in one place
+ *  only. */
+const NAIRA_PER_USD = UNITS_PER_USD['NGN'];
+
+/**
+ * Units of a currency to one US dollar. The conversions below and the rate
+ * ticker both ask this rather than keeping a copy of a rate of their own, which
+ * is what keeps them in step when the table is edited.
+ */
+export function unitsPerUsd(code: string): number {
+  return UNITS_PER_USD[code] ?? 1;
+}
+
+/** Naira to one unit of a currency, from its dollar rate and the anchor. */
+const nairaPerUnitOf = (code: string): number => NAIRA_PER_USD / unitsPerUsd(code);
+
 export const CURRENCIES: Currency[] = [
-  { code: 'NGN', country: 'Nigeria', symbol: '₦', decimals: 0 },
-  { code: 'USD', country: 'United States', symbol: '$', decimals: 2, nairaPerUnit: NAIRA_PER_USD * USD_PER_UNIT['USD'] },
-  { code: 'GBP', country: 'United Kingdom', symbol: '£', decimals: 2, nairaPerUnit: NAIRA_PER_USD * USD_PER_UNIT['GBP'] },
-  { code: 'EUR', country: 'Eurozone', symbol: '€', decimals: 2, nairaPerUnit: NAIRA_PER_USD * USD_PER_UNIT['EUR'] },
-  { code: 'GHS', country: 'Ghana', symbol: 'GH₵', decimals: 0, nairaPerUnit: NAIRA_PER_USD * USD_PER_UNIT['GHS'] },
-  { code: 'KES', country: 'Kenya', symbol: 'KSh', decimals: 0, nairaPerUnit: NAIRA_PER_USD * USD_PER_UNIT['KES'] },
-  { code: 'ZAR', country: 'South Africa', symbol: 'R', decimals: 0, nairaPerUnit: NAIRA_PER_USD * USD_PER_UNIT['ZAR'] },
-  { code: 'CNY', country: 'China', symbol: '¥', decimals: 2, nairaPerUnit: NAIRA_PER_USD * USD_PER_UNIT['CNY'] },
+  { code: 'NGN', country: 'Nigeria', iso: 'ng', symbol: '₦', decimals: 0 },
+  { code: 'USD', country: 'United States', iso: 'us', symbol: '$', decimals: 2, nairaPerUnit: nairaPerUnitOf('USD') },
+  { code: 'GBP', country: 'United Kingdom', iso: 'gb', symbol: '£', decimals: 2, nairaPerUnit: nairaPerUnitOf('GBP') },
+  { code: 'EUR', country: 'Eurozone', iso: 'eu', symbol: '€', decimals: 2, nairaPerUnit: nairaPerUnitOf('EUR') },
+  { code: 'GHS', country: 'Ghana', iso: 'gh', symbol: 'GH₵', decimals: 0, nairaPerUnit: nairaPerUnitOf('GHS') },
+  { code: 'ZAR', country: 'South Africa', iso: 'za', symbol: 'R', decimals: 0, nairaPerUnit: nairaPerUnitOf('ZAR') },
+  { code: 'CNY', country: 'China', iso: 'cn', symbol: '¥', decimals: 2, nairaPerUnit: nairaPerUnitOf('CNY') },
+  { code: 'KRW', country: 'South Korea', iso: 'kr', symbol: '₩', decimals: 0, nairaPerUnit: nairaPerUnitOf('KRW') },
+  { code: 'JPY', country: 'Japan', iso: 'jp', symbol: '¥', decimals: 0, nairaPerUnit: nairaPerUnitOf('JPY') },
 ];
 
 /**
@@ -64,11 +101,16 @@ export const CURRENCIES: Currency[] = [
  * some environments render as "NGN" where the naira sign belongs - the same
  * reason the cart does its own formatting. The symbol is carried on the currency
  * so both places agree on it.
+ *
+ * The number of decimals is the currency's own unless a caller asks for another.
+ * The rate ticker asks for two on every line, including the currencies whose own
+ * small change is worth less than a naira, so its column of figures reads
+ * straight down.
  */
-export function formatMoney(value: number, currency: Currency): string {
+export function formatMoney(value: number, currency: Currency, decimals = currency.decimals): string {
   const grouped = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: currency.decimals,
-    maximumFractionDigits: currency.decimals,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   });
   return `${currency.symbol}${grouped.format(value)}`;
 }

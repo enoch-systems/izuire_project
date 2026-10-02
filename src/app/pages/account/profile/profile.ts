@@ -2,6 +2,7 @@ import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AccountGate } from '../../../components/account-gate/account-gate';
 import { AccountNav } from '../../../components/account-nav/account-nav';
+import { Breadcrumb } from '../../../components/breadcrumb/breadcrumb';
 import { AddressInfo, AuthUser, AuthService } from '../../../services/auth.service';
 
 /** A blank address, so an empty profile still renders a full form. */
@@ -23,7 +24,7 @@ function emptyAddress(): AddressInfo {
  */
 @Component({
   selector: 'app-account-profile',
-  imports: [FormsModule, AccountGate, AccountNav],
+  imports: [FormsModule, AccountGate, AccountNav, Breadcrumb],
   templateUrl: './profile.html',
 })
 export class AccountProfile {

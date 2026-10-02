@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 import { CartLine, CartService, naira } from '../../services/cart.service';
 
 /**
@@ -16,7 +17,7 @@ import { CartLine, CartService, naira } from '../../services/cart.service';
  */
 @Component({
   selector: 'app-cart',
-  imports: [RouterLink],
+  imports: [RouterLink, Breadcrumb],
   templateUrl: './cart.html',
 })
 export class Cart {

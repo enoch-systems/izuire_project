@@ -2,6 +2,11 @@
      page it is covering, and last is the toast. -->
 <app-signature-loader />
 <app-site-header />
+<!-- The rate strip rides directly under the header on every page, so the day's
+     rates are the first thing beneath the nav. It sits in normal flow rather
+     than sticky: it goes with the page as the reader scrolls, leaving the header
+     pinned exactly as it was. -->
+<app-rate-ticker />
 <app-search-overlay />
 <!-- The legal modal is a sibling of the search overlay for the same reason: it is
      opened from the footer, which lives below the routed page, and reads shared

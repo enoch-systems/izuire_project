@@ -3,11 +3,7 @@
   @if (product(); as p) {
     <!-- The product itself -->
     <div class="container">
-      <nav class="pd-breadcrumb" aria-label="Breadcrumb">
-        <a routerLink="/">Home</a><span>/</span>
-        <a routerLink="/marketplace">Marketplace</a><span>/</span>
-        <span>{{ p.title }}</span>
-      </nav>
+      <app-breadcrumb variant="product" [leaf]="p.title" />
 
       <div class="pd-layout">
         <!-- Gallery -->

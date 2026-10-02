@@ -17,12 +17,14 @@
         </div>
         <div class="cta-row hero-slide">
           <a routerLink="/quote" class="btn btn-primary">Start Sourcing</a>
-          @if (auth.user(); as user) {
-            <a routerLink="/account/profile" class="btn btn-ghost">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>
-              Welcome back, {{ (user.name || user.email).split(' ')[0] }}
-            </a>
-          } @else {
+          <!-- The sign-in call is here for the visitor who is not signed in, and
+               only for them. Signed in it used to swap for a "Welcome back, name"
+               button linking to the profile, which meant the hero's one clear
+               action was joined by a second one greeting someone the header had
+               already greeted. The button now simply is not there, leaving
+               "Start Sourcing" alone rather than replacing it. The header's own
+               welcome chip is still where a signed-in shopper finds their name. -->
+          @if (!auth.user()) {
             <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started<span class="hero-join-sep">or</span>Log in</button>
           }
         </div>

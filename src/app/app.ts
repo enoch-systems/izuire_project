@@ -4,6 +4,7 @@ import { Meta } from '@angular/platform-browser';
 import { filter } from 'rxjs';
 import { SiteHeader } from './components/site-header/site-header';
 import { SiteFooter } from './components/site-footer/site-footer';
+import { RateTicker } from './components/rate-ticker/rate-ticker';
 import { SearchOverlay } from './components/search-overlay/search-overlay';
 import { LegalModal } from './components/legal-modal/legal-modal';
 import { AuthModal } from './components/auth-modal/auth-modal';
@@ -15,7 +16,7 @@ import { MediaMuteService } from './services/media-mute.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SiteHeader, SiteFooter, SearchOverlay, LegalModal, AuthModal, CartToast, SignatureLoader, AuthLoader, LogoutConfirm],
+  imports: [RouterOutlet, SiteHeader, SiteFooter, RateTicker, SearchOverlay, LegalModal, AuthModal, CartToast, SignatureLoader, AuthLoader, LogoutConfirm],
   templateUrl: './app.html',
 })
 export class App {

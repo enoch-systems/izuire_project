@@ -212,8 +212,11 @@
   }
   .btn-dark:hover{background:#000; transform:translateY(-1px);}
   /* The flat black hover is a step past --ink, which now lightens in dark mode.
-     A black-on-dark hover would read as a hole, so it is pinned dark there. */
-  :root[data-theme="dark"] .btn-dark{ background:#2A2A24; }
+     A black-on-dark hover would read as a hole, so it is pinned dark there — and
+     the label comes back up to --ink with it, because --white is the dark end of
+     the palette in this mode and would otherwise put near-black type on a
+     near-black button. */
+  :root[data-theme="dark"] .btn-dark{ background:#2A2A24; color:var(--ink); }
   :root[data-theme="dark"] .btn-dark:hover{ background:#3A3A32; }
   .btn-outline{
     background:transparent;
@@ -250,13 +253,36 @@
     transition:min-height .3s var(--ease);
   }
   #site-header.is-scrolled .header-inner{ min-height:68px; }
+  /* ---- The wordmark, restyled ----
+     The mark is a PNG on its own plate (see logo.ts), so nothing here can redraw
+     it. What a restyle can do is give it the brand's answer to a hover, the way
+     the buttons and the step rules already have one: the link takes a soft wash
+     and the mark lifts a hair, while a hairline of the brand colour draws in
+     underneath it from the left. */
   .logo-link{
+    position:relative;
     display:flex; align-items:center; flex-shrink:0;
-    padding:0 6px; margin-right:auto;
-    transition:opacity .25s var(--ease);
+    padding:5px 8px; margin-right:auto;
+    border-radius:10px;
+    transition:background-color .28s var(--ease);
   }
-  .logo-link:hover{ opacity:.82; }
-  .logo-link img{ height:32px; width:auto; transition:height .3s var(--ease); }
+  .logo-link::after{
+    content:"";
+    position:absolute; left:8px; right:8px; bottom:2px;
+    height:2px; border-radius:2px;
+    background:linear-gradient(90deg, var(--orange), var(--orange-deep));
+    transform:scaleX(0);
+    transform-origin:left center;
+    transition:transform .34s var(--ease);
+  }
+  .logo-link:hover, .logo-link:focus-visible{ background-color:rgba(245,130,31,.10); }
+  .logo-link:hover::after, .logo-link:focus-visible::after{ transform:scaleX(1); }
+  .logo-link img{
+    position:relative; z-index:1;
+    height:32px; width:auto;
+    transition:height .3s var(--ease), transform .28s var(--ease);
+  }
+  .logo-link:hover img{ transform:translateY(-1px); }
   #site-header.is-scrolled .logo-link img{ height:29px; }
   /* The nav slot. The toggle is its own box rather than a nav link, so it takes
      the same 28px gap but is not a destination — a faint rule marks the edge
@@ -551,6 +577,129 @@
     .theme-toggle, .theme-toggle-track, .theme-toggle-knob, .theme-toggle-knob svg{
       transition-duration:.01ms;
     }
+  }
+
+  /* ============ RATE TICKER ============ */
+  /* The strip of indicative rates that rides under the header. It is not sticky:
+     it sits in normal flow and goes with the page as the reader scrolls, leaving
+     the header pinned as before.
+
+     The figures are set in services/currency.ts, in the one table the marketplace
+     also converts its prices from, so there is no second copy of a rate anywhere
+     on the site, and nothing here is fetched. */
+  .rate-ticker{
+    position:relative;
+    display:flex; align-items:stretch;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  /* The money every figure beside it is quoted against. It is held out of the
+     travel rather than riding along, so it is still there to read once the rates
+     have moved past it. */
+  .rate-ticker__base{
+    flex:none;
+    display:flex; align-items:center; gap:8px;
+    padding:0 14px;
+    background:var(--white);
+    border-right:1px solid var(--line);
+    font-family:var(--font-d); font-weight:700;
+    font-size:.7rem; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--orange-deep);
+    white-space:nowrap;
+  }
+  /* A slow breath on the dot in front of it, the way a live figure is marked. */
+  .rate-ticker__pulse{
+    width:6px; height:6px; border-radius:50%;
+    background:currentColor;
+    animation:ratePulse 2.4s var(--ease) infinite;
+  }
+  @keyframes ratePulse{
+    0%, 100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:.3; transform:scale(.7); }
+  }
+  /* The window the rates travel across. The fades at each edge stop a chip from
+     being chopped off square as it enters and leaves. */
+  .rate-ticker__viewport{
+    flex:1; min-width:0;
+    overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 34px, #000 calc(100% - 34px), transparent 100%);
+    mask-image:linear-gradient(90deg, transparent 0, #000 34px, #000 calc(100% - 34px), transparent 100%);
+  }
+  /* A set runs to about 1400px, so half a lap in 36s is just under 40px a
+     second: quick enough to read as running, slow enough to read by. */
+  .rate-ticker__track{
+    display:flex; width:max-content;
+    animation:rateFlow 36s linear infinite;
+  }
+  /* The run is half the track, which is exactly one set, so the travel ends with
+     the second set standing where the first one began and the jump back to the
+     start lands on it: no seam. Spacing lives on the chips rather than as a gap
+     on this row, because a gap here would put one extra space into the loop and
+     nudge the whole strip every time it came round. */
+  @keyframes rateFlow{
+    from{ transform:translate3d(0,0,0); }
+    to{ transform:translate3d(-50%,0,0); }
+  }
+  /* Reading the strip should not be a race, so it holds still under the pointer. */
+  .rate-ticker:hover .rate-ticker__track{ animation-play-state:paused; }
+  .rate-ticker__set{ display:flex; align-items:center; flex:none; }
+  .rate-ticker__set > *{ margin-right:28px; padding:9px 0; }
+  .rate-ticker__when{
+    display:inline-flex; align-items:center;
+    font-family:var(--font-d); font-weight:700;
+    font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--orange-deep);
+    white-space:nowrap;
+  }
+  .rate-ticker__item{
+    display:inline-flex; align-items:center; gap:8px;
+    white-space:nowrap;
+  }
+  /* Height only, never both measures: each flag keeps its own proportions, so
+     none of them is stretched to fit a box. The ring is what stops a flag with
+     white in it from disappearing into a white page. */
+  .rate-ticker__flag{
+    height:14px; width:auto; flex:none;
+    border-radius:2px;
+    box-shadow:0 0 0 1px rgba(17,17,17,.16);
+  }
+  .rate-ticker__code{
+    font-family:var(--font-d); font-weight:700;
+    font-size:.68rem; letter-spacing:.08em;
+    color:var(--ink-60);
+  }
+  .rate-ticker__figure{
+    font-family:var(--font-d); font-weight:700;
+    font-size:.8rem;
+    color:var(--ink);
+    /* Figures travelling in a column line up on their digits. */
+    font-variant-numeric:tabular-nums;
+  }
+  /* On a near-black page the deep orange loses its bite, so the label steps to
+     the brand orange and the flag ring lifts to keep the same separation. */
+  :root[data-theme="dark"] .rate-ticker__base,
+  :root[data-theme="dark"] .rate-ticker__when{ color:var(--orange); }
+  :root[data-theme="dark"] .rate-ticker__flag{ box-shadow:0 0 0 1px rgba(244,242,237,.3); }
+  /* Less motion means no travel at all: the strip stops where it is and is left
+     scrollable by hand, which is the honest version of "show me the rates" with
+     nothing moving. The second set goes with the loop, since without the run it
+     would only say the same thing twice. */
+  @media (prefers-reduced-motion: reduce){
+    .rate-ticker__track{ animation:none; }
+    .rate-ticker__viewport{
+      overflow-x:auto;
+      -webkit-mask-image:none; mask-image:none;
+      scrollbar-width:none;
+    }
+    .rate-ticker__viewport::-webkit-scrollbar{ display:none; }
+    .rate-ticker__set[aria-hidden="true"]{ display:none; }
+    .rate-ticker__pulse{ animation:none; }
+  }
+  @media (max-width:620px){
+    .rate-ticker__set > *{ margin-right:20px; }
+    .rate-ticker__base{ padding:0 11px; gap:6px; font-size:.66rem; }
+    .rate-ticker__figure{ font-size:.76rem; }
   }
 
   /* ============ SIGNATURE LOADER ============ */
@@ -1664,31 +1813,25 @@
   }
 
   /* ============ RFQ FORM ============ */
+  /* The form is the whole page now: one centred column, so the questions sit
+     directly under the eye instead of beside a column of copy. */
   .rfq-wrap{
-    display:grid;
-    grid-template-columns:.85fr 1.15fr;
-    gap:56px;
-    align-items:start;
+    max-width:720px;
+    margin:0 auto;
   }
-  .rfq-info h2{font-size:clamp(1.7rem,3vw,2.3rem); margin:14px 0 16px;}
-  .rfq-info p{color:var(--ink-60); margin-bottom:28px; max-width:420px;}
-  .rfq-points{display:flex; flex-direction:column; gap:16px;}
-  .rfq-point{display:flex; gap:12px; align-items:flex-start;}
-  .rfq-point .dot{
-    width:22px; height:22px; border-radius:50%;
-    background:var(--orange); flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    margin-top:2px;
-  }
-  .rfq-point .dot svg{width:12px; height:12px; stroke:var(--white); fill:none;}
-  .rfq-point span{font-size:.92rem; color:var(--ink-60);}
 
-  .rfq-form{
-    background:var(--paper);
+  /* The form is no longer one big card. Each step's fields sit in their own
+     `.rfq-group` panel, so the page reads as a short stack of forms rather than
+     a single grey box. */
+  .rfq-form{ display:block; }
+  .rfq-group{
+    display:grid; gap:16px;
+    padding:20px;
+    background-color:var(--white);
     border:1px solid var(--line);
-    border-radius:16px;
-    padding:36px;
+    border-radius:14px;
   }
+  .rfq-group .field{ margin-bottom:0; }
   .form-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   .field{margin-bottom:18px;}
   .field label{
@@ -1709,18 +1852,347 @@
      keeps the platform's light panel on a dark form. */
   .field select option,
   .field select optgroup{ background:var(--white); color:var(--ink); }
-  .field textarea{resize:vertical; min-height:96px;}
+  /* The selects are this form's main input, so they draw their own chevron rather
+     than the platform's — same treatment as the home hero search, and for the same
+     reason: a data-URI chevron is the only way to guarantee it is drawn in ink
+     that reads against the field. Longhands, never the shorthand, so the image
+     here survives the same reset that stripped the home cards' backgrounds. */
+  .field select{
+    appearance:none; -webkit-appearance:none;
+    cursor:pointer; border-radius:9px;
+    padding:12px 40px 12px 14px;
+    background-color:var(--white);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23111111' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 15px center;
+    background-size:12px 8px;
+  }
+  :root[data-theme="dark"] .field select{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23F4F2ED' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  .field textarea{resize:vertical; min-height:92px;}
+
+  /* ---- Floating labels ----
+     The label rests inside the control as its placeholder and lifts to the top
+     edge once there is a value, which is what stops a form this long from
+     reading as a wall of boxes. `:not(:placeholder-shown)` covers every text
+     control; a select has no placeholder — its empty option is deliberately
+     blank for exactly this reason — so it carries `is-set` from the template. */
+  .field--float{ position:relative; }
+  .field--float input, .field--float select, .field--float textarea{
+    padding:20px 14px 8px;
+    border-radius:10px;
+    font-family:var(--font-d);
+    font-size:.95rem;
+    color:var(--ink);
+  }
+  .field--float select{ padding-right:42px; }
+  .field--float label{
+    position:absolute; left:15px; right:15px; top:14px;
+    margin:0; pointer-events:none;
+    font-size:.95rem; font-weight:500; color:var(--ink-40);
+    transform-origin:left top;
+    transition:transform .18s var(--ease), color .18s var(--ease);
+  }
+  /* Focus and filled are the same visual state, so they are the same rule. */
+  .field--float input:focus + label,
+  .field--float input:not(:placeholder-shown) + label,
+  .field--float textarea:focus + label,
+  .field--float textarea:not(:placeholder-shown) + label,
+  .field--float select:focus + label,
+  .field--float select.is-set + label{
+    transform:translateY(-7px) scale(.72);
+    color:var(--orange-deep);
+  }
+  /* A ring rather than a bare border change, so the target is obvious on touch. */
+  .field--float input:focus, .field--float select:focus, .field--float textarea:focus{
+    border-color:var(--orange);
+    box-shadow:0 0 0 4px rgba(245,130,31,.14);
+  }
+  .field--float textarea{ min-height:104px; }
+
   .field-error{font-size:.74rem; color:#C0392B; margin-top:5px; display:none;}
   .field.has-error input, .field.has-error select, .field.has-error textarea{border-color:#C0392B;}
   .field.has-error .field-error{display:block;}
-  .form-actions{display:flex; gap:12px; margin-top:22px; flex-wrap:wrap;}
-  .form-note{font-size:.76rem; color:var(--ink-40); margin-top:14px;}
+
+  /* ============ INTERACTIVE SELECT (app-select-field) ============
+     The form's own dropdown. Elsewhere a list can lean on the platform
+     <select>; these are the lists we want the visitor to feel, so the control
+     wears the same floating label, hairline and error line as the text fields,
+     and its panel opens *in the flow* of the page — nothing measured in script,
+     and nothing to lose to a parent's overflow. */
+  app-select-field{ display:block; }
+  .sselect{ position:relative; }
+
+  .sselect__trigger{
+    display:flex; align-items:center;
+    min-height:52px;
+    padding:20px 42px 8px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background-color:var(--white);
+    font-family:var(--font-d); font-size:.95rem; color:var(--ink);
+    cursor:pointer;
+    transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  .sselect__value{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* The chevron is drawn here rather than left to the platform, for the same
+     reason the old selects drew their own: a data-URI is the only way to pin
+     the ink. It turns over as the panel opens. */
+  .sselect__caret{
+    position:absolute; right:15px; top:50%;
+    width:12px; height:8px;
+    color:var(--ink-40);
+    transform:translateY(-50%);
+    transition:transform .3s var(--ease), color .3s var(--ease);
+  }
+  .sselect__caret svg{ display:block; width:12px; height:8px; stroke:currentColor; }
+  .sselect.is-open .sselect__caret{ transform:translateY(-50%) rotate(180deg); color:var(--orange-deep); }
+
+  .sselect__label{
+    position:absolute; left:15px; right:15px; top:14px;
+    margin:0; pointer-events:none;
+    font-family:var(--font-d);
+    font-size:.95rem; font-weight:500; color:var(--ink-40);
+    transform-origin:left top;
+    transition:transform .18s var(--ease), color .18s var(--ease);
+  }
+  /* Focus, filled and open are one visual state, the same rule the text fields
+     and the old selects share. */
+  .sselect.is-set .sselect__label,
+  .sselect.is-open .sselect__label,
+  .sselect:focus-within .sselect__label{
+    transform:translateY(-7px) scale(.72);
+    color:var(--orange-deep);
+  }
+  .sselect .req{ color:var(--orange-deep); }
+  .sselect:focus-within .sselect__trigger,
+  .sselect.is-open .sselect__trigger{
+    border-color:var(--orange);
+    box-shadow:0 0 0 4px rgba(245,130,31,.14);
+  }
+  .sselect.has-error .sselect__trigger{ border-color:#C0392B; }
+  .sselect.has-error .field-error{ display:block; }
+
+  /* 0fr → 1fr, the same trick the optional step uses: the panel opens to
+     whatever height the list needs. Past a point the list scrolls instead of
+     dragging the rest of the form down with it. */
+  .sselect__panel{
+    display:grid;
+    grid-template-rows:0fr;
+    opacity:0; margin-top:0;
+    transition:grid-template-rows .34s var(--ease), opacity .24s var(--ease), margin-top .34s var(--ease);
+  }
+  .sselect.is-open .sselect__panel{ grid-template-rows:1fr; opacity:1; margin-top:8px; }
+  .sselect__panel-inner{ overflow:hidden; }
+  .sselect.is-open .sselect__panel-inner{ overflow-y:auto; max-height:264px; }
+  .sselect__list{
+    margin:0; padding:6px; list-style:none;
+    background-color:var(--white);
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 18px 34px -24px rgba(17,17,17,.5);
+  }
+  /* The row under the cursor lifts, in the brand's faint tint rather than a
+     grey — the same colour answer the page gives everywhere else. */
+  .sselect__opt{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 12px; border-radius:8px;
+    font-family:var(--font-d); font-size:.9rem; color:var(--ink);
+    cursor:pointer;
+    transition:background-color .15s var(--ease), color .15s var(--ease);
+  }
+  .sselect__opt.is-active{ background-color:rgba(245,130,31,.12); }
+  .sselect__opt.is-chosen{ color:var(--orange-deep); font-weight:600; }
+  .sselect__opt-tick{
+    flex:none; width:15px; height:15px;
+    color:var(--orange-deep);
+    opacity:0; transform:scale(.7);
+    transition:opacity .2s var(--ease), transform .2s var(--ease);
+  }
+  .sselect__opt-tick svg{ display:block; width:15px; height:15px; stroke:currentColor; }
+  .sselect__opt.is-chosen .sselect__opt-tick{ opacity:1; transform:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .sselect__panel, .sselect__caret, .sselect__label, .sselect__opt-tick{ transition:none !important; }
+  }
+  /* One send button on its own row. The email fallback is reduced to a line of
+     text, so the channel is still there without competing with the send. */
+  .rfq-send{ margin-top:28px; text-align:center; }
+  /* `display:block` on the button is what puts the email fallback on its own line
+     instead of letting the two share the button's row. */
+  .rfq-send__btn{ display:block; margin:0 auto; width:100%; max-width:440px; min-height:56px; font-size:1.02rem; border-radius:12px; }
+  .rfq-send__alt{
+    display:inline-block; margin-top:13px;
+    font-size:.82rem; color:var(--ink-40); text-decoration:none;
+    border-bottom:1px solid transparent;
+    transition:color .2s var(--ease), border-color .2s var(--ease);
+  }
+  .rfq-send__alt:hover, .rfq-send__alt:focus-visible{ color:var(--orange-deep); border-bottom-color:currentColor; }
   .form-success{
     display:none;
     background:#EAF6EE; border:1px solid #BFE3CB; color:#1E6B3C;
     padding:14px 16px; border-radius:8px; font-size:.86rem; margin-bottom:18px;
   }
   .form-success.show{display:block;}
+
+  /* ---- RFQ: the request read back ----
+     A dashed slip under the last step that turns solid and brand-coloured the
+     moment the request can go, and wears a chip for every answer standing. It
+     is what makes a three-step form feel like one conversation: the visitor can
+     see their choices without scrolling back up. */
+  .rfq-preview{
+    display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px;
+    margin-top:30px; padding:14px 16px;
+    border:1px dashed var(--line);
+    border-radius:12px;
+    background-color:var(--paper);
+    transition:border-color .35s var(--ease), border-style .35s var(--ease);
+  }
+  .rfq-preview.is-live{ border-style:solid; border-color:rgba(245,130,31,.55); }
+  .rfq-preview__tag{
+    display:inline-flex; align-items:center; gap:8px; flex:none;
+    font-family:var(--font-d);
+    font-size:.72rem; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-40);
+  }
+  .rfq-preview__tag svg{ width:15px; height:15px; stroke:currentColor; }
+  .rfq-preview__line{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-height:26px; }
+  .rfq-preview__hint{ font-size:.84rem; color:var(--ink-40); }
+  .rfq-chip{
+    display:inline-flex; align-items:center;
+    padding:5px 12px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background-color:var(--white);
+    font-family:var(--font-d); font-size:.8rem; color:var(--ink);
+    animation:chipIn .32s var(--ease) both;
+  }
+  /* A chip arrives rather than appears, so the strip reads as answering the
+     visitor rather than redrawing itself. */
+  @keyframes chipIn{
+    from{ opacity:0; transform:translateY(5px) scale(.94); }
+    to{ opacity:1; transform:none; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .rfq-chip{ animation:none; }
+  }
+
+  /* ---- RFQ: the step form ----
+     The form is three numbered steps rather than one run of nine fields, each with
+     a rule under its head that fills as that step is answered. Everything below is
+     written on the site's own tokens (--white / --paper / --line / --orange /
+     --ink*), so the dark mode block repaints it with nothing extra stated here. */
+
+  /* The meter: a bare track, no panel of its own — it is a readout, not a step. */
+  .rfq-meter{ margin-bottom:30px; }
+  .rfq-meter__head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:10px;}
+  .rfq-meter__count{font-size:.78rem; font-weight:600; font-family:var(--font-d); color:var(--ink-60);}
+  .rfq-meter__state{font-size:.74rem; font-weight:600; color:var(--ink-40); transition:color .3s var(--ease);}
+  .rfq-meter.is-ready .rfq-meter__state{color:var(--orange-deep);}
+  .rfq-meter__track{height:6px; border-radius:3px; background-color:var(--line); overflow:hidden;}
+  .rfq-meter__fill{
+    display:block; height:100%;
+    background:linear-gradient(90deg, var(--orange), var(--orange-deep));
+    border-radius:3px;
+    transition:width .5s var(--ease);
+  }
+
+  /* One step: a number chip, the title, and a tick that fills in when it is done. */
+  .rfq-step{position:relative;}
+  .rfq-step + .rfq-step{margin-top:30px; padding-top:30px; border-top:1px solid var(--line);}
+  .rfq-step__head{display:flex; align-items:flex-start; gap:14px;}
+  .rfq-step__num{
+    flex-shrink:0;
+    width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-d); font-weight:700; font-size:.86rem;
+    color:var(--ink-60);
+    background-color:var(--white);
+    border:1px solid var(--line);
+    transition:background-color .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease);
+  }
+  .rfq-step__label{flex:1; min-width:0;}
+  .rfq-step__label h3{font-size:1.02rem; font-family:var(--font-d); font-weight:700;}
+  .rfq-step__label strong{display:block; font-size:1.02rem; font-family:var(--font-d); font-weight:700;}
+  .rfq-step__label small{display:block; font-size:.82rem; color:var(--ink-40); margin-top:3px;}
+  /* The tick: a circle that scales in and turns orange once the step is done. */
+  .rfq-step__tick{
+    flex-shrink:0;
+    width:24px; height:24px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background-color:var(--line);
+    transform:scale(.6); opacity:.45;
+    transition:background-color .35s var(--ease), transform .35s var(--ease), opacity .35s var(--ease);
+  }
+  .rfq-step__tick svg{width:12px; height:12px; stroke:var(--white); fill:none;}
+  .rfq-step.is-ready .rfq-step__num{background-color:var(--orange); border-color:var(--orange); color:var(--white);}
+  .rfq-step.is-ready .rfq-step__tick{background-color:var(--orange); transform:scale(1); opacity:1;}
+
+  /* The rule under a step's head: a hairline, with the orange fill running across
+     it the moment the step is answered. */
+  .rfq-step__rule{
+    position:relative;
+    height:2px; margin:14px 0 20px;
+    border-radius:2px; overflow:hidden;
+    background-color:var(--line);
+  }
+  .rfq-step__rule span{
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, var(--orange), var(--orange-deep));
+    transform-origin:left center;
+    transform:scaleX(0);
+    transition:transform .6s var(--ease);
+  }
+  .rfq-step.is-ready .rfq-step__rule span{transform:scaleX(1);}
+
+  /* Step 2: the optional block opens on its own. */
+  .rfq-step__toggle{
+    display:flex; align-items:flex-start; gap:14px; width:100%;
+    background:none; border:0; padding:0; margin:0;
+    cursor:pointer; text-align:left; font:inherit; color:inherit;
+  }
+  .rfq-step__toggle:focus-visible{outline:2px solid var(--orange); outline-offset:4px; border-radius:6px;}
+  .rfq-step__chev{
+    flex-shrink:0; width:20px; height:20px; margin-top:5px;
+    stroke:var(--ink-40); fill:none;
+    transition:transform .4s var(--ease), stroke .3s var(--ease);
+  }
+  .rfq-step--optional.is-open .rfq-step__chev{transform:rotate(180deg); stroke:var(--orange-deep);}
+  /* 0fr → 1fr lets the panel open to whatever height its fields need, with no
+     measurement in script and no max-height to guess at. */
+  .rfq-step__panel{display:grid; grid-template-rows:0fr; transition:grid-template-rows .45s var(--ease);}
+  .rfq-step--optional.is-open .rfq-step__panel{grid-template-rows:1fr;}
+  .rfq-step__inner{
+    overflow:hidden;
+    opacity:0; transform:translateY(-6px);
+    transition:opacity .35s var(--ease), transform .45s var(--ease);
+  }
+  .rfq-step--optional.is-open .rfq-step__inner{opacity:1; transform:none;}
+
+  /* The send row only looks armed once the request can actually go. */
+  .rfq-send .btn-primary{opacity:.55; transition:opacity .3s var(--ease), transform .2s var(--ease);}
+  .rfq-send.is-ready .btn-primary{opacity:1;}
+  .rfq-send.is-ready .btn-primary:hover{transform:translateY(-1px);}
+
+  /* The success banner is the one piece of this form with its own colours rather
+     than the site's tokens, and it was a pale green panel — which reads as a hole
+     punched in a dark form. Restated here in mode-aware steps so it sits on the
+     dark surface instead of fighting it. */
+  :root[data-theme="dark"] .form-success{
+    background:#12240F;
+    border-color:#2C5230;
+    color:#9FE0B4;
+  }
+
+  /* Less motion: every one of these still shows its final state, it just arrives
+     instead of animating. */
+  @media (prefers-reduced-motion: reduce){
+    .rfq-meter__fill, .rfq-step__rule span, .rfq-step__num, .rfq-step__tick,
+    .rfq-step__panel, .rfq-step__inner, .rfq-step__chev,
+    .field--float label, .rfq-send__alt, .rfq-send .btn-primary{transition:none !important;}
+  }
 
   /* ============ TESTIMONIALS ============ */
   .testi-wrap{position:relative; max-width:760px; margin:0 auto;}
@@ -2115,7 +2587,6 @@
     /* Stacked, so the hairline between the two columns turns horizontal. */
     .subbrand-rail{grid-template-columns:1fr;}
     .subbrand + .subbrand{ border-left:none; border-top:1px solid var(--line); }
-    .rfq-wrap{grid-template-columns:1fr;}
     /* The footer's own tablet track sits with the rest of the footer rules, above,
        where the grid it reshapes is defined. Repeating it here would only fight
        that block at the same width. */
@@ -2194,11 +2665,53 @@
     padding:56px 0 64px;
     border-bottom:1px solid var(--line);
   }
-  .breadcrumb{font-size:.8rem; color:var(--ink-40); margin-bottom:16px;}
-  .breadcrumb a{color:var(--ink-60);}
+  /* Breadcrumb navigation, shared by every inner page. The trail itself is read
+     from the route's own data (see <app-breadcrumb />), so this block only has
+     to draw the row: the stops, the slash between them, and the stop the visitor
+     is standing on. */
+  .breadcrumb{
+    display:flex; flex-wrap:wrap; align-items:center; gap:5px;
+    font-size:.8rem; color:var(--ink-40); margin-bottom:16px;
+  }
+  .breadcrumb a{color:var(--ink-60); transition:color .18s var(--ease);}
   .breadcrumb a:hover{color:var(--orange-deep);}
+  /* The slash divides two stops; it is decoration and says nothing itself. */
+  .breadcrumb-sep{opacity:.7;}
+  /* The product page stands its trail a shade larger and lets the product's own
+     name close it in the display face — that name is the page's title. */
+  .breadcrumb--product{font-size:.82rem; margin-bottom:22px;}
+  .breadcrumb--product .breadcrumb-current{
+    color:var(--ink); font-family:var(--font-d); font-weight:600;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:56vw;
+  }
   .page-hero h1{font-size:clamp(2rem,4vw,2.8rem); margin-bottom:14px;}
   .page-hero p{color:var(--ink-60); font-size:1.02rem; max-width:600px;}
+  /* The lead under an inner page's title: a shade wider and a shade looser than
+     a body paragraph, because it is the sentence that says what the page is
+     for before the form starts asking. */
+  .page-hero p.page-hero__lead{ max-width:620px; line-height:1.62; }
+  /* What the page promises, as ticks rather than a paragraph. */
+  .rfq-assure{
+    display:flex; flex-wrap:wrap;
+    gap:10px 22px;
+    margin-top:24px;
+    list-style:none;
+  }
+  .rfq-assure li{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:var(--font-d);
+    font-size:.82rem; color:var(--ink-60);
+  }
+  .rfq-assure li::before{
+    content:"";
+    flex:none; width:17px; height:17px;
+    border-radius:50%;
+    background-color:rgba(245,130,31,.14);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D96D14' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:9px 9px;
+  }
 
   /* ============ SERVICE / ICON CARDS ============ */
   .service-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
@@ -2409,7 +2922,7 @@
   .mk-search-clear svg{ width:12px; height:12px; stroke:currentColor; }
 
   /* The currency picker, as a labelled select rather than the pair of pills this
-     used to be: there are eight currencies, and eight pills would either wrap in
+     used to be: there are nine currencies, and nine pills would either wrap in
      the toolbar or need a scroller inside it. */
   .mk-currency{ display:inline-flex; align-items:center; gap:10px; }
   .mk-currency-label{
@@ -3240,9 +3753,8 @@
     .subbrand h3{ font-size:1.7rem; }
 
     /* Forms / RFQ */
-    .rfq-form{ padding:24px 20px; border-radius:12px; }
-    .form-actions{ flex-direction:column; }
-    .form-actions .btn{ width:100%; padding:15px 20px; }
+    .rfq-group{ padding:16px; border-radius:12px; }
+    .rfq-send__btn{ min-height:52px; font-size:.98rem; }
 
     /* Marketplace */
     .marketplace-toolbar{ flex-direction:column; align-items:stretch; gap:14px; }
@@ -3326,7 +3838,7 @@
     .trust-stat .num{ font-size:1.4rem; }
     .subbrand{ padding:24px 20px 26px; }
     .subbrand p{ font-size:.88rem; }
-    .rfq-form{ padding:20px 16px; }
+    .rfq-group{ padding:14px; }
     .testi-slide p{ font-size:.98rem; }
     .footer-bottom{ font-size:.74rem; }
     .footer-lead{ font-size:.9rem; }
@@ -4761,16 +5273,9 @@
 
 .product-detail-page{ padding:32px 0 0; }
 
-  .pd-breadcrumb{
-    display:flex; flex-wrap:wrap; align-items:center; gap:6px;
-    font-size:.82rem; color:var(--ink-40); margin-bottom:22px;
-  }
-  .pd-breadcrumb a{ color:var(--ink-60); transition:color .18s var(--ease); }
-  .pd-breadcrumb a:hover{ color:var(--orange-deep); }
-  .pd-breadcrumb span:last-child{
-    color:var(--ink); font-family:var(--font-d); font-weight:600;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:56vw;
-  }
+  /* The trail above the gallery is the shared breadcrumb in its product variant
+     — .breadcrumb--product, in the shared page-hero block — so the product page
+     styles nothing of it here. */
 
   .pd-layout{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:40px; align-items:start; }
 
@@ -6319,6 +6824,9 @@
     transition:opacity .26s var(--ease), visibility .26s;
   }
   .confirm-overlay.open{ opacity:1; visibility:visible; pointer-events:auto; }
+  /* The scrim already reads as a dim on a light page; on a dark one it has to
+     hold the dialog apart from the page instead, so it is taken darker still. */
+  :root[data-theme="dark"] .confirm-overlay{ background:rgba(8,8,6,.72); }
   .confirm-dialog{
     width:min(430px, 100%);
     padding:30px 28px 26px;
@@ -6331,6 +6839,14 @@
     transition:transform .3s var(--ease);
   }
   .confirm-overlay.open .confirm-dialog{ transform:none; }
+  /* --white is the page colour once the palette inverts, so the dialog would sit
+     flush with the scrim behind it. It steps up to --paper instead — the same
+     one-step lift the dark cards use — behind the stronger hairline. */
+  :root[data-theme="dark"] .confirm-dialog{
+    background:var(--paper);
+    border-color:var(--line-strong);
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+  }
   .confirm-icon{
     width:58px; height:58px; margin:0 auto 16px;
     display:flex; align-items:center; justify-content:center;
@@ -6338,6 +6854,13 @@
     background:rgba(192,57,43,.1);
     border:1px solid rgba(192,57,43,.28);
     color:#C0392B;
+  }
+  /* The danger red is mixed for a white chip. On a near-black one it goes muddy,
+     so dark mode lifts it to a lighter tint that still reads as "careful". */
+  :root[data-theme="dark"] .confirm-icon{
+    background:rgba(240,130,115,.14);
+    border-color:rgba(240,130,115,.4);
+    color:#F08273;
   }
   .confirm-icon svg{ width:24px; height:24px; stroke:currentColor; }
   .confirm-dialog h2{ font-size:1.24rem; margin-bottom:10px; }

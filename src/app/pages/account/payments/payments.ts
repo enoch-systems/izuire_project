@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { AccountGate } from '../../../components/account-gate/account-gate';
 import { AccountNav } from '../../../components/account-nav/account-nav';
+import { Breadcrumb } from '../../../components/breadcrumb/breadcrumb';
 import { AuthService, Transaction, TxStatus } from '../../../services/auth.service';
 import { naira } from '../../../services/cart.service';
 
@@ -26,7 +27,7 @@ const STATUS_TEXT: Record<TxStatus, string> = {
  */
 @Component({
   selector: 'app-payments',
-  imports: [AccountGate, AccountNav],
+  imports: [AccountGate, AccountNav, Breadcrumb],
   templateUrl: './payments.html',
 })
 export class Payments {

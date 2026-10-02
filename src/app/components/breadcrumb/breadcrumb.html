@@ -1,0 +1,16 @@
+<nav
+  class="breadcrumb"
+  [class.breadcrumb--product]="variant() === 'product'"
+  aria-label="Breadcrumb"
+>
+  @for (stop of crumbs(); track $index; let last = $last) {
+    @if (stop.link && !last) {
+      <a [routerLink]="stop.link">{{ stop.label }}</a>
+    } @else {
+      <span class="breadcrumb-current">{{ stop.label }}</span>
+    }
+    @if (!last) {
+      <span class="breadcrumb-sep" aria-hidden="true">/</span>
+    }
+  }
+</nav>

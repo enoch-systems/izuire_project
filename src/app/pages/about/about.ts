@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 
 @Component({
   selector: 'app-about',
-  imports: [RouterLink],
+  imports: [RouterLink, Breadcrumb],
   templateUrl: './about.html',
 })
 export class About {
@@ -18,13 +19,13 @@ export class About {
       tag: 'Guangzhou ops',
       year: 'Our base',
       title: 'Setting up shop inside Guangzhou\'s markets',
-      body: 'We put our operational team on the ground in Guangzhou, inside the wholesale markets and factory networks of one of the world\'s largest manufacturing hubs. Being physically where the sourcing happens — not working through intermediaries — is what lets us see quality issues before they ship and negotiate pricing most importers can\'t get on their own.',
+      body: 'We put our operational team on the ground in Guangzhou, inside the wholesale markets and factory networks of one of the world\'s largest manufacturing hubs. Being physically where the sourcing happens, not working through intermediaries, is what lets us see quality issues before they ship and negotiate pricing most importers can\'t get on their own.',
     },
     {
       tag: 'CAC registered',
       year: 'Back home',
       title: 'Registered in Nigeria, accountable at home',
-      body: 'Izuire Co. Ltd. is registered with Nigeria\'s Corporate Affairs Commission (CAC), with scope covering importation, exportation, and general trading of consumer goods and merchandise. Our Onitsha roots mean we stay close to the realities of the African businesses we serve — pricing, clearing, last-mile, payment flows — not just the factory side of the trade.',
+      body: 'Izuire Co. Ltd. is registered with Nigeria\'s Corporate Affairs Commission (CAC), with scope covering importation, exportation, and general trading of consumer goods and merchandise. Our Onitsha roots mean we stay close to the realities of the African businesses we serve, pricing, clearing, last-mile, payment flows, not just the factory side of the trade.',
     },
     {
       tag: 'Onitsha HQ',
@@ -36,7 +37,7 @@ export class About {
       tag: 'Growing network',
       year: 'Today',
       title: 'Serving Africa, one order at a time',
-      body: 'While our roots are Nigeria-first, our sourcing and logistics network is built to serve importers across the wider African market. Lagos, Abuja, Accra, Douala, Nairobi — wherever your business is, if you need reliable sourcing out of China, we can build the route.',
+      body: 'While our roots are Nigeria-first, our sourcing and logistics network is built to serve importers across the wider African market. Lagos, Abuja, Accra, Douala, Nairobi, wherever your business is, if you need reliable sourcing out of China, we can build the route.',
     },
   ];
 
@@ -44,7 +45,7 @@ export class About {
     {
       n: '01',
       name: 'Our Mission',
-      body: 'To give African buyers direct, trustworthy access to Chinese manufacturers, with sourcing, quality control and logistics handled end-to-end — so that sourcing isn\'t the bottleneck in growing a business.',
+      body: 'To give African buyers direct, trustworthy access to Chinese manufacturers, with sourcing, quality control and logistics handled end-to-end, so that sourcing isn\'t the bottleneck in growing a business.',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
     },
     {
@@ -71,13 +72,13 @@ export class About {
     {
       n: '02',
       name: 'Onitsha, Nigeria',
-      body: 'Our registered office — Shop No. GFQ 53, Happy Baby Line, Young Shall Grow Plaza, Main Market, Onitsha, Anambra State. Walk in anytime.',
+      body: 'Our registered office, Shop No. GFQ 53, Happy Baby Line, Young Shall Grow Plaza, Main Market, Onitsha, Anambra State. Walk in anytime.',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>',
     },
     {
       n: '03',
       name: 'Serving Africa',
-      body: 'While our roots are in Nigeria, our sourcing and logistics network is built to serve importers across the wider African market — send us your destination.',
+      body: 'While our roots are in Nigeria, our sourcing and logistics network is built to serve importers across the wider African market, send us your destination.',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>',
     },
   ];

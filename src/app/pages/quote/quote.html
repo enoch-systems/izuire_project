@@ -2,84 +2,193 @@
 
 <section class="page-hero">
   <div class="container">
-    <div class="breadcrumb"><a routerLink="/">Home</a> / Request a Quote</div>
+    <app-breadcrumb />
     <span class="eyebrow">Get a price</span>
     <h1>Request a Quote</h1>
-    <p>Tell us what you're sourcing and we'll come back with pricing, MOQ and lead time, usually within 24 hours.</p>
+    <p class="page-hero__lead">
+      Tell us what you want to buy, how many, and where it should land. A buyer on our Guangzhou
+      floor reads it, prices it against real suppliers, and comes back to you with a landed quote,
+      usually within 24 hours.
+    </p>
+    <ul class="rfq-assure">
+      <li>Free, no obligation</li>
+      <li>A reply within 24 hours</li>
+      <li>Sourcing, inspection &amp; freight in one</li>
+    </ul>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
     <div class="rfq-wrap">
-      <div class="rfq-info">
-        <span class="eyebrow">Why request through Izuire</span>
-        <h2 style="font-size:1.6rem; margin:14px 0 16px;">No obligation. No hidden fees.</h2>
-        <div class="rfq-points">
-          <div class="rfq-point"><div class="dot"><svg viewBox="0 0 24 24" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span>Quotes are free, you only pay if you go ahead.</span></div>
-          <div class="rfq-point"><div class="dot"><svg viewBox="0 0 24 24" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span>We negotiate directly with factories on your behalf.</span></div>
-          <div class="rfq-point"><div class="dot"><svg viewBox="0 0 24 24" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span>Every order is quality-checked before it ships.</span></div>
-          <div class="rfq-point"><div class="dot"><svg viewBox="0 0 24 24" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><span>Prefer WhatsApp? Send your request straight through.</span></div>
-        </div>
-      </div>
-
       <form class="rfq-form" id="rfqForm" novalidate (ngSubmit)="submit()">
-        <div class="form-success" id="formSuccess" role="status" [class.show]="success()">Thanks, your request is ready. Continue on WhatsApp to send it, or use the email option below.</div>
-        <div class="form-row">
-          <div class="field" id="field-category" [class.has-error]="submitted() && categoryInvalid()">
-            <label for="rfqCategory">Product / Category <span class="req">*</span></label>
-            <input type="text" id="rfqCategory" name="rfqCategory" [(ngModel)]="rfqCategory" placeholder="e.g. Phone screens, Okrika bales">
-            <div class="field-error">Please tell us what you're sourcing.</div>
+        <div class="form-success" id="formSuccess" role="status" [class.show]="success()">Request ready, opening WhatsApp.</div>
+
+        <!-- One slim track, no card around it: four required answers, filled as
+             they land and orange the moment the request can go. -->
+        <div class="rfq-meter" [class.is-ready]="ready()">
+          <div class="rfq-meter__head">
+            <span class="rfq-meter__count">{{ requiredFilled() }} of 4 required</span>
+            <span class="rfq-meter__state">{{ ready() ? 'Ready to send' : 'Incomplete' }}</span>
           </div>
-          <div class="field" id="field-qty" [class.has-error]="submitted() && qtyInvalid()">
-            <label for="rfqQty">Quantity <span class="req">*</span></label>
-            <input type="text" id="rfqQty" name="rfqQty" [(ngModel)]="rfqQty" placeholder="e.g. 50 units, 5 bales">
-            <div class="field-error">Please enter a quantity.</div>
-          </div>
-        </div>
-        <div class="field">
-          <label for="rfqSpecs">Specifications</label>
-          <input type="text" id="rfqSpecs" name="rfqSpecs" [(ngModel)]="rfqSpecs" placeholder="e.g. Grade A, colour, size, model">
-        </div>
-        <div class="form-row">
-          <div class="field">
-            <label for="rfqPrice">Target Price (optional)</label>
-            <input type="text" id="rfqPrice" name="rfqPrice" [(ngModel)]="rfqPrice" placeholder="e.g. ₦20,000 per unit">
-          </div>
-          <div class="field">
-            <label for="rfqDestination">Destination</label>
-            <input type="text" id="rfqDestination" name="rfqDestination" [(ngModel)]="rfqDestination" placeholder="e.g. Lagos, Onitsha">
+          <div class="rfq-meter__track" role="progressbar" aria-valuemin="0" aria-valuemax="4" [attr.aria-valuenow]="requiredFilled()">
+            <span class="rfq-meter__fill" [style.width.%]="progress() * 100"></span>
           </div>
         </div>
-        <div class="field">
-          <label for="rfqShipMethod">Preferred Shipping Method</label>
-          <select id="rfqShipMethod" name="rfqShipMethod" [(ngModel)]="rfqShipMethod">
-            <option value="">No preference, advise me</option>
-            <option value="Air Freight">Air Freight</option>
-            <option value="Sea Freight">Sea Freight</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="field" id="field-phone" [class.has-error]="submitted() && phoneInvalid()">
-            <label for="rfqPhone">WhatsApp / Phone <span class="req">*</span></label>
-            <input type="tel" id="rfqPhone" name="rfqPhone" [(ngModel)]="rfqPhone" placeholder="e.g. 0803 000 0000">
-            <div class="field-error">Please enter a phone number.</div>
+
+        <!-- ---------- STEP 1: WHAT YOU NEED ---------- -->
+        <section class="rfq-step" [class.is-ready]="stepReady(1)">
+          <header class="rfq-step__head">
+            <span class="rfq-step__num">1</span>
+            <div class="rfq-step__label">
+              <h3>{{ step(1).title }}</h3>
+            </div>
+            <span class="rfq-step__tick" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </span>
+          </header>
+          <div class="rfq-step__rule" aria-hidden="true"><span></span></div>
+
+          <div class="rfq-group">
+            <div class="form-row">
+              <app-select-field
+                fieldId="rfqCategory"
+                name="rfqCategory"
+                label="Category"
+                [required]="true"
+                [options]="categories"
+                [error]="submitted() && categoryInvalid()"
+                errorText="Pick a category."
+                [(ngModel)]="rfqCategory" />
+              <app-select-field
+                fieldId="rfqQty"
+                name="rfqQty"
+                label="Quantity"
+                [required]="true"
+                [options]="quantities"
+                [error]="submitted() && qtyInvalid()"
+                errorText="Pick a quantity."
+                [(ngModel)]="rfqQty" />
+            </div>
+
+            <!-- "Other" is the one choice a list cannot answer, so it asks for the
+                 name in its own field rather than making everyone type into the
+                 product box to begin with. -->
+            @if (rfqCategory === 'Other') {
+              <div class="field field--float" [class.has-error]="submitted() && categoryInvalid()">
+                <input type="text" id="rfqProduct" name="rfqProduct" [(ngModel)]="rfqProduct" placeholder=" ">
+                <label for="rfqProduct">Product name <span class="req">*</span></label>
+                <div class="field-error">Name the product.</div>
+              </div>
+            }
+
+            <div class="field field--float">
+              <textarea id="rfqDetails" name="rfqDetails" [(ngModel)]="rfqDetails" placeholder=" "></textarea>
+              <label for="rfqDetails">Details</label>
+            </div>
           </div>
-          <div class="field" id="field-email" [class.has-error]="submitted() && emailInvalid()">
-            <label for="rfqEmail">Email <span class="req">*</span></label>
-            <input type="email" id="rfqEmail" name="rfqEmail" [(ngModel)]="rfqEmail" placeholder="you&#64;example.com">
-            <div class="field-error">Please enter a valid email.</div>
+        </section>
+
+        <!-- ---------- STEP 2: SHIPPING (OPTIONAL, COLLAPSIBLE) ---------- -->
+        <section class="rfq-step rfq-step--optional" [class.is-open]="shippingOpen()" [class.is-ready]="stepReady(2)">
+          <button type="button" class="rfq-step__toggle" (click)="shippingOpen.set(!shippingOpen())" [attr.aria-expanded]="shippingOpen()" aria-controls="rfqShippingPanel">
+            <span class="rfq-step__num">2</span>
+            <span class="rfq-step__label">
+              <strong>{{ step(2).title }}</strong>
+              <small>Optional</small>
+            </span>
+            <svg class="rfq-step__chev" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="rfq-step__rule" aria-hidden="true"><span></span></div>
+          <!-- `grid-template-rows: 0fr → 1fr` is what lets the panel open to its
+               natural height without anyone measuring it in script. -->
+          <div class="rfq-step__panel" id="rfqShippingPanel">
+            <div class="rfq-step__inner">
+              <div class="rfq-group">
+                <div class="form-row">
+                  <app-select-field
+                    fieldId="rfqDestination"
+                    name="rfqDestination"
+                    label="Destination"
+                    [options]="destinations"
+                    [(ngModel)]="rfqDestination" />
+                  <app-select-field
+                    fieldId="rfqShipMethod"
+                    name="rfqShipMethod"
+                    label="Shipping"
+                    [options]="shippingMethods"
+                    [(ngModel)]="rfqShipMethod" />
+                </div>
+
+                @if (rfqDestination === 'Other') {
+                  <div class="field field--float">
+                    <input type="text" id="rfqOtherPlace" name="rfqOtherPlace" [(ngModel)]="rfqOtherPlace" placeholder=" ">
+                    <label for="rfqOtherPlace">City / port</label>
+                  </div>
+                }
+
+                <div class="field field--float">
+                  <input type="text" id="rfqPrice" name="rfqPrice" [(ngModel)]="rfqPrice" placeholder=" ">
+                  <label for="rfqPrice">Target price</label>
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
+        <!-- ---------- STEP 3: CONTACT ---------- -->
+        <section class="rfq-step" [class.is-ready]="stepReady(3)">
+          <header class="rfq-step__head">
+            <span class="rfq-step__num">3</span>
+            <div class="rfq-step__label">
+              <h3>{{ step(3).title }}</h3>
+            </div>
+            <span class="rfq-step__tick" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </span>
+          </header>
+          <div class="rfq-step__rule" aria-hidden="true"><span></span></div>
+
+          <div class="rfq-group">
+            <div class="form-row">
+              <div class="field field--float" [class.has-error]="submitted() && phoneInvalid()">
+                <input type="tel" id="rfqPhone" name="rfqPhone" [(ngModel)]="rfqPhone" placeholder=" ">
+                <label for="rfqPhone">WhatsApp / Phone <span class="req">*</span></label>
+                <div class="field-error">Enter a phone number.</div>
+              </div>
+              <div class="field field--float" [class.has-error]="submitted() && emailInvalid()">
+                <input type="email" id="rfqEmail" name="rfqEmail" [(ngModel)]="rfqEmail" placeholder=" ">
+                <label for="rfqEmail">Email <span class="req">*</span></label>
+                <div class="field-error">Enter a valid email.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- The request read back. It sits between the last question and the
+             send so the visitor can see, without scrolling up, that everything
+             they chose is what they meant — and it fills as they go rather than
+             sitting there as an empty box. -->
+        <div class="rfq-preview" [class.is-live]="ready()">
+          <span class="rfq-preview__tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 12h8M9 16h8M9 8h4"/></svg>
+            Your request
+          </span>
+          <span class="rfq-preview__line">
+            @for (chip of previewChips(); track chip) {
+              <span class="rfq-chip">{{ chip }}</span>
+            }
+            @if (!previewChips().length) {
+              <span class="rfq-preview__hint">Your choices gather here as you go.</span>
+            }
+          </span>
         </div>
-        <div class="field">
-          <label for="rfqDetails">Additional Details</label>
-          <textarea id="rfqDetails" name="rfqDetails" [(ngModel)]="rfqDetails" placeholder="Anything else that helps us quote accurately."></textarea>
+
+        <!-- One button. Email stays a plain text link underneath, so the fallback
+             is still there without competing with the send. -->
+        <div class="rfq-send" [class.is-ready]="ready()">
+          <button type="submit" class="btn btn-primary rfq-send__btn" id="rfqSubmit">Request Quote</button>
+          <a href="#" class="rfq-send__alt" id="rfqEmailBtn" (click)="sendEmail($event)">Prefer email? Send it to {{ contactEmail }}</a>
         </div>
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary" id="rfqSubmit">Send via WhatsApp</button>
-          <a href="#" class="btn btn-outline" id="rfqEmailBtn" (click)="sendEmail($event)">Send via Email</a>
-        </div>
-        <p class="form-note">By submitting, you agree to be contacted about this request. We reply within 24 hours.</p>
       </form>
     </div>
   </div>

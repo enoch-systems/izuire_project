@@ -3,14 +3,14 @@
 <!-- ============ HEAD ============ -->
 <section class="page-hero cart-head">
   <div class="container">
-    <div class="breadcrumb"><a routerLink="/">Home</a> / Cart</div>
+    <app-breadcrumb />
     <div class="cart-head-row">
       <h1>Your cart</h1>
       @if (!cart.isEmpty()) {
         <span class="cart-head-count">{{ cart.count() }} <span class="cart-head-count-unit">units</span></span>
       }
     </div>
-    <p>Wholesale lines — quantities move in whole minimums. Review, then proceed to checkout and we'll confirm freight, duties and final pricing.</p>
+    <p>Wholesale lines, quantities move in whole minimums. Review, then proceed to checkout and we'll confirm freight, duties and final pricing.</p>
   </div>
 </section>
 
@@ -135,7 +135,7 @@
             <strong>{{ money(cart.subtotal()) }}</strong>
           </div>
 
-          <p class="cart-summary-fine">Indicative only — excludes freight, insurance and import duty. Your final invoice is confirmed with your quote.</p>
+          <p class="cart-summary-fine">Indicative only, excludes freight, insurance and import duty. Your final invoice is confirmed with your quote.</p>
 
           <button type="button" class="btn btn-primary cart-summary-cta" (click)="onCheckout()">
             Proceed to checkout
