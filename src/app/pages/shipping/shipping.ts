@@ -1,12 +1,13 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
+import { TrustHtmlPipe } from '../../pipes/trust-html.pipe';
 
 const mkWords = (t: string): string[] => t.trim().split(/\s+/);
 
 @Component({
   selector: 'app-shipping',
-  imports: [RouterLink, Breadcrumb],
+  imports: [RouterLink, Breadcrumb, TrustHtmlPipe],
   templateUrl: './shipping.html',
 })
 export class Shipping {

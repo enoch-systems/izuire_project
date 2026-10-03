@@ -1,4 +1,4 @@
-<main id="top">
+<main id="top" class="svc-page">
 
 <section class="page-hero">
   <div class="container page-hero-inner">
@@ -11,6 +11,16 @@
       <span class="bar"></span>
       <span>05 Steps from brief to your door</span>
     </div>
+
+    <!-- Image slot: drop <img class="svc-shot__img" src="…" alt="…"> inside the
+         figure when the photo is ready — it fills the frame as-is. -->
+    <figure class="svc-shot svc-shot--wide">
+      <span class="svc-shot__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h2L8.5 4h7L17 6h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      </span>
+      <span class="svc-shot__label">Inside the Guangzhou markets</span>
+      <span class="svc-shot__hint">Photo coming soon</span>
+    </figure>
   </div>
 </section>
 
@@ -25,12 +35,38 @@
     <div class="cluster-grid">
       @for (c of clusters; track c.n) {
         <div class="cluster-item">
-          <div class="cluster-chip" [innerHTML]="c.icon"></div>
+          <div class="cluster-chip" [innerHTML]="c.icon | trustHtml"></div>
           <span class="cluster-num">{{ c.n }} / Service</span>
           <h4>{{ c.title }}</h4>
           <p>{{ c.body }}</p>
         </div>
       }
+    </div>
+
+    <!-- Image slots: three more photos blended under the service grid. Swap each
+         placeholder's contents for <img class="svc-shot__img" src="…" alt="…">. -->
+    <div class="svc-shots svc-shots--under">
+      <figure class="svc-shot">
+        <span class="svc-shot__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h2L8.5 4h7L17 6h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </span>
+        <span class="svc-shot__label">Factory visits</span>
+        <span class="svc-shot__hint">Photo coming soon</span>
+      </figure>
+      <figure class="svc-shot">
+        <span class="svc-shot__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h2L8.5 4h7L17 6h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </span>
+        <span class="svc-shot__label">QC inspection bench</span>
+        <span class="svc-shot__hint">Photo coming soon</span>
+      </figure>
+      <figure class="svc-shot">
+        <span class="svc-shot__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h2L8.5 4h7L17 6h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </span>
+        <span class="svc-shot__label">Packing &amp; consolidation</span>
+        <span class="svc-shot__hint">Photo coming soon</span>
+      </figure>
     </div>
   </div>
 </section>
@@ -52,7 +88,7 @@
           <h3>{{ s.title }}</h3>
           <p>
             @for (w of s.body; track w; let wi = $index) {
-              <span class="w" [style.transitionDelay]="(wi * 0.025) + 's'">&nbsp;{{ w }}</span>
+              <span class="w" [style.transitionDelay]="(wi * 0.025) + 's'">{{ w }}</span>
             }
           </p>
           @if (s.perk) {
@@ -60,6 +96,25 @@
           }
         </div>
       }
+    </div>
+
+    <!-- Image slots: two more photos closing out the flow. Swap each
+         placeholder's contents for <img class="svc-shot__img" src="…" alt="…">. -->
+    <div class="svc-shots svc-shots--two svc-shots--after-journey">
+      <figure class="svc-shot">
+        <span class="svc-shot__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h2L8.5 4h7L17 6h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </span>
+        <span class="svc-shot__label">Photo proof at inspection</span>
+        <span class="svc-shot__hint">Photo coming soon</span>
+      </figure>
+      <figure class="svc-shot">
+        <span class="svc-shot__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 012-2h2L8.5 4h7L17 6h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </span>
+        <span class="svc-shot__label">Door-to-door delivery</span>
+        <span class="svc-shot__hint">Photo coming soon</span>
+      </figure>
     </div>
   </div>
 </section>

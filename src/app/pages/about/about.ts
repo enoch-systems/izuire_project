@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
+import { TrustHtmlPipe } from '../../pipes/trust-html.pipe';
 
 @Component({
   selector: 'app-about',
-  imports: [RouterLink, Breadcrumb],
+  imports: [RouterLink, Breadcrumb, TrustHtmlPipe],
   templateUrl: './about.html',
 })
 export class About {

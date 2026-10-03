@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
+import { TrustHtmlPipe } from '../../pipes/trust-html.pipe';
 
 const mkWords = (text: string): string[] =>
   text.trim().split(/\s+/);
 
 @Component({
   selector: 'app-sourcing',
-  imports: [RouterLink, Breadcrumb],
+  imports: [RouterLink, Breadcrumb, TrustHtmlPipe],
   templateUrl: './sourcing.html',
 })
 export class Sourcing {

@@ -3,7 +3,7 @@ import { AccountGate } from '../../../components/account-gate/account-gate';
 import { AccountNav } from '../../../components/account-nav/account-nav';
 import { Breadcrumb } from '../../../components/breadcrumb/breadcrumb';
 import { AuthService, Transaction, TxStatus } from '../../../services/auth.service';
-import { naira } from '../../../services/cart.service';
+import { DisplayCurrencyService } from '../../../services/display-currency.service';
 
 /** The three ways the list can be filtered. */
 type Tab = 'all' | 'pending' | 'successful';
@@ -32,7 +32,10 @@ const STATUS_TEXT: Record<TxStatus, string> = {
 })
 export class Payments {
   protected readonly auth = inject(AuthService);
-  protected readonly money = naira;
+  /** The shared display-currency pick: every figure on the page reads through
+   *  it, so choosing a money here follows the shopper across the site. */
+  protected readonly fx = inject(DisplayCurrencyService);
+  protected readonly money = (value: number): string => this.fx.price(value);
 
   protected readonly tab = signal<Tab>('all');
   protected readonly tabs: { id: Tab; label: string }[] = [

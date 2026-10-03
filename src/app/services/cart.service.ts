@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
-import { Product } from '../pages/marketplace/marketplace-data';
+import { Product, ProductBadge } from '../pages/marketplace/marketplace-data';
 
 /** One line of the cart. */
 export interface CartLine {
@@ -10,7 +10,9 @@ export interface CartLine {
   /** The product photo, snapshot with the rest of the line so the cart shows the
    *  same shot the shopper clicked. Undefined for listings without a photo. */
   image?: Product['image'];
-  verified: boolean;
+  /** The card's promotional label, carried across so a line keeps the reason it
+   *  caught the shopper's eye. Absent when the listing had none. */
+  badge?: ProductBadge;
   /** Naira per unit, snapshotted from the product at the moment it was added. */
   unitPrice: number;
   /** e.g. `/ unit`. Carries its own leading slash. */
@@ -98,7 +100,7 @@ export class CartService {
           title: product.title,
           image: product.image,
           icon: product.icon,
-          verified: product.verified,
+          badge: product.badge,
           unitPrice: product.unitPrice,
           unit: product.unit,
           minQty: product.minQty,

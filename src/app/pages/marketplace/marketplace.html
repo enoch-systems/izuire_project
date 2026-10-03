@@ -117,8 +117,8 @@
                   }
                 </svg>
                 }
-                @if (p.verified) {
-                  <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
+                @if (p.badge) {
+                  <span class="product-badge">{{ p.badge }}</span>
                 }
               </div>
               <div class="product-text">
@@ -257,9 +257,12 @@
           <h3 class="mk-set-head">Show prices in</h3>
           <label class="mk-currency">
             <span class="mk-currency-field">
-              <select [value]="currency().code" (change)="setCurrency($any($event.target).value)" aria-label="Currency for prices">
+              <select (change)="setCurrency($any($event.target).value)" aria-label="Currency for prices">
                 @for (c of currencies; track c.code) {
-                  <option [value]="c.code">{{ c.symbol }} {{ c.code }} · {{ c.country }}</option>
+                  <!-- Selected rides on the option rather than as [value] on the
+                       select: the select's own write lands before the options
+                       exist on a prerendered page, and is never retried. -->
+                  <option [value]="c.code" [selected]="currency().code === c.code">{{ c.symbol }} {{ c.code }} · {{ c.country }}</option>
                 }
               </select>
               <svg class="mk-currency-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>

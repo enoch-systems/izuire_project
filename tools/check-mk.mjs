@@ -51,8 +51,15 @@ await sleep(300);
 // The cart restores itself from localStorage when the service is constructed, so
 // the key has to be gone BEFORE the app boots — clearing it afterwards would
 // leave the already-restored lines in memory and stack this run's onto them.
+// The key tracks cart.service.ts's STORAGE_KEY; a cart left over from an earlier
+// run made the badge assertion count those units too. The display-currency key
+// is cleared for the same reason: a currency picked in an earlier run would
+// otherwise open this one with converted prices.
 await send('Page.addScriptToEvaluateOnNewDocument', {
-  source: `try { localStorage.removeItem('izuire.cart.v1'); } catch (e) {}`,
+  source: `try {
+    localStorage.removeItem('izuire.cart.v2');
+    localStorage.removeItem('izuire.currency.v1');
+  } catch (e) {}`,
 });
 await send('Page.navigate', { url });
 await sleep(5000);
@@ -163,7 +170,7 @@ const out = [];
   $('.mk-sheet-x').click();
   await wait(300);
 // ---- Quantity and the cart ----
-  localStorage.removeItem('izuire.cart.v1');
+  localStorage.removeItem('izuire.cart.v2');
   const qty = $('.product-qty-input');
   const before = Number(qty.value);
   $$('.product-qty-step')[1].click();

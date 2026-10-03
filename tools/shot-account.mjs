@@ -54,7 +54,7 @@ const session = (over) =>
     email: 'user1@gmail.com',
     phone: '+234 800 000 0000',
     company: 'Demo Trading Ltd.',
-    memberTier: 'Trusted',
+    memberTier: 'Verified',
     createdAt: '14 Mar 2026',
     ...over,
   });

@@ -10,6 +10,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { UiService } from '../../services/ui.service';
 import { SEARCH_ITEMS } from '../../services/search-items';
+import { DisplayCurrencyService } from '../../services/display-currency.service';
 import { CATEGORIES, FEATURED, PRODUCTS, Product } from '../../pages/marketplace/marketplace-data';
 
 /** One slice of a string, so a matched run can be wrapped in <mark>. */
@@ -77,6 +78,7 @@ const FALLBACKS = ['hair', 'solar', 'bales', 'panels', 'shipping', 'MOQ'];
 export class SearchOverlay {
   private readonly ui = inject(UiService);
   private readonly router = inject(Router);
+  private readonly fx = inject(DisplayCurrencyService);
 
   protected readonly open = this.ui.searchOpen;
   protected readonly query = signal('');
@@ -84,6 +86,11 @@ export class SearchOverlay {
   protected readonly recommended = this.buildRecommended();
   protected readonly popular = POPULAR;
   protected readonly fallbacks = FALLBACKS;
+
+  /** A recommended listing's price, in the site's picked display currency. */
+  protected price(p: Product): string {
+    return this.fx.price(p.unitPrice);
+  }
 
   /** Quick doors out of the panel, before a query. */
   protected readonly quickLinks = [
@@ -115,7 +122,7 @@ export class SearchOverlay {
         index: 0,
         icon: p.icon,
         image: p.image,
-        price: p.ngn,
+        price: this.fx.price(p.unitPrice),
         meta: CAT_LABELS.get(p.cat) ?? p.cat,
       }));
 

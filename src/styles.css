@@ -679,6 +679,14 @@
     display:inline-flex; align-items:center; gap:8px;
     white-space:nowrap;
   }
+  /* The money the site is showing prices in: its chip carries a warm pill, so
+     the reader's own rate is the one to catch as the strip travels. */
+  .rate-ticker__item.is-active{
+    padding:4px 10px; border-radius:999px;
+    background:rgba(245,130,31,.12);
+  }
+  .rate-ticker__item.is-active .rate-ticker__code{ color:var(--orange-deep); }
+  :root[data-theme="dark"] .rate-ticker__item.is-active .rate-ticker__code{ color:var(--orange); }
   /* Height only, never both measures: each flag keeps its own proportions, so
      none of them is stretched to fit a box. The ring is what stops a flag with
      white in it from disappearing into a white page. */
@@ -1330,15 +1338,23 @@
     padding:6%;
     display:block;
   }
-  .verified-badge{
+  /* The card's badge: the promotional word, on one fill — the brand orange — so a
+     grid of them reads as a shop's own labels rather than a colour riot. Every
+     card wears at most one, and it is always this same orange, whichever word is
+     on it; changing the colour of every badge on the site is this one rule.
+
+     The words themselves live in PRODUCTS (see ProductBadge): "Popular",
+     "Hot Deal", "New", "Best Selling" — a claim about the listing, where the
+     "Verified" this replaced was a claim about the whole catalogue and so
+     belonged on none of the cards in particular. */
+  .product-badge{
     position:absolute; top:10px; left:10px;
     background:var(--orange); color:var(--white);
     font-family:var(--font-d); font-weight:600; font-size:.62rem;
     letter-spacing:.03em; text-transform:uppercase;
     padding:5px 9px; border-radius:4px;
-    display:flex; align-items:center; gap:4px;
+    white-space:nowrap;
   }
-  .verified-badge svg{width:10px; height:10px; stroke:var(--white); fill:none;}
   .product-body{padding:16px 16px 18px; display:flex; flex-direction:column; gap:8px; flex:1;}
   .product-body h4{font-size:.94rem; font-weight:600;}
   .product-price{font-family:var(--font-d); font-weight:700; font-size:1.05rem;}
@@ -3761,7 +3777,7 @@
     .product-body h4{ font-size:.9rem; }
     .product-price{ font-size:.96rem; }
     .product-body .btn{ width:100%; padding:11px 12px; font-size:.8rem; }
-    .verified-badge{ top:8px; left:8px; padding:4px 8px; font-size:.56rem; }
+    .product-badge{ top:8px; left:8px; padding:4px 8px; font-size:.56rem; }
 
     /* Steps */
     .steps{ row-gap:28px; margin-top:36px; }
@@ -3902,8 +3918,7 @@
     .product-specs{ font-size:.66rem; line-height:1.3; }
     .product-moq{ font-size:.66rem; }
     .product-body .btn{ width:100%; padding:9px 6px; font-size:.7rem; border-radius:5px; margin-top:4px; }
-    .verified-badge{ top:6px; left:6px; padding:3px 6px; font-size:.5rem; border-radius:3px; }
-    .verified-badge svg{ width:8px; height:8px; }
+    .product-badge{ top:6px; left:6px; padding:3px 6px; font-size:.5rem; border-radius:3px; }
 
     /* The marketplace card carries its own type scale (see the PRODUCTS block),
        so the compact sizes are restated for it here: the scoped rules there are
@@ -4337,7 +4352,13 @@
   .cart-line-remove svg{ width:14px; height:14px; }
   .cart-line-remove:hover{ color:#c5281e; }
 
-  .cart-line-verified{ margin-top:8px; }
+  /* In the cart the badge is one more line of the line's own column — under the
+     title, above the price — rather than a sticker on a photograph, so it is
+     taken back out of the absolute positioning the card's rule gives it: left
+     absolute, the nearest positioned box here is nothing of the line's, and the
+     pill ends up parked against the page. `align-self` stops the flex column
+     stretching it to the full width. */
+  .cart-line-badge{ position:static; align-self:flex-start; margin-top:8px; }
 
   .cart-line-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; margin-top:8px; font-size:.82rem; }
   .cart-line-unit{ font-family:var(--font-d); font-weight:700; color:var(--ink); }
@@ -4726,10 +4747,9 @@
     .product-grid--featured .product-qty{ margin-bottom:12px; }
     /* A thumb this size still cannot carry a full-size badge, so it keeps its
        compact form rather than covering the shot. */
-    .product-grid--featured .verified-badge{
+    .product-grid--featured .product-badge{
       top:6px; left:6px; padding:3px 6px; font-size:.5rem; border-radius:3px;
     }
-    .product-grid--featured .verified-badge svg{ width:8px; height:8px; }
 
     /* The pager narrows with the section: the chevrons step down a touch and the
        gap to the dots tightens so the whole row keeps clear of the card edges. */
@@ -4911,47 +4931,101 @@
 .marketplace-page .product-media--photo{ background:var(--white); }
 .marketplace-page .product-media img{ padding:5%; }
 .marketplace-page .product-media svg{ width:42%; height:42%; stroke:var(--ink); opacity:.24; }
-.marketplace-page .verified-badge{
-  top:10px; left:10px; padding:5px 10px 5px 8px;
+.marketplace-page .product-badge{
+  top:10px; left:10px; padding:5px 10px;
   border-radius:999px; font-size:.6rem; letter-spacing:.05em;
   box-shadow:0 2px 10px rgba(245,130,31,.32);
 }
-.marketplace-page .verified-badge svg{ width:11px; height:11px; }
 
-/* The body is a stack of rows rather than a flex column with one uniform gap:
-   the price, the minimum and the stepper each want their own distance from
-   what is around them, and a single gap cannot give all three. */
+/* ---------- The card's type scale ----------
+   Four steps and no more, mobile first, stated once:
+
+     1. the name          - 600, in full ink
+     2. the price         - 700, in full ink, the largest thing on the card
+     3. the specification - 500 at 60% ink: the grades, the ages, who the stock suits
+     4. the footnotes     - the unit and the minimum, at the bottom of the scale
+
+   Size alone would leave the middle two reading alike, so the weights step with
+   the sizes, 700 / 600 / 500 / 600, and the colour only confirms the order the
+   size and the weight have already set. The four used to sit inside a 0.3rem
+   band - 16, 13.1, 11 and 9.9px on a phone - which is why a card read as one
+   grey block of text with nowhere for the eye to land.
+
+   The sizes are in `cqw`, the card's own width, because the same card is
+   two-across on a phone, three-across on a tablet and four-across on a desktop:
+   a breakpoint per column count would restate these four numbers three times and
+   still be wrong in the gaps between them. The home page's featured rail sizes
+   its own type this way already. Each cqw size carries a plain value first, so a
+   browser without container queries keeps a readable card rather than dropping
+   the declaration. */
+.marketplace-page .product-grid--market .product-card{ container-type:inline-size; }
+
+/* The facts inside the link and the controls below it start at the same inset:
+   the two blocks used to carry different padding, so the name and the stepper
+   did not begin on the same line. The block's own bottom pad is zero, which
+   leaves the gap under the minimum to the stepper's margin alone. */
+.marketplace-page .product-text{
+  gap:0;
+  padding:12px 12px 0;
+  padding:clamp(10px, 5.2cqw, 15px) clamp(10px, 5.2cqw, 15px) 0;
+}
 .marketplace-page .product-grid--market .product-body{
-  padding:14px 14px 16px; gap:0;
-}
-.marketplace-page .product-grid--market .product-title{
-  font-size:.95rem; line-height:1.3; margin:0 0 4px;
-}
-.marketplace-page .product-grid--market .product-specs{
-  font-size:.75rem; line-height:1.4; margin:0 0 10px;
+  gap:0;
+  padding:0 12px 13px;
+  padding:0 clamp(10px, 5.2cqw, 15px) clamp(11px, 5.2cqw, 15px);
 }
 
-/* The price, on its own and set as large as the card allows. The orange wash
+/* 1. The name. Two lines, both of them reserved: a one-line title beside a
+      two-line one would otherwise ride the whole card's content up by a line,
+      and the prices - the thing being compared - would sit at two heights. */
+.marketplace-page .product-grid--market .product-title{
+  font-size:.8rem; font-weight:600; line-height:1.26; letter-spacing:-.005em;
+  font-size:clamp(.8rem, 5.7cqw, .98rem);
+  color:var(--ink); margin:0 0 3px; min-height:2.52em;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+
+/* 2. The specification, a step under the name, in the lighter weight. Two lines
+      rather than a one-line clamp, because at this size most of them fit on a
+      single line anyway and the handful that do not are the ones carrying the
+      most - which is not the place to cut a fact. */
+.marketplace-page .product-grid--market .product-specs{
+  font-size:.66rem; font-weight:500; line-height:1.35;
+  font-size:clamp(.66rem, 4.6cqw, .78rem);
+  color:var(--ink-60); margin:0 0 9px;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+
+/* 3. The price, on its own and set as large as the card allows. The orange wash
    that used to sit behind it is gone: a filled box behind every figure on the
    page is a form field, and this is a shop. */
 .marketplace-page .product-grid--market .product-price{
-  display:flex; align-items:baseline; flex-wrap:wrap; gap:1px 5px;
+  display:flex; align-items:baseline; flex-wrap:wrap; gap:1px 4px;
   margin:0; padding:0; background:none; border-radius:0;
-  font-family:var(--font-d); font-weight:700; font-size:1.22rem;
-  line-height:1.18; letter-spacing:-.02em; color:var(--ink);
+  font-family:var(--font-d); font-weight:700;
+  font-size:1.04rem;
+  font-size:clamp(1.04rem, 7.8cqw, 1.3rem);
+  line-height:1.16; letter-spacing:-.02em; color:var(--ink);
   min-width:0; overflow-wrap:anywhere;
 }
 .marketplace-page .product-grid--market .product-price .unit{
-  font-family:var(--font-b); font-weight:500; font-size:.72rem; color:var(--ink-40);
+  font-family:var(--font-b); font-weight:500;
+  font-size:.58rem;
+  font-size:clamp(.58rem, 4.3cqw, .72rem);
+  color:var(--ink-40);
 }
 
-/* The minimum as a pill rather than a line of small type. It is a condition on
-   the price above it, not another fact about the product, and a pill says so. */
+/* 4. The minimum, at the foot of the scale: the smallest type on the card, and
+   still in the card's display face at 600, so it reads as a term rather than as
+   a caption. It is a condition on the price above it, not another fact about the
+   product, and the pill says so. */
 .marketplace-page .product-grid--market .product-moq{
   align-self:flex-start;
-  margin:8px 0 0; padding:4px 9px;
+  margin:6px 0 0; padding:3px 8px;
   border:1px solid var(--line); border-radius:999px; background:var(--paper);
-  font-family:var(--font-d); font-size:.66rem; font-weight:600;
+  font-family:var(--font-d); font-weight:600;
+  font-size:.56rem;
+  font-size:clamp(.56rem, 4.1cqw, .68rem);
   letter-spacing:.02em; color:var(--ink-60);
 }
 
@@ -5242,19 +5316,13 @@
 
   .marketplace-page .product-grid--market{ gap:10px; }
   .marketplace-page .product-media{ aspect-ratio:1/.95; }
-  .marketplace-page .verified-badge{ top:7px; left:7px; padding:4px 7px; font-size:.52rem; }
-  .marketplace-page .verified-badge svg{ width:9px; height:9px; }
+  .marketplace-page .product-badge{ top:7px; left:7px; padding:4px 7px; font-size:.52rem; }
 
-  .marketplace-page .product-grid--market .product-body{ padding:11px 11px 12px; }
-  .marketplace-page .product-grid--market .product-title{ font-size:.82rem; line-height:1.28; }
-  .marketplace-page .product-grid--market .product-specs{ font-size:.69rem; margin-bottom:8px; }
-  .marketplace-page .product-grid--market .product-price{ font-size:1rem; }
-  .marketplace-page .product-grid--market .product-price .unit{ font-size:.64rem; }
-  .marketplace-page .product-grid--market .product-moq{
-    font-size:.62rem; padding:3px 8px; margin-top:6px;
-  }
+  /* The card's own type sits on the container scale declared with the card, so
+     none of it is restated here: on a phone the scale lands on its phone floors
+     by itself. Only the controls change shape at this width. */
   .marketplace-page .product-grid--market .product-qty{
-    min-height:40px; margin:8px 0 0; border-radius:9px;
+    min-height:40px; margin:8px 0 8px; border-radius:9px;
   }
   .marketplace-page .product-grid--market .product-qty-step{ width:34px; }
   .marketplace-page .product-grid--market .product-qty-input{ font-size:1rem; }
@@ -5277,8 +5345,10 @@
 @media (max-width: 380px){
   .mk-bar-cats .container{ padding:0 14px; }
   .mk-bar-cats .filter-bar{ margin:0 -14px; padding:9px 14px; }
-  .marketplace-page .product-grid--market .product-title{ font-size:.78rem; }
-  .marketplace-page .product-grid--market .product-price{ font-size:.94rem; }
+  /* The card has nothing to restate at this width either: its type is on the
+     container scale, and 380px of screen puts every one of those sizes on the
+     floor it already uses - so the two rules that used to step the name and the
+     price down here are gone rather than kept in step by hand. */
 }
 
 /* Motion off: the sheet slides and the tick draws, so both drop to the state
@@ -5319,15 +5389,14 @@
   .pd-media img{ width:100%; height:100%; object-fit:cover; }
   .pd-media-fallback{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--ink-40); }
   .pd-media-fallback svg{ width:34%; height:34%; stroke:var(--ink); opacity:.5; }
-  .pd-verified{
+  .pd-badge{
     position:absolute; top:12px; left:12px;
-    display:inline-flex; align-items:center; gap:5px;
-    padding:6px 10px; border-radius:999px;
-    background:rgba(17,17,17,.72); color:#fff;
-    font-family:var(--font-d); font-size:.66rem; font-weight:600; letter-spacing:.02em;
-    backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    padding:6px 11px; border-radius:999px;
+    background:var(--orange); color:#fff;
+    font-family:var(--font-d); font-weight:600; font-size:.66rem;
+    letter-spacing:.06em; text-transform:uppercase;
+    box-shadow:0 2px 12px rgba(245,130,31,.35);
   }
-  .pd-verified svg{ width:11px; height:11px; stroke:#fff; fill:none; }
 
   .pd-thumbs{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
   .pd-thumb{
@@ -5628,6 +5697,15 @@
   .journey-step p .w{
     opacity:0;
     transition:all .32s var(--ease);
+  }
+  /* The words are adjacent spans with no text node between them, so the
+     browser sees one unbreakable token (…spec,target,price,…) and the
+     paragraph runs past the edge of the screen. A generated trailing space
+     restores normal word breaking; it hangs at line ends, so the ragged
+     right still looks like plain text. (A &nbsp; would not break at all,
+     and Angular strips plain whitespace-only nodes between elements.) */
+  .journey-step p .w::after{
+    content:" ";
   }
   .journey-step.lit p .w{ opacity:1; }
   .journey-perk{
@@ -6599,13 +6677,13 @@
   }
   .search-rec-media > svg{ width:34px; height:34px; stroke:var(--ink-40); }
   .search-rec-media.is-photo img{ width:100%; height:100%; object-fit:cover; }
-  .search-rec-verified{
-    position:absolute; top:6px; right:6px;
-    width:20px; height:20px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    background:var(--blue); color:#fff;
+  .search-rec-badge{
+    align-self:flex-start;
+    padding:3px 8px; border-radius:999px;
+    background:var(--orange); color:#fff;
+    font-family:var(--font-d); font-style:normal; font-weight:600;
+    font-size:.54rem; letter-spacing:.07em; text-transform:uppercase;
   }
-  .search-rec-verified svg{ width:11px; height:11px; stroke:currentColor; }
   .search-rec-body{ display:flex; flex-direction:column; gap:4px; min-width:0; }
   .search-rec-body strong{ font-family:var(--font-d); font-weight:600; font-size:.82rem; line-height:1.28; }
   .search-rec-body small{ font-size:.78rem; font-weight:600; color:var(--orange-deep); }
@@ -7026,13 +7104,33 @@
     box-shadow:0 14px 40px rgba(17,17,17,.05);
   }
   :root[data-theme="dark"] .account-card{ box-shadow:none; }
-  .account-card-head{ margin-bottom:20px; }
-  .account-card-head h2{ font-size:1.2rem; margin-bottom:6px; }
-  .account-card-head p{ font-size:.86rem; color:var(--ink-60); }
+  /* The head runs three levels deep — kicker, title, gloss — so the eye lands on
+     the title while the two smaller lines stay quiet. The hairline closes the
+     head off from the form beneath it. Kicker follows the product pages'
+     .pd-eyebrow treatment, so a section label looks the same everywhere. */
+  .account-card-head{ margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--line); }
+  .account-card-kicker{
+    display:block; margin-bottom:9px;
+    font-family:var(--font-d); font-size:.7rem; font-weight:600;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--orange-deep);
+  }
+  .account-card-head h2{ font-size:1.35rem; font-weight:700; letter-spacing:-.015em; margin-bottom:7px; }
+  .account-card-head p{ font-size:.86rem; line-height:1.55; color:var(--ink-60); max-width:58ch; }
   .account-form .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
   .account-form .field{ margin-bottom:16px; }
+  /* Label and value split: the label sits back in small, muted type while the
+     field's own value steps forward in the display face at full ink, so a
+     filled form reads as data rather than as a run of equal-weight lines. */
+  .account-form .field label{ font-size:.74rem; letter-spacing:.02em; color:var(--ink-60); margin-bottom:6px; }
+  .account-form .field input{ font-family:var(--font-d); font-weight:500; font-size:.93rem; color:var(--ink); }
+  .account-form .field input::placeholder{ color:var(--ink-40); font-weight:400; }
   .field .opt{ font-weight:400; font-size:.76rem; color:var(--ink-40); }
-  .account-card-actions{ display:flex; justify-content:flex-end; padding-top:4px; }
+  /* The save row is the card's footer: a hairline of its own keeps the button
+     from floating up against the last field. */
+  .account-card-actions{
+    display:flex; align-items:center; justify-content:flex-end; gap:14px;
+    margin-top:4px; padding-top:18px; border-top:1px solid var(--line);
+  }
   .account-card-actions .btn[disabled]{ opacity:.5; cursor:not-allowed; }
   @media (max-width: 620px){
     .account-card{ padding:22px 18px 20px; }
@@ -7055,19 +7153,72 @@
     background:linear-gradient(135deg, var(--orange), var(--orange-deep));
     color:#fff; font-family:var(--font-d); font-weight:700; font-size:1.4rem;
   }
-  .account-id-card > strong{ font-family:var(--font-d); font-size:1.05rem; }
+  .account-id-card > strong{ font-family:var(--font-d); font-weight:700; font-size:1.1rem; letter-spacing:-.01em; }
   .account-id-email{ font-size:.8rem; color:var(--ink-40); word-break:break-all; }
   .account-id-facts{
     width:100%; margin-top:18px; padding-top:15px;
     border-top:1px solid var(--line);
-    display:flex; flex-direction:column; gap:10px;
+    display:flex; flex-direction:column; gap:11px;
   }
-  .account-id-facts li{ display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:.8rem; }
-  .account-id-facts span{ color:var(--ink-40); }
-  .account-id-facts strong{ font-weight:600; color:var(--ink-60); text-align:right; }
+  /* Key and value split: the key is a small, spaced caption in the display face
+     and the value the data itself, so the two never read as one run of equal
+     type the way a label and its figure should not. */
+  .account-id-facts li{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+  .account-id-facts span{
+    flex:none;
+    font-family:var(--font-d); font-size:.66rem; font-weight:600;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--ink-40);
+  }
+  .account-id-facts strong{ font-family:var(--font-d); font-weight:600; font-size:.85rem; color:var(--ink); text-align:right; }
   .account-id-btn{ width:100%; margin-top:18px; padding:12px 18px; }
   .account-note{ margin-top:22px; font-size:.78rem; color:var(--ink-40); }
   .account-note--aside{ margin-top:0; }
+
+  /* The display-currency picker, on Payments and Settings. Same field as the
+     marketplace's own select — appearance stripped, chevron drawn as a sibling
+     so it takes the mode's ink — so one control reads the same wherever the
+     choice is made, and every figure on the site answers to it. */
+  .pay-tools{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    gap:12px 18px; margin-bottom:18px;
+  }
+  .pay-tools-note{ font-size:.8rem; line-height:1.55; color:var(--ink-40); max-width:56ch; }
+  .fx-pick{ display:inline-flex; align-items:center; gap:10px; }
+  .fx-pick-label{
+    font-family:var(--font-d); font-size:.68rem; font-weight:600;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-40);
+    white-space:nowrap;
+  }
+  .fx-field{ position:relative; display:flex; align-items:center; }
+  .fx-field select{
+    -webkit-appearance:none; appearance:none;
+    min-height:44px; padding:0 40px 0 15px;
+    border:1px solid var(--line); border-radius:10px;
+    background:var(--white); color:var(--ink);
+    font-family:var(--font-d); font-weight:600; font-size:.95rem;
+    cursor:pointer;
+    transition:border-color .2s var(--ease), background .2s var(--ease);
+  }
+  .fx-field select:hover{ border-color:var(--line-strong); background:var(--paper); }
+  .fx-field select:focus-visible{ outline:2px solid var(--orange-deep); outline-offset:2px; }
+  /* The open list is drawn by the browser, so it needs the mode's own colours
+     or it keeps the platform's light panel on a dark page. */
+  .fx-field select option{ background:var(--white); color:var(--ink); }
+  /* A sibling rather than a background image, so it takes the ink of the mode
+     and never needs a second copy for dark. It sits over the select's own right
+     padding and takes no pointer events, so a click still opens the list. */
+  .fx-chevron{
+    position:absolute; right:14px; width:13px; height:13px;
+    stroke:var(--ink-60); pointer-events:none;
+  }
+  @media (max-width: 620px){
+    .pay-tools{ align-items:stretch; }
+    .fx-pick{ width:100%; justify-content:space-between; }
+    .fx-field{ flex:1; min-width:0; }
+    /* 1rem is the floor: iOS zooms the page on focus under 16px, and this
+       field is tappable. */
+    .fx-field select{ width:100%; font-size:1rem; }
+  }
 
   /* --- Payments --- */
   .pay-summary{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; margin-bottom:26px; }
@@ -7230,15 +7381,6 @@
   .settings-switch.on{ background:var(--orange); }
   .settings-switch.on span{ transform:translateX(20px); background:#fff; }
 
-  .settings-seg{
-    display:inline-flex; gap:4px; padding:4px;
-    background:var(--paper); border:1px solid var(--line); border-radius:12px;
-  }
-  .settings-seg button{
-    padding:9px 16px; border-radius:9px;
-    font-family:var(--font-d); font-weight:600; font-size:.85rem; color:var(--ink-60);
-  }
-  .settings-seg button.active{ background:var(--white); color:var(--ink); box-shadow:0 1px 3px rgba(17,17,17,.12); }
   .settings-hint{ margin-top:12px; font-size:.78rem; color:var(--ink-40); }
 
   .settings-links{ display:flex; flex-direction:column; }
@@ -7316,3 +7458,141 @@
   }
 
   .mobile-nav-account-out svg{ width:17px; height:17px; stroke:currentColor; }
+
+/* =====================================================================
+   SERVICES PAGES (sourcing / shipping / business solutions) —
+   PHOTO SLOTS + MOBILE TYPE FIT. Appended last so it wins the cascade
+   over the shared page styles above; the type pass is scoped to
+   .svc-page so the other inner pages keep their approved scale.
+   ===================================================================== */
+
+  /* --- Empty photo cards ---------------------------------------------
+     Placeholder frames waiting on real shots. To fill one, put
+     <img class="svc-shot__img" src="…" alt="…"> inside the figure —
+     it covers the frame and the placeholder bits stand down. */
+  .svc-shot{
+    position:relative;
+    margin:0;
+    aspect-ratio:4/3;
+    border:1px dashed rgba(245,130,31,.45);
+    border-radius:16px;
+    background:
+      radial-gradient(120% 90% at 15% 0%, rgba(245,130,31,.10), transparent 60%),
+      repeating-linear-gradient(135deg, rgba(17,17,17,.03) 0 10px, transparent 10px 20px),
+      var(--paper);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:8px; text-align:center; padding:18px;
+    overflow:hidden;
+    transition:border-color .3s var(--ease), transform .3s var(--ease);
+  }
+  .svc-shot:hover{ border-color:var(--orange); transform:translateY(-2px); }
+  .svc-shot__icon{ display:flex; }
+  .svc-shot__icon svg{
+    width:34px; height:34px;
+    stroke:var(--orange-deep); fill:none;
+    stroke-linecap:round; stroke-linejoin:round;
+    opacity:.9;
+  }
+  .svc-shot__label{
+    font-family:var(--font-d); font-weight:700;
+    font-size:.84rem; line-height:1.3; color:var(--ink);
+    max-width:24ch;
+  }
+  .svc-shot__hint{
+    font-family:var(--font-d); font-weight:600;
+    font-size:.64rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-40);
+  }
+  /* The hero slot stretches wider than it is tall. */
+  .svc-shot--wide{
+    aspect-ratio:2.3/1;
+    margin-top:30px;
+  }
+  /* Filled state: the image owns the frame. */
+  .svc-shot:has(.svc-shot__img){
+    padding:0; border-style:solid; border-color:var(--line);
+    background:var(--paper);
+  }
+  .svc-shot:has(.svc-shot__img) > :not(.svc-shot__img){ display:none; }
+  .svc-shot__img{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    border-radius:inherit;
+  }
+
+  /* --- Photo slot grids ---------------------------------------------- */
+  .svc-shots{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-top:38px;
+  }
+  .svc-shots--two{ grid-template-columns:repeat(2,1fr); }
+  .svc-shots--methods{ max-width:960px; margin-left:auto; margin-right:auto; }
+  .svc-shots--after-journey{ margin-top:54px; }
+  .svc-shots--destinations{ margin-top:34px; }
+
+  @media (max-width: 980px){
+    .svc-shots{ grid-template-columns:repeat(2,1fr); }
+  }
+
+  /* --- Mobile: type scaled to fit, sections tidied -------------------- */
+  @media (max-width: 620px){
+    .svc-page .page-hero{ padding:34px 0 40px; }
+    .svc-page .page-hero h1{ font-size:clamp(1.5rem, 6.4vw, 1.78rem); letter-spacing:-.01em; margin-bottom:10px; }
+    .svc-page .page-hero p{ font-size:.92rem; line-height:1.6; }
+
+    .svc-page .hero-step-counter{ font-size:.66rem; gap:8px; margin-top:20px; letter-spacing:.1em; }
+    .svc-page .hero-step-counter .bar{ width:38px; }
+
+    .svc-page .section{ padding:44px 0; }
+    .svc-page .cluster-head,
+    .svc-page .journey-intro{ margin-bottom:34px; }
+    .svc-page .cluster-head h2,
+    .svc-page .journey-intro h2{ font-size:1.34rem; line-height:1.26; margin-top:11px; }
+    .svc-page .cluster-head p,
+    .svc-page .journey-intro p{ font-size:.89rem; line-height:1.6; margin-top:11px; }
+
+    .svc-page .cluster-item{ padding:24px 18px 26px; }
+    .svc-page .cluster-chip{ width:40px; height:40px; border-radius:11px; margin-bottom:14px; }
+    .svc-page .cluster-chip svg{ width:20px; height:20px; }
+    .svc-page .cluster-num{ font-size:.66rem; margin-bottom:6px; }
+    .svc-page .cluster-item h4{ font-size:.97rem; margin-bottom:6px; }
+    .svc-page .cluster-item p{ font-size:.85rem; line-height:1.55; }
+
+    .svc-page .journey-step{ padding-left:54px; padding-bottom:38px; }
+    .svc-page .journey-marker{ width:34px; height:34px; border-radius:9px; font-size:.74rem; box-shadow:0 0 0 5px var(--paper); }
+    .svc-page .journey-rail{ left:16px; }
+    .svc-page .journey-chapter{ font-size:.64rem; letter-spacing:.12em; }
+    .svc-page .journey-step h3{ font-size:1.02rem; margin-bottom:9px; }
+    .svc-page .journey-step p{ font-size:.88rem; line-height:1.6; }
+    .svc-page .journey-perk{ margin-top:14px; padding:11px 13px; font-size:.78rem; border-radius:0 7px 7px 0; }
+
+    .svc-page .value-item{ padding:26px 18px; }
+    .svc-page .value-num{ font-size:.74rem; margin-bottom:10px; }
+    .svc-page .value-icon{ width:40px; height:40px; border-radius:10px; margin-bottom:14px; }
+    .svc-page .value-item h4{ font-size:1.02rem; }
+    .svc-page .value-item p{ font-size:.86rem; }
+
+    .svc-page .path-nav-head h4{ font-size:.94rem; }
+    .svc-page .path-panel h3{ font-size:1.14rem; }
+    .svc-page .path-panel > p{ font-size:.9rem; line-height:1.6; }
+    .svc-page .path-features li{ padding:10px 13px; font-size:.86rem; }
+
+    .svc-page .band-section{ padding:44px 0; }
+    .svc-page .band-section h2{ font-size:1.38rem; }
+    .svc-page .band-section p{ font-size:.92rem; line-height:1.6; margin-bottom:24px; }
+    .svc-page .band-eyebrow{ font-size:.66rem; margin-bottom:14px; }
+
+    /* Photo slots on a phone: cards stay a two-up gallery, the hero slot
+       keeps enough height for icon + caption. */
+    .svc-shots{ gap:12px; margin-top:30px; }
+    .svc-shots--after-journey{ margin-top:40px; }
+    .svc-shot{ border-radius:13px; gap:6px; padding:12px 10px; }
+    .svc-shot--wide{ aspect-ratio:16/9; margin-top:24px; }
+    .svc-shot__icon svg{ width:27px; height:27px; }
+    .svc-shot__label{ font-size:.76rem; }
+    .svc-shot__hint{ font-size:.58rem; letter-spacing:.12em; }
+  }

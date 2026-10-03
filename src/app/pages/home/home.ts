@@ -14,6 +14,7 @@ import { FEATURED, Product, PRODUCTS } from '../marketplace/marketplace-data';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 import { AuthService } from '../../services/auth.service';
+import { DisplayCurrencyService } from '../../services/display-currency.service';
 
 /** One slide of the hero stat carousel (a card plus its backdrop design). */
 interface HeroStat {
@@ -174,6 +175,9 @@ for (let i = 0; i < PRODUCTS.length; i += PAGE_SIZE) {
   templateUrl: './home.html',
 })
 export class Home implements OnInit, OnDestroy, AfterViewInit {
+  /** The site-wide display-currency pick, so the featured rail quotes the same
+   *  money as the marketplace and the payments page. */
+  private readonly fx = inject(DisplayCurrencyService);
   /** Slider positions, one per story. */
   protected readonly dots = TESTIMONIALS.map((_, index) => index);
   /** The stories in the slider, so the slide markup is generated from one place. */
@@ -236,6 +240,11 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
   /** The four products under "Featured products", in showcase order. */
   protected readonly featured = FEATURED;
+
+  /** A catalogue price in the site's picked display currency. */
+  protected price(naira: number): string {
+    return this.fx.price(naira);
+  }
 
   /** The showcase as pager pages, and which one is showing. */
   protected readonly pages = PRODUCT_PAGES;

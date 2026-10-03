@@ -257,8 +257,8 @@
                         }
                       </svg>
                       }
-                      @if (p.verified) {
-                        <span class="verified-badge"><svg viewBox="0 0 24 24" stroke-width="2.5" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>
+                      @if (p.badge) {
+                        <span class="product-badge">{{ p.badge }}</span>
                       }
                     </div>
                   </a>
@@ -266,7 +266,7 @@
                     <a class="product-title-link" [routerLink]="['/product', p.id]"><h4 class="product-title">{{ p.title }}</h4></a>
                     <div class="product-specs">{{ p.specs }}</div>
                     <div class="product-price">
-                      <span class="price-val">{{ p.ngn }}</span>
+                      <span class="price-val">{{ price(p.unitPrice) }}</span>
                       <span class="unit">{{ p.unit }}</span>
                     </div>
                       <div class="product-qty">

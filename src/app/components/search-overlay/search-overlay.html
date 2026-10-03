@@ -52,15 +52,16 @@
                       }
                     </svg>
                   }
-                  @if (p.verified) {
-                    <span class="search-rec-verified" aria-label="Verified supplier">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-                    </span>
-                  }
                 </span>
                 <span class="search-rec-body">
+                  <!-- The label sits with the words rather than on the thumbnail: a
+                       recommendation this small has no room to lay "Best Selling"
+                       over the shot without covering it. -->
+                  @if (p.badge) {
+                    <em class="search-rec-badge">{{ p.badge }}</em>
+                  }
                   <strong>{{ p.title }}</strong>
-                  <small>{{ p.ngn }} <em>{{ p.unit }}</em></small>
+                  <small>{{ price(p) }} <em>{{ p.unit }}</em></small>
                 </span>
               </a>
             }

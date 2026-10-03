@@ -49,7 +49,7 @@
       @for (v of values; track v.n) {
         <div class="value-item">
           <span class="value-num">{{ v.n }} / Pillar</span>
-          <div class="value-icon" [innerHTML]="v.icon"></div>
+          <div class="value-icon" [innerHTML]="v.icon | trustHtml"></div>
           <h4>{{ v.name }}</h4>
           <p>{{ v.body }}</p>
         </div>
@@ -88,7 +88,7 @@
       @for (p of presence; track p.n) {
         <div class="value-item">
           <span class="value-num">{{ p.n }} / Location</span>
-          <div class="value-icon" [innerHTML]="p.icon"></div>
+          <div class="value-icon" [innerHTML]="p.icon | trustHtml"></div>
           <h4>{{ p.name }}</h4>
           <p>{{ p.body }}</p>
         </div>

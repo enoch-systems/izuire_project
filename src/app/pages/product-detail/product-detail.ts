@@ -1,9 +1,10 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Product, PRODUCTS } from '../marketplace/marketplace-data';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
-import { CartService, naira } from '../../services/cart.service';
+import { CartService } from '../../services/cart.service';
+import { DisplayCurrencyService } from '../../services/display-currency.service';
 
 /** A single view then the shopper can flip through in the gallery. */
 interface GalleryShot {
@@ -56,8 +57,11 @@ function deriveGallery(product: Product): GalleryShot[] {
 })
 export class ProductDetail {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   protected readonly cart = inject(CartService);
-  protected readonly money = naira;
+  private readonly fx = inject(DisplayCurrencyService);
+  /** The price, in the site's picked display currency. */
+  protected readonly money = (value: number): string => this.fx.price(value);
   protected readonly Math = Math;
 
   /** The product this route renders, or null when the id is unknown. */
@@ -102,12 +106,16 @@ export class ProductDetail {
   });
 
   constructor() {
-    this.load(this.router.url);
+    /* Every product lives on the same route, so Angular reuses this component
+       when a "You may also like" card (or any /product/:id link) is followed —
+       the constructor only ever runs once. Watching the param is what actually
+       swaps the product on those in-page navigations; the initial emission
+       still drives the prerendered first paint. */
+    this.route.paramMap.subscribe((params) => this.load(params.get('id') ?? ''));
   }
 
-  /** Look the product up from the route's final segment. */
-  private load(url: string): void {
-    const id = url.split('/').pop() ?? '';
+  /** Look the product up by its route id. */
+  private load(id: string): void {
     const found = PRODUCTS.find((p) => p.id === id) ?? null;
     this.product.set(found);
     this.activeShot.set(0);

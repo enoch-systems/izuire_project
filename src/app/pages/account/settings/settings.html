@@ -23,6 +23,7 @@
           <section class="account-card">
             <header class="account-card-head">
               <div>
+                <span class="account-card-kicker">Interface</span>
                 <h2>Appearance</h2>
                 <p>The same switch the header carries, written out in full.</p>
               </div>
@@ -44,6 +45,7 @@
           <section class="account-card">
             <header class="account-card-head">
               <div>
+                <span class="account-card-kicker">Alerts</span>
                 <h2>Notifications</h2>
                 <p>What we send you about quotes, payments and shipments.</p>
               </div>
@@ -82,20 +84,32 @@
           <section class="account-card">
             <header class="account-card-head">
               <div>
-                <h2>Marketplace currency</h2>
-                <p>The figure listings open with. You can still flip it per page.</p>
+                <span class="account-card-kicker">Storefront</span>
+                <h2>Display currency</h2>
+                <p>The money every price on the site is shown in. Pick it once and it holds everywhere.</p>
               </div>
             </header>
-            <div class="settings-seg" role="group" aria-label="Preferred currency">
-              <button type="button" [class.active]="currency() === 'NGN'" (click)="setCurrency('NGN')" [attr.aria-pressed]="currency() === 'NGN'">₦ Naira</button>
-              <button type="button" [class.active]="currency() === 'RMB'" (click)="setCurrency('RMB')" [attr.aria-pressed]="currency() === 'RMB'">¥ Renminbi</button>
-            </div>
-            <p class="settings-hint">RMB prices are supplier quotes, the naira figure is the one you settle in.</p>
+            <label class="fx-pick">
+              <span class="fx-pick-label">Show prices in</span>
+              <span class="fx-field">
+                <select (change)="fx.set($any($event.target).value)" aria-label="Display currency across the site">
+                  @for (c of fx.currencies; track c.code) {
+                    <!-- Selected rides on the option rather than as [value] on the
+                         select: the select's own write lands before the options
+                         exist on a prerendered page, and is never retried. -->
+                    <option [value]="c.code" [selected]="fx.currency().code === c.code">{{ c.symbol }} {{ c.code }} · {{ c.country }}</option>
+                  }
+                </select>
+                <svg class="fx-chevron" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </span>
+            </label>
+            <p class="settings-hint">Naira is the figure that settles; every other money is an indicative reading of it at today's rate. The pick is remembered on this device.</p>
           </section>
 
           <section class="account-card">
             <header class="account-card-head">
               <div>
+                <span class="account-card-kicker">Session</span>
                 <h2>Account</h2>
                 <p>Jump to the rest, or end the session on this device.</p>
               </div>
@@ -122,7 +136,7 @@
         </div>
 
         <p class="account-note">
-          Appearance is remembered between visits. The notification and currency switches are demo preferences, they reset when the page reloads.
+          Appearance and display currency are remembered between visits. The notification switches are demo preferences, they reset when the page reloads.
         </p>
       </div>
     </section>

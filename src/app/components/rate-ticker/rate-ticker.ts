@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CURRENCIES, formatMoney, unitsPerUsd } from '../../services/currency';
+import { DisplayCurrencyService } from '../../services/display-currency.service';
 
 /** One entry of the strip: which money, and what one dollar buys of it. */
 interface TickerRate {
@@ -36,6 +37,11 @@ interface TickerRate {
 export class RateTicker {
   /** The set is printed twice so the loop has somewhere to travel to. */
   protected readonly copies = [0, 1];
+
+  /** The site's display currency: its chip is marked in the strip, so the rate
+   *  behind the prices a reader is looking for is the one to find in the travel. */
+  private readonly fx = inject(DisplayCurrencyService);
+  protected readonly active = this.fx.currency;
 
   /** The date the figures are stated for, shown as the strip's first chip. */
   protected readonly today = new Intl.DateTimeFormat('en-GB', {

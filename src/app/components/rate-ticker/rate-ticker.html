@@ -17,7 +17,7 @@
         <div class="rate-ticker__set" [attr.aria-hidden]="copy ? 'true' : null">
           <span class="rate-ticker__when">Today · {{ today }}</span>
           @for (rate of rates; track rate.code) {
-            <span class="rate-ticker__item" [attr.title]="rate.country + ' · 1 USD = ' + rate.figure">
+            <span class="rate-ticker__item" [class.is-active]="rate.code === active().code" [attr.title]="rate.country + ' · 1 USD = ' + rate.figure">
               <img class="rate-ticker__flag" [src]="flagSrc(rate.iso)" alt="" />
               <span class="rate-ticker__code">{{ rate.code }}</span>
               <span class="rate-ticker__figure">{{ rate.figure }}</span>

@@ -2,7 +2,7 @@ import { Component, HostListener, computed, effect, inject, signal } from '@angu
 import { RouterLink } from '@angular/router';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 import { CATEGORIES, PRODUCTS, Product } from './marketplace-data';
-import { CURRENCIES, Currency, convertFromNaira, formatMoney } from '../../services/currency';
+import { DisplayCurrencyService } from '../../services/display-currency.service';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 
@@ -28,9 +28,13 @@ const PAGE_SIZE = 8;
   templateUrl: './marketplace.html',
 })
 export class Marketplace {
+  /** The site-wide display-currency pick. The sheet's select writes straight to
+   *  it, so the choice survives leaving the page and follows the shopper to the
+   *  payments page, a product page and home alike. */
+  private readonly fx = inject(DisplayCurrencyService);
   protected readonly products = PRODUCTS;
   protected readonly categories = CATEGORIES;
-  protected readonly currencies = CURRENCIES;
+  protected readonly currencies = this.fx.currencies;
   protected readonly pageSize = PAGE_SIZE;
   protected readonly priceBands = [
     { id: 'all', label: 'Any price', min: 0, max: Infinity },
@@ -50,8 +54,10 @@ export class Marketplace {
     { id: 'price-low', label: 'Price: low to high' },
     { id: 'price-high', label: 'Price: high to low' },
   ];
-  /** The money prices are shown in. Naira, because that is the price. */
-  protected readonly currency = signal<Currency>(CURRENCIES[0]);
+  /** The money prices are shown in — the shared pick, naira unless a visit said
+   *  otherwise. Exposed as the service's own computed, so this page and the
+   *  select that sets it can never disagree. */
+  protected readonly currency = this.fx.currency;
   protected readonly filter = signal('all');
   protected readonly priceFilter = signal('all');
   protected readonly sortOrder = signal('featured');
@@ -156,15 +162,11 @@ export class Marketplace {
   * from naira using the USD-based indicative rates and carry an `≈`.
    */
   protected price(p: Product): string {
-    const currency = this.currency();
-    if (currency.code === 'NGN') return p.ngn;
-    const converted = convertFromNaira(p.unitPrice, currency);
-    return converted === null ? p.ngn : `≈ ${formatMoney(converted, currency)}`;
+    return this.fx.price(p.unitPrice);
   }
 
   protected setCurrency(code: string): void {
-    const next = this.currencies.find((c) => c.code === code);
-    if (next) this.currency.set(next);
+    this.fx.set(code);
   }
 
   protected setFilter(filter: string): void {

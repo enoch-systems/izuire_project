@@ -23,7 +23,7 @@ export interface AuthUser {
   shipping?: AddressInfo;
   billing?: AddressInfo;
   createdAt?: string;
-  memberTier?: 'Standard' | 'Trusted' | 'Enterprise';
+  memberTier?: 'Standard' | 'Verified' | 'Enterprise';
 }
 
 /** Status of a mock payment/order record. */
@@ -65,7 +65,7 @@ const MOCK_ACCOUNT: { email: string; password: string; profile: AuthUser } = {
     email: 'user1@gmail.com',
     phone: '+234 800 000 0000',
     company: 'Demo Trading Ltd.',
-    memberTier: 'Trusted',
+    memberTier: 'Verified',
     createdAt: '14 Mar 2026',
     shipping: {
       line1: 'Shop No. GFQ 53, Happy Baby Line',
@@ -280,7 +280,7 @@ export class AuthService {
       ...MOCK_ACCOUNT.profile,
       name: name.trim(),
       email: email.trim().toLowerCase(),
-      memberTier: 'Standard',
+      memberTier: 'Verified',
       createdAt: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     });
     this.loadingStage.set('idle');
@@ -382,7 +382,15 @@ export class AuthService {
       const parsed: unknown = JSON.parse(raw);
       if (typeof parsed !== 'object' || parsed === null) return null;
       const user = parsed as Partial<AuthUser>;
-      return typeof user.email === 'string' && user.email ? (user as AuthUser) : null;
+      if (typeof user.email !== 'string' || !user.email) return null;
+      // A session saved before a tier was renamed still holds the retired word —
+      // "Trusted", say — and the account chip renders whatever it is given, so
+      // the dead name would outlive the rename on every returning visit. A tier
+      // the union still knows is kept; anything else falls back to the current
+      // default, which is what a fresh sign-in writes.
+      const tier = user.memberTier;
+      const known = tier === 'Standard' || tier === 'Verified' || tier === 'Enterprise';
+      return { ...user, memberTier: known ? tier : 'Verified' } as AuthUser;
     } catch {
       return null;
     }
