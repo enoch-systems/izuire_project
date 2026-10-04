@@ -86,13 +86,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     "fragment": undefined
   },
   {
-    "title": "CBM Calculator",
-    "cat": "Shipping",
-    "desc": "Estimate your shipment volume",
-    "route": "/shipping",
-    "fragment": "calculator"
-  },
-  {
     "title": "New Importers",
     "cat": "Business Solutions",
     "desc": "Start sourcing from China with support at every step",

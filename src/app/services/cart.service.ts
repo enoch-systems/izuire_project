@@ -28,10 +28,12 @@ const STORAGE_KEY = 'izuire.cart.v2';
 /** Grouping done here rather than by `Intl` currency style, which some environments
  *  render as "NGN" instead of the naira sign. */
 const grouped = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+/** The same, for an amount that is not a whole naira: the cents still show. */
+const groupedCents = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/** Format a naira amount for display, e.g. 18500 -> "₦18,500". */
+/** Format a naira amount: 18500 -> "₦18,500", 18500.5 -> "₦18,500.50". */
 export function naira(value: number): string {
-  return `₦${grouped.format(value)}`;
+  return `₦${(Number.isInteger(value) ? grouped : groupedCents).format(value)}`;
 }
 
 /**

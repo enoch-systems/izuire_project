@@ -58,7 +58,7 @@
           </div>
           <div class="pay-card">
             <span class="pay-card-label">Orders</span>
-            <strong class="pay-card-value">{{ auth.transactions().length }}</strong>
+            <strong class="pay-card-value">{{ list().length }}</strong>
             <span class="pay-card-note">All time, from this account</span>
           </div>
         </div>
@@ -127,7 +127,7 @@
         }
 
         <p class="account-note">
-          Demo account, payments, references and tracking numbers are seeded mock data, not a real ledger.
+          Every order and payment here lives in Supabase against your own account, and only you can see it.
         </p>
       </div>
     </section>

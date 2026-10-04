@@ -231,7 +231,7 @@
     <div class="product-pager">
       <div class="product-pager-viewport">
         <div class="product-pager-track" [style.transform]="'translateX(-' + page() * 100 + '%)'">
-          @for (group of pages; track $index) {
+          @for (group of pages(); track $index) {
             <div class="product-grid product-grid--featured">
               @for (p of group; track p.id) {
                 <article class="product-card">
@@ -306,11 +306,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <div class="product-dots-track" role="tablist" aria-label="Featured product pages">
-          @for (group of pages; track $index) {
-            <button type="button" class="product-dot" role="tab" [class.active]="page() === $index" (click)="goToPage($index)" [attr.aria-selected]="page() === $index" [attr.aria-label]="'Page ' + ($index + 1) + ' of ' + pages.length"></button>
+          @for (group of pages(); track $index) {
+            <button type="button" class="product-dot" role="tab" [class.active]="page() === $index" (click)="goToPage($index)" [attr.aria-selected]="page() === $index" [attr.aria-label]="'Page ' + ($index + 1) + ' of ' + pages().length"></button>
           }
         </div>
-        <button type="button" class="product-dots-nav" (click)="stepPage(1)" [disabled]="page() === pages.length - 1" aria-label="Next products">
+        <button type="button" class="product-dots-nav" (click)="stepPage(1)" [disabled]="page() === pages().length - 1" aria-label="Next products">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>

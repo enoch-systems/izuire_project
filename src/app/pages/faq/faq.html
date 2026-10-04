@@ -1,4 +1,4 @@
-<main id="top">
+<main id="top" class="co-page">
 
 <section class="page-hero">
   <div class="container page-hero-inner">
@@ -42,7 +42,7 @@
                 <div class="faq-item" id="{{ item.id }}" [class.open]="isOpen(item.id)">
                   <button class="faq-q" type="button" (click)="toggle(item.id)">
                     <span>{{ item.q }}</span>
-                    <span class="plus" aria-hidden="true"></span>
+                    <span class="chev" aria-hidden="true"></span>
                   </button>
                   <div class="faq-a" [style.maxHeight]="maxHeight(item.id)"><p [innerHTML]="item.a"></p></div>
                 </div>

@@ -161,6 +161,64 @@
         </div>
       </div>
     </section>
+
+    <!-- Reviews: the listing's own, live from Supabase. -->
+    <section class="pd-reviews section">
+      <div class="container">
+        <div class="pd-reviews-head">
+          <h2>Reviews</h2>
+          <span class="pd-reviews-count">{{ reviews().length }} {{ reviews().length === 1 ? 'review' : 'reviews' }}</span>
+        </div>
+
+        <div class="pd-reviews-layout">
+          <div class="pd-reviews-list">
+            @if (reviews().length) {
+              @for (r of reviews(); track r.id) {
+                <article class="pd-review">
+                  <div class="pd-review-head">
+                    <span class="pd-stars" aria-hidden="true">
+                      @for (star of [1,2,3,4,5]; track star) {
+                        <svg viewBox="0 0 24 24" [class.filled]="star <= r.rating"><path d="M12 2l3 6.5 7 .8-5.2 4.6 1.4 6.9L12 17l-6.2 3.8 1.4-6.9L2 9.3l7-.8z"/></svg>
+                      }
+                    </span>
+                    <strong>{{ r.authorName }}</strong>
+                  </div>
+                  @if (r.title) { <h3>{{ r.title }}</h3> }
+                  @if (r.body) { <p>{{ r.body }}</p> }
+                </article>
+              }
+            } @else {
+              <p class="pd-reviews-empty">No reviews yet. Be the first to review this listing.</p>
+            }
+          </div>
+
+          <aside class="pd-review-form">
+            <h3>Write a review</h3>
+            @if (auth.user()) {
+              <span class="pd-review-stars">
+                <span>Your rating</span>
+                <span class="pd-stars pd-stars--pick" role="radiogroup" aria-label="Your rating">
+                  @for (star of [1,2,3,4,5]; track star) {
+                    <button type="button" role="radio" [attr.aria-checked]="draftRating() === star" [attr.aria-label]="star + ' star' + (star > 1 ? 's' : '')" (click)="setDraftRating(star)">
+                      <svg viewBox="0 0 24 24" [class.filled]="star <= draftRating()" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.6 1.4 6.9L12 17l-6.2 3.8 1.4-6.9L2 9.3l7-.8z"/></svg>
+                    </button>
+                  }
+                </span>
+              </span>
+              <input type="text" placeholder="Headline (optional)" [value]="draftTitle()" (input)="draftTitle.set($any($event.target).value)" aria-label="Review headline">
+              <textarea rows="3" placeholder="What did you think of this listing?" [value]="draftBody()" (input)="draftBody.set($any($event.target).value)" aria-label="Review body"></textarea>
+              @if (reviewError()) { <p role="alert" class="pd-review-error">{{ reviewError() }}</p> }
+              <button type="button" class="btn btn-primary" (click)="submitReview()" [disabled]="reviewBusy()">
+                {{ reviewBusy() ? 'Saving…' : 'Submit review' }}
+              </button>
+            } @else {
+              <p class="pd-reviews-empty">Sign in to leave a review.</p>
+              <button type="button" class="btn btn-outline" (click)="auth.openAuth()">Log in</button>
+            }
+          </aside>
+        </div>
+      </div>
+    </section>
   }
 
 </main>

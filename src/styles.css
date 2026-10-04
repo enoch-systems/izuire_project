@@ -2862,6 +2862,21 @@
     width:100%; display:flex; justify-content:space-between; align-items:center; gap:16px;
     padding:22px 4px; text-align:left; font-family:var(--font-d); font-weight:600; font-size:1rem;
   }
+  .faq-q .chev{
+    width:24px; height:24px; border-radius:50%; border:1.5px solid var(--ink); flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center; position:relative;
+    transition:transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease);
+  }
+  /* Down-pointing chevron, drawn in CSS (no icon font / lucide). */
+  .faq-q .chev::after{
+    content:""; width:8px; height:8px; flex:none;
+    border-right:2px solid var(--ink); border-bottom:2px solid var(--ink);
+    transform:rotate(45deg) translate(-1px,-1px);
+    transition:border-color .25s var(--ease);
+  }
+  .faq-item.open .faq-q .chev{background:var(--orange); border-color:var(--orange); transform:rotate(180deg);}
+  .faq-item.open .faq-q .chev::after{border-color:var(--white);}
+  /* Keep the old plus markup working if it appears anywhere else. */
   .faq-q .plus{
     width:24px; height:24px; border-radius:50%; border:1.5px solid var(--ink); flex-shrink:0;
     display:flex; align-items:center; justify-content:center; position:relative; transition:transform .25s var(--ease), background .25s var(--ease);
@@ -7595,4 +7610,111 @@
     .svc-shot__icon svg{ width:27px; height:27px; }
     .svc-shot__label{ font-size:.76rem; }
     .svc-shot__hint{ font-size:.58rem; letter-spacing:.12em; }
+  }
+
+  /* =====================================================================
+     COMPANY PAGES (about / insights / faq / legal / contact) —
+     RESPONSIVE-ONLY PASS. Mirrors the .svc-page mobile type fit above,
+     scoped to .co-page so approved desktop scale is untouched.
+     No photo slots added here per request.
+     ===================================================================== */
+
+  /* Prevent any long word / link / address from forcing sideways scroll. */
+  .co-page{ overflow-x:clip; }
+  .co-page .container{ min-width:0; }
+  .co-page p, .co-page li, .co-page h1, .co-page h2, .co-page h3,
+  .co-page h4, .co-page a, .co-page span{
+    overflow-wrap:anywhere;
+  }
+  .co-page .flow-link, .co-page .faq-q span, .co-page .legal-body p,
+  .co-page .legal-body li{ overflow-wrap:anywhere; word-break:break-word; }
+
+  @media (max-width: 980px){
+    .co-page .section{ padding:52px 0; }
+    .co-page .insight-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+
+  /* --- Mobile: same tighter hero / section rhythm as .svc-page --------- */
+  @media (max-width: 620px){
+    .co-page .page-hero{ padding:34px 0 40px; }
+    .co-page .page-hero h1{ font-size:clamp(1.5rem, 6.4vw, 1.78rem); letter-spacing:-.01em; margin-bottom:10px; }
+    .co-page .page-hero p{ font-size:.92rem; line-height:1.6; }
+
+    .co-page .hero-step-counter{ font-size:.66rem; gap:8px; margin-top:20px; letter-spacing:.1em; }
+    .co-page .hero-step-counter .bar{ width:38px; }
+
+    .co-page .section{ padding:44px 0; }
+    .co-page .cluster-head,
+    .co-page .story-head{ margin-bottom:34px; }
+    .co-page .cluster-head h2,
+    .co-page .story-head h2{ font-size:1.34rem; line-height:1.26; margin-top:11px; }
+    .co-page .cluster-head p,
+    .co-page .story-head p{ font-size:.89rem; line-height:1.6; margin-top:11px; }
+    .co-page .eyebrow{ font-size:.66rem; }
+
+    /* About: values + story + founder match svc density */
+    .co-page .value-item{ padding:26px 18px; }
+    .co-page .value-num{ font-size:.74rem; margin-bottom:10px; }
+    .co-page .value-icon{ width:40px; height:40px; border-radius:10px; margin-bottom:14px; }
+    .co-page .value-item h4{ font-size:1.02rem; }
+    .co-page .value-item p{ font-size:.86rem; line-height:1.6; }
+    .co-page .story-card h4{ font-size:.97rem; margin-bottom:6px; }
+    .co-page .story-card p{ font-size:.85rem; line-height:1.55; }
+    .co-page .story-tag{ font-size:.62rem; }
+    .co-page .founder-card{ gap:14px; text-align:left; }
+    .co-page .founder-card h4{ font-size:1.02rem; }
+    .co-page .founder-card p{ font-size:.85rem; line-height:1.6; }
+
+    /* Band CTA matches svc */
+    .co-page .band-section{ padding:44px 0; }
+    .co-page .band-section h2{ font-size:1.38rem; }
+    .co-page .band-section p{ font-size:.92rem; line-height:1.6; margin-bottom:24px; }
+    .co-page .band-eyebrow{ font-size:.66rem; margin-bottom:14px; }
+
+    /* Insights: single column, tighter cards + banner */
+    .co-page .insight-grid{ grid-template-columns:1fr; gap:14px; }
+    .co-page .coming-soon-banner{ padding:14px 16px; font-size:.82rem; line-height:1.55; margin-bottom:24px; }
+    .co-page .insight-media{ aspect-ratio:16/9; }
+    .co-page .insight-body h4{ font-size:.92rem; line-height:1.35; }
+    .co-page .insight-body p{ font-size:.84rem; line-height:1.55; }
+
+    /* FAQ: chips become a sideways swipe row, questions stay tappable */
+    .co-page .faq-group-wrap{ gap:0; }
+    .co-page .faq-cats{
+      flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch;
+      scrollbar-width:none; padding:6px; gap:6px; margin-bottom:20px;
+      max-width:100%;
+    }
+    .co-page .faq-cats::-webkit-scrollbar{ display:none; }
+    .co-page .faq-cat{ flex:0 0 auto; font-size:.8rem; padding:10px 12px; white-space:nowrap; }
+    .co-page .faq-group{ margin-bottom:32px; }
+    .co-page .faq-group-head h3{ font-size:1.08rem; }
+    .co-page .faq-group-head p{ font-size:.86rem; line-height:1.6; margin:8px 0 0 12px; }
+    .co-page .faq-q{ padding:16px 2px; font-size:.9rem; gap:12px; }
+    .co-page .faq-a p{ font-size:.86rem; line-height:1.6; }
+
+    /* Legal: slimmer hero + readable body copy */
+    .co-page .legal-hero{ padding:16px; gap:10px; margin-bottom:22px; }
+    .co-page .legal-hero svg{ width:32px; height:32px; }
+    .co-page .legal-hero h3{ font-size:1rem; }
+    .co-page .legal-hero p{ font-size:.84rem; line-height:1.6; }
+    .co-page .tabs{ margin-bottom:22px; }
+    .co-page .tab-btn{ padding:12px 14px; font-size:.84rem; }
+    .co-page .legal-body p, .co-page .legal-body li{ font-size:.86rem; line-height:1.6; }
+    .co-page .legal-section-head{ margin:28px 0 14px; }
+    .co-page .legal-section-head h3{ font-size:1.05rem; }
+    .co-page .tab-panel h3[style]{ font-size:1.05rem !important; }
+
+    /* Contact: steps + form fit a 360px viewport */
+    .co-page .flow-step-body h4{ font-size:.98rem; }
+    .co-page .flow-step-body p{ font-size:.85rem; line-height:1.6; }
+    .co-page .flow-link{ font-size:.8rem; padding:9px 12px; max-width:100%; }
+    .co-page .flow-actions{ gap:8px; }
+    /* The form panel carries an inline padding (40px 44px) — !important wins. */
+    .co-page .path-wrap .path-panel[style]{ padding:22px 18px !important; min-height:auto; }
+    .co-page .path-panel h3{ font-size:1.14rem; }
+    .co-page .path-panel > p{ font-size:.9rem; line-height:1.6; }
+    .co-page .rfq-form .form-row{ grid-template-columns:1fr; gap:0; }
+    .co-page .rfq-form .form-actions{ display:grid; grid-template-columns:1fr; gap:10px; }
+    .co-page .rfq-form .form-actions .btn{ width:100%; text-align:center; }
   }

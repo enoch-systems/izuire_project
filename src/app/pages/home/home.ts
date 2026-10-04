@@ -5,12 +5,14 @@ import {
   OnDestroy,
   OnInit,
   computed,
+  effect,
   inject,
   signal,
   viewChildren,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FEATURED, Product, PRODUCTS } from '../marketplace/marketplace-data';
+import { FEATURED, Product } from '../marketplace/marketplace-data';
+import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 import { AuthService } from '../../services/auth.service';
@@ -117,15 +119,8 @@ const TESTIMONIALS: Testimonial[] = [
 /** Products per pager page. Four keeps the grid's own four-column rhythm. */
 const PAGE_SIZE = 4;
 
-/**
- * The showcase, split into pages for the dot pager under the grid. Chunked from
- * the whole catalogue so the pager actually cycles through the range rather than
- * shuffling the same four cards; the trailing page takes whatever is left.
- */
-const PRODUCT_PAGES: Product[][] = [];
-for (let i = 0; i < PRODUCTS.length; i += PAGE_SIZE) {
-  PRODUCT_PAGES.push(PRODUCTS.slice(i, i + PAGE_SIZE));
-}
+/* The showcase's pager pages are derived from the live catalogue in the
+   component, so a price/featured edit from /admin lands without a redeploy. */
 
 /**
  * Home page. The testimonial slider reproduces the original behavior:
@@ -238,17 +233,38 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     ),
   );
 
-  /** The four products under "Featured products", in showcase order. */
-  protected readonly featured = FEATURED;
+  /** The catalogue backend: Supabase rows when live, the bundled list otherwise. */
+  private readonly catalogue = inject(ProductService);
+
+  /** The showcase pages through the whole live catalogue. */
+  protected readonly catalogueRows = this.catalogue.all;
 
   /** A catalogue price in the site's picked display currency. */
   protected price(naira: number): string {
     return this.fx.price(naira);
   }
 
-  /** The showcase as pager pages, and which one is showing. */
-  protected readonly pages = PRODUCT_PAGES;
+  /**
+   * The showcase as pager pages. Chunked from the live catalogue so the pager
+   * cycles the whole range rather than shuffling the same four cards; the
+   * trailing page takes whatever is left.
+   */
+  protected readonly pages = computed<Product[][]>(() => {
+    const rows = this.catalogueRows();
+    const chunked: Product[][] = [];
+    for (let i = 0; i < rows.length; i += PAGE_SIZE) chunked.push(rows.slice(i, i + PAGE_SIZE));
+    return chunked.length > 0 ? chunked : [FEATURED];
+  });
   protected readonly page = signal(0);
+
+  constructor() {
+    // The live catalogue can be a different length than the bundled one, so a
+    // pager left on a page that no longer exists is nudged back in range.
+    effect(() => {
+      const last = Math.max(0, this.pages().length - 1);
+      if (this.page() > last) this.page.set(last);
+    });
+  }
 
   /**
    * Show a page of the showcase. The track is moved with a single transform, so
@@ -266,7 +282,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
    */
   protected stepPage(delta: number): void {
     const next = this.page() + delta;
-    this.page.set(Math.min(Math.max(next, 0), this.pages.length - 1));
+    this.page.set(Math.min(Math.max(next, 0), this.pages().length - 1));
   }
 
   /** The cart. Its count drives the header badge; `addedId` flashes the card's

@@ -63,12 +63,11 @@ export class Cart {
   }
 
   /**
-   * The next step after a basket is built. Payment APIs aren't wired yet, so for
-   * now this carries the basket to the quote flow — where freight, duties and
-   * final pricing get confirmed — exactly as the previous CTA did.
+   * The next step after a basket is built: the checkout, which writes the order
+   * against the signed-in account and records the payment.
    */
   protected onCheckout(): void {
-    void this.router.navigate(['/quote']);
+    void this.router.navigate(['/checkout']);
   }
 
   /** Extended price for one line. */

@@ -1,5 +1,6 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { CURRENCIES, Currency, convertFromNaira, formatMoney } from './currency';
+import { SupabaseService } from './supabase.service';
 
 /**
  * The money every price on the site is *shown* in.
@@ -22,6 +23,7 @@ export class DisplayCurrencyService {
   /** Where the pick is kept between visits. Bump if the shape ever changes. */
   private static readonly STORAGE_KEY = 'izuire.currency.v1';
 
+  private readonly backend = inject(SupabaseService);
   /** The ISO code picked on this device. NGN unless a visit chose otherwise. */
   private readonly code = signal<string>(DisplayCurrencyService.restore());
 
@@ -36,7 +38,7 @@ export class DisplayCurrencyService {
   /** True outside NGN, so a page can explain the indicative conversion. */
   readonly converted = computed(() => this.currency().code !== 'NGN');
 
-  /** Pick a currency; the choice persists to this device. */
+  /** Pick a currency; persists to device + Supabase row when signed in. */
   set(code: string): void {
     if (!CURRENCIES.some((c) => c.code === code)) return;
     this.code.set(code);
@@ -44,6 +46,36 @@ export class DisplayCurrencyService {
       localStorage.setItem(DisplayCurrencyService.STORAGE_KEY, code);
     } catch {
       // Storage unavailable. The pick then lasts for this visit only.
+    }
+    void this.persistCurrency(code);
+  }
+
+  /** Load the server-side pick once a backend session exists. */
+  async pullFromServer(): Promise<void> {
+    try {
+      const { data: session } = await this.backend.supabase.auth.getSession();
+      const uid = session.session?.user?.id;
+      if (!uid) return;
+      const { data } = await this.backend.supabase
+        .from('user_settings')
+        .select('currency')
+        .eq('user_id', uid)
+        .maybeSingle();
+      const server = data?.['currency'] as string | undefined;
+      if (server && CURRENCIES.some((c) => c.code === server)) this.code.set(server);
+    } catch {
+      // user_settings not migrated yet — device pick still applies.
+    }
+  }
+
+  private async persistCurrency(code: string): Promise<void> {
+    try {
+      const { data: session } = await this.backend.supabase.auth.getSession();
+      const uid = session.session?.user?.id;
+      if (!uid) return;
+      await this.backend.supabase.from('user_settings').upsert({ user_id: uid, currency: code });
+    } catch {
+      // Offline — device pick still applies.
     }
   }
 
@@ -53,9 +85,12 @@ export class DisplayCurrencyService {
    */
   price(naira: number): string {
     const currency = this.currency();
+    // A price that is not a whole unit still prints its cents, so an admin
+    // typing 18500.50 shows as 18500.50 rather than being rounded away.
+    const decimals = Number.isInteger(naira) ? currency.decimals : 2;
     const converted = convertFromNaira(naira, currency);
-    if (converted === null) return formatMoney(naira, currency);
-    return `≈ ${formatMoney(converted, currency)}`;
+    if (converted === null) return formatMoney(naira, currency, decimals);
+    return `≈ ${formatMoney(converted, currency, decimals)}`;
   }
 
   /** The saved code, or NGN — on the server, in private mode, or if stale. */

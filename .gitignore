@@ -34,6 +34,11 @@ yarn-error.log
 .env
 .env.local
 .env.*.local
+# Local environment overrides holding real Supabase / admin values.
+# Committed environment.ts files keep placeholders only.
+src/environments/*.local.ts
+# Scratch log captured from a failed tools/seed-db.mjs run.
+seed.out
 ng_serve.log
 .sass-cache/
 /connect.lock

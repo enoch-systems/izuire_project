@@ -1,7 +1,8 @@
 import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
-import { CATEGORIES, PRODUCTS, Product } from './marketplace-data';
+import { CATEGORIES, Product } from './marketplace-data';
+import { ProductService } from '../../services/product.service';
 import { DisplayCurrencyService } from '../../services/display-currency.service';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
@@ -26,13 +27,45 @@ const PAGE_SIZE = 8;
   selector: 'app-marketplace',
   imports: [RouterLink, Breadcrumb],
   templateUrl: './marketplace.html',
+  styles: [`
+    .mk-featured .section-head { align-items: flex-end; gap: 12px; }
+    .mk-featured-more { font-size: .85rem; font-weight: 600; color: var(--orange); text-decoration: none; }
+    .mk-featured-rail {
+      display: grid; grid-auto-flow: column; grid-auto-columns: 78%;
+      gap: 14px; overflow-x: auto; padding-bottom: 6px;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+    }
+    .mk-featured-card {
+      scroll-snap-align: start; display: flex; flex-direction: column;
+      border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+      background: var(--white); color: inherit; text-decoration: none;
+    }
+    .mk-featured-media { position: relative; aspect-ratio: 4 / 3; background: var(--paper); }
+    .mk-featured-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .mk-featured-media svg { width: 40%; height: 40%; margin: 30% auto; display: block; stroke: var(--ink-40); }
+    .mk-featured-body { padding: 12px 14px; display: grid; gap: 6px; }
+    .mk-featured-body h3 { font-size: .95rem; margin: 0; }
+    .mk-featured-price { display: flex; align-items: baseline; gap: 6px; }
+    .mk-featured-price .unit { font-size: .76rem; color: var(--ink-60); }
+    @media (min-width: 720px) {
+      .mk-featured-rail { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); grid-auto-columns: auto; overflow: visible; }
+    }
+    @media (min-width: 1024px) {
+      .mk-featured-rail { grid-template-columns: repeat(5, 1fr); }
+    }
+  `],
 })
 export class Marketplace {
   /** The site-wide display-currency pick. The sheet's select writes straight to
    *  it, so the choice survives leaving the page and follows the shopper to the
    *  payments page, a product page and home alike. */
   private readonly fx = inject(DisplayCurrencyService);
-  protected readonly products = PRODUCTS;
+  /** The catalogue backend: Supabase rows when live, the bundled list otherwise. */
+  private readonly catalogue = inject(ProductService);
+  /** The whole catalogue, live from Supabase (or the bundled list offline). */
+  protected readonly products = this.catalogue.all;
+  /** The featured rail at the top of the page, fed by the same rows as home. */
+  protected readonly featured = this.catalogue.featured;
   protected readonly categories = CATEGORIES;
   protected readonly currencies = this.fx.currencies;
   protected readonly pageSize = PAGE_SIZE;
@@ -104,7 +137,7 @@ export class Marketplace {
    * find.
    */
   protected readonly shown = computed(() => {
-    const matching = this.products.filter((p) => this.matches(p));
+    const matching = this.products().filter((p) => this.matches(p));
     if (this.sortOrder() === 'price-low') return matching.sort((a, b) => a.unitPrice - b.unitPrice);
     if (this.sortOrder() === 'price-high') return matching.sort((a, b) => b.unitPrice - a.unitPrice);
     return matching;
@@ -129,7 +162,7 @@ export class Marketplace {
   private readonly counts = computed(() => {
     const q = this.query().trim().toLowerCase();
     const counted = new Map<string, number>();
-    for (const p of this.products) {
+    for (const p of this.products()) {
       if (q !== '' && p.name.indexOf(q) === -1) continue;
       counted.set(p.cat, (counted.get(p.cat) ?? 0) + 1);
     }

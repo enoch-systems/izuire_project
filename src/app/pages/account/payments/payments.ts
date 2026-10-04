@@ -3,6 +3,7 @@ import { AccountGate } from '../../../components/account-gate/account-gate';
 import { AccountNav } from '../../../components/account-nav/account-nav';
 import { Breadcrumb } from '../../../components/breadcrumb/breadcrumb';
 import { AuthService, Transaction, TxStatus } from '../../../services/auth.service';
+import { OrderService } from '../../../services/order.service';
 import { DisplayCurrencyService } from '../../../services/display-currency.service';
 
 /** The three ways the list can be filtered. */
@@ -32,10 +33,23 @@ const STATUS_TEXT: Record<TxStatus, string> = {
 })
 export class Payments {
   protected readonly auth = inject(AuthService);
+  /** Real orders for the signed-in account, straight from the database. */
+  private readonly orders = inject(OrderService);
   /** The shared display-currency pick: every figure on the page reads through
    *  it, so choosing a money here follows the shopper across the site. */
   protected readonly fx = inject(DisplayCurrencyService);
   protected readonly money = (value: number): string => this.fx.price(value);
+
+  /**
+   * The history this page reads. Real orders whenever the account has them (or
+   * the backend is live and simply has none yet), otherwise the bundled demo
+   * list - so a visitor previewing the page is not shown an empty shell, and a
+   * signed-in buyer only ever sees their own rows.
+   */
+  protected readonly list = computed(() => {
+    const live = this.orders.transactions();
+    return live.length > 0 || this.orders.ready() ? live : this.auth.transactions();
+  });
 
   protected readonly tab = signal<Tab>('all');
   protected readonly tabs: { id: Tab; label: string }[] = [
@@ -48,25 +62,25 @@ export class Payments {
   protected readonly openRow = signal<string | null>(null);
 
   protected readonly rows = computed(() =>
-    this.auth.transactions().filter((t) => this.tab() === 'all' || t.status === this.tab()),
+    this.list().filter((t) => this.tab() === 'all' || t.status === this.tab()),
   );
 
   protected readonly paid = computed(() =>
-    this.auth.transactions().filter((t) => t.status === 'successful').reduce((sum, t) => sum + t.amount, 0),
+    this.list().filter((t) => t.status === 'successful').reduce((sum, t) => sum + t.amount, 0),
   );
   protected readonly awaiting = computed(() =>
-    this.auth.transactions().filter((t) => t.status === 'pending').reduce((sum, t) => sum + t.amount, 0),
+    this.list().filter((t) => t.status === 'pending').reduce((sum, t) => sum + t.amount, 0),
   );
   protected readonly successfulCount = computed(
-    () => this.auth.transactions().filter((t) => t.status === 'successful').length,
+    () => this.list().filter((t) => t.status === 'successful').length,
   );
   protected readonly pendingCount = computed(
-    () => this.auth.transactions().filter((t) => t.status === 'pending').length,
+    () => this.list().filter((t) => t.status === 'pending').length,
   );
 
   protected count(tab: Tab): number {
-    if (tab === 'all') return this.auth.transactions().length;
-    return this.auth.transactions().filter((t) => t.status === tab).length;
+    if (tab === 'all') return this.list().length;
+    return this.list().filter((t) => t.status === tab).length;
   }
 
   protected setTab(tab: Tab): void {

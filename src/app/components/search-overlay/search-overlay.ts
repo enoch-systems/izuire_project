@@ -11,7 +11,8 @@ import { Router, RouterLink } from '@angular/router';
 import { UiService } from '../../services/ui.service';
 import { SEARCH_ITEMS } from '../../services/search-items';
 import { DisplayCurrencyService } from '../../services/display-currency.service';
-import { CATEGORIES, FEATURED, PRODUCTS, Product } from '../../pages/marketplace/marketplace-data';
+import { CATEGORIES, Product } from '../../pages/marketplace/marketplace-data';
+import { ProductService } from '../../services/product.service';
 
 /** One slice of a string, so a matched run can be wrapped in <mark>. */
 interface TextPart {
@@ -79,6 +80,8 @@ export class SearchOverlay {
   private readonly ui = inject(UiService);
   private readonly router = inject(Router);
   private readonly fx = inject(DisplayCurrencyService);
+  /** The same live catalogue the marketplace and home read. */
+  private readonly catalogue = inject(ProductService);
 
   protected readonly open = this.ui.searchOpen;
   protected readonly query = signal('');
@@ -105,7 +108,7 @@ export class SearchOverlay {
     const q = this.query().trim().toLowerCase();
     if (!q) return [];
 
-    const products: Hit[] = PRODUCTS.filter((p) =>
+    const products: Hit[] = this.catalogue.all().filter((p) =>
       (p.title + ' ' + p.specs + ' ' + p.moq + ' ' + (CAT_LABELS.get(p.cat) ?? p.cat))
         .toLowerCase()
         .includes(q),
@@ -254,10 +257,13 @@ export class SearchOverlay {
     return parts;
   }
 
-  /** The featured four first, then a couple more lines to fill the rail. */
+  /** The featured set first, then a couple more lines to fill the rail. */
   private buildRecommended(): Product[] {
-    const featured = [...FEATURED];
-    const extras = PRODUCTS.filter((p) => !featured.some((f) => f.id === p.id)).slice(0, 2);
+    const featured = this.catalogue.featured();
+    const extras = this.catalogue
+      .all()
+      .filter((p) => !featured.some((f) => f.id === p.id))
+      .slice(0, 2);
     return [...featured, ...extras];
   }
 }

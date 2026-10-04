@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 import { TrustHtmlPipe } from '../../pipes/trust-html.pipe';
@@ -11,24 +11,6 @@ const mkWords = (t: string): string[] => t.trim().split(/\s+/);
   templateUrl: './shipping.html',
 })
 export class Shipping {
-  protected readonly l = signal(0);
-  protected readonly w = signal(0);
-  protected readonly h = signal(0);
-  protected readonly qty = signal(0);
-
-  protected readonly cbm = computed(() => {
-    const per = (this.l() / 100) * (this.w() / 100) * (this.h() / 100);
-    return (per * (this.qty() || 1)).toFixed(2);
-  });
-
-  protected onInput(which: 'l' | 'w' | 'h' | 'qty', event: Event): void {
-    const value = parseFloat((event.target as HTMLInputElement).value) || 0;
-    if (which === 'l') this.l.set(value);
-    if (which === 'w') this.w.set(value);
-    if (which === 'h') this.h.set(value);
-    if (which === 'qty') this.qty.set(value);
-  }
-
   readonly steps = [
     {
       n: '01',

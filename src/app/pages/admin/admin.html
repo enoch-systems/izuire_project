@@ -1,0 +1,38 @@
+<main id="top">
+  <section class="page-hero">
+    <div class="container page-hero-inner">
+      <app-breadcrumb />
+      <span class="eyebrow">Admin</span>
+      <h1>Catalogue manager</h1>
+      <p>Signed in as {{ auth.user()?.email }}. Prices save in kobo (exact cents) and stream live to home + marketplace.</p>
+      @if (flash()) { <p role="status">{{ flash() }}</p> }
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      @if (loading()) {
+        <p>Loading products…</p>
+      } @else if (rows().length === 0) {
+        <p>No product rows yet — run the seed script (<code>npm run seed:products</code>) after <code>supabase db push</code>.</p>
+        <p><a routerLink="/">Back home</a></p>
+      } @else {
+        @for (row of rows(); track row['id']) {
+          <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:12px 0; border-bottom:1px solid var(--line);">
+            <strong>{{ row['title'] }}</strong>
+            <span style="opacity:.6">{{ row['cat'] }}</span>
+            <label>Price ₦
+              <input type="text" [value]="priceInput(row)" (input)="setPriceDraft(row, $any($event.target).value)" style="width:120px">
+            </label>
+            <button type="button" class="btn btn-primary" (click)="savePrice(row)">Save price</button>
+            <button type="button" class="btn btn-outline" (click)="toggleFeatured(row)">
+              {{ row['featured'] ? 'Unfeature' : 'Feature' }}
+            </button>
+            <button type="button" class="btn btn-outline" (click)="toggleActive(row)">
+              {{ row['active'] ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        }
+      }
+    </div>
+  </section>
+</main>

@@ -1,4 +1,5 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { SupabaseService } from './supabase.service';
 
 /** Which screen the auth modal is on. */
 export type AuthMode = 'login' | 'signup' | 'forgot';
@@ -16,14 +17,20 @@ export interface AddressInfo {
 /** A full signed-in profile. Sign-up only asks for name + email; the rest is
  *  completed later on the profile page and patched in via updateProfile(). */
 export interface AuthUser {
+  /** Supabase auth id — null while the legacy demo session is in force. */
+  id?: string | null;
   name: string;
   email: string;
   phone?: string;
   company?: string;
+  /** Storage URL for the user's avatar (avatars bucket), or '' for initial. */
+  avatarUrl?: string;
   shipping?: AddressInfo;
   billing?: AddressInfo;
   createdAt?: string;
   memberTier?: 'Standard' | 'Verified' | 'Enterprise';
+  /** True only for the NG_ADMIN_EMAIL account. Drives /admin gating. */
+  isAdmin?: boolean;
 }
 
 /** Status of a mock payment/order record. */
@@ -186,6 +193,11 @@ const STORAGE_KEY = 'izuire.session.v1';
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly backend = inject(SupabaseService);
+  /** True once Supabase Auth answered — header shows logged-out until then. */
+  readonly ready = signal(false);
+  /** Last auth error for the modal to surface (null = no error). */
+  readonly authError = signal<string | null>(null);
   /** The signed-in user, null when logged out. Restored from the last visit, so
    *  a reload (or a deep link to an account page) does not sign anyone out. */
   readonly user = signal<AuthUser | null>(this.restore());
@@ -212,6 +224,75 @@ export class AuthService {
     // Keep the demo session between visits, exactly as the cart and the theme
     // are kept. Storage can be unavailable, so every write is guarded.
     effect(() => this.persist(this.user()));
+    // Supabase is the source of truth when it answers. A Supabase session
+    // replaces the demo one; no session keeps whatever restore() found until
+    // the user signs in/out through Supabase.
+    void this.bootFromSupabase();
+  }
+
+  /** First paint: adopt the Supabase session (if any) + subscribe to change. */
+  private async bootFromSupabase(): Promise<void> {
+    try {
+      const { data } = await this.backend.supabase.auth.getSession();
+      await this.adoptSession(data.session?.user ?? null);
+      this.backend.supabase.auth.onAuthStateChange((_event, session) => {
+        void this.adoptSession(session?.user ?? null);
+      });
+    } catch {
+      // Offline / misconfigured backend: the demo session still works.
+    } finally {
+      this.ready.set(true);
+    }
+  }
+
+  /** Map a Supabase user (+ profile row) onto the app's AuthUser shape. */
+  private async adoptSession(
+    sbUser: { id: string; email?: string | null; created_at?: string } | null,
+  ): Promise<void> {
+    if (!sbUser) return; // logged out remotely — keep local demo state as-is
+    const email = (sbUser.email ?? '').toLowerCase();
+    let profile: Partial<AuthUser> = {};
+    try {
+      const { data } = await this.backend.supabase
+        .from('profiles')
+        .select('name,email,phone,company,avatar_url,member_tier,shipping,billing,created_at')
+        .eq('user_id', sbUser.id)
+        .maybeSingle();
+      if (data) {
+        profile = {
+          name: (data['name'] as string) ?? '',
+          email: (data['email'] as string) ?? email,
+          phone: (data['phone'] as string) ?? '',
+          company: (data['company'] as string) ?? '',
+          avatarUrl: (data['avatar_url'] as string) ?? '',
+          memberTier: (data['member_tier'] as AuthUser['memberTier']) ?? 'Standard',
+          shipping: (data['shipping'] as AddressInfo) ?? undefined,
+          billing: (data['billing'] as AddressInfo) ?? undefined,
+        };
+      }
+    } catch {
+      // profiles table not migrated yet — fall back to auth metadata.
+    }
+    const created = sbUser.created_at
+      ? new Date(sbUser.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : undefined;
+    this.setUser({
+      id: sbUser.id,
+      name: profile.name || email.split('@')[0] || 'Izuire buyer',
+      email,
+      phone: profile.phone,
+      company: profile.company,
+      avatarUrl: profile.avatarUrl,
+      shipping: profile.shipping,
+      billing: profile.billing,
+      memberTier: profile.memberTier ?? 'Standard',
+      createdAt: created,
+      isAdmin: await this.resolveAdmin(email),
+    });
+    // A real account's history is its own: drop the seeded demo ledger so the
+    // Payments page shows only what this user has actually ordered.
+    this.transactions.set([]);
+    this.loadingStage.set('idle');
   }
 
   openAuth(): void {
@@ -245,15 +326,38 @@ export class AuthService {
   }
 
   /**
-   * Mock login: only the demo account works. Shows the signature loader for
-   * ~4 seconds while the text underneath cycles through a few steps.
+   * Real login first (Supabase), demo account as offline fallback.
+   * Shows the signature loader for ~4 seconds while the text cycles.
    */
   async login(email: string, password: string): Promise<void> {
     // Stage the loader first so the button submit handler can drive the
     // overlay directly out of the service without having to track its own busy.
     this.loadingStage.set('signing-in');
+    this.authError.set(null);
     this.runSigningInCopy();
+    // Try the backend without blocking the loader ceremony.
+    const backendAttempt = (async (): Promise<boolean> => {
+      try {
+        const { data, error } = await this.backend.supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
+        if (error || !data.user) return false;
+        await this.adoptSession({
+          id: data.user.id,
+          email: data.user.email,
+          created_at: data.user.created_at,
+        });
+        return true;
+      } catch {
+        return false; // backend unreachable — demo fallback below
+      }
+    })();
     await this.wait(LOGIN_DELAY);
+    if (await backendAttempt) {
+      this.loadingStage.set('idle');
+      return;
+    }
     if (
       email.trim().toLowerCase() === MOCK_ACCOUNT.email &&
       password === MOCK_ACCOUNT.password
@@ -266,12 +370,48 @@ export class AuthService {
     throw new Error('That email and password do not match a demo account.');
   }
 
-  /** Mock sign-up: any non-empty fields create a session with the rest of the
-   *  demo account's data overlaid so the Profile page has something to edit. */
+  /** Real sign-up (Supabase) with demo-session fallback when offline. */
   async signup(name: string, email: string, password: string): Promise<void> {
     this.loadingStage.set('creating');
+    this.authError.set(null);
     this.runCreatingCopy();
+    const cleanEmail = email.trim().toLowerCase();
+    const backendAttempt = (async (): Promise<boolean> => {
+      try {
+        const { data, error } = await this.backend.supabase.auth.signUp({
+          email: cleanEmail,
+          password,
+          options: { data: { name: name.trim() } },
+        });
+        if (error || !data.user) return false;
+        try {
+          await this.backend.supabase.from('profiles').upsert({
+            user_id: data.user.id,
+            name: name.trim(),
+            email: cleanEmail,
+            member_tier: 'Standard',
+          });
+        } catch {
+          // profiles table not migrated yet — session still counts.
+        }
+        await this.adoptSession({
+          id: data.user.id,
+          email: data.user.email ?? cleanEmail,
+          created_at: data.user.created_at,
+        });
+        // adoptSession maps '' names; prefer what was just typed.
+        this.user.update((u) => (u ? { ...u, name: name.trim() } : u));
+        return true;
+      } catch {
+        return false;
+      }
+    })();
     await this.wait(SIGNUP_DELAY);
+    if (await backendAttempt) {
+      this.loadingStage.set('idle');
+      return;
+    }
+    // Offline/demo fallback: accept anything well-formed locally.
     if (!name.trim() || !email.trim() || password.length < 6) {
       this.loadingStage.set('idle');
       throw new Error('Please complete every field, with a password of 6+ characters.');
@@ -286,10 +426,15 @@ export class AuthService {
     this.loadingStage.set('idle');
   }
 
-  /** Mock password reset: always succeeds for now. */
+  /** Real reset via Supabase; falls back to the local success screen offline. */
   async resetPassword(email: string): Promise<void> {
     this.loadingStage.set('resetting');
     this.loaderCopy.set('Sending a reset link to your inbox…');
+    try {
+      await this.backend.supabase.auth.resetPasswordForEmail(email.trim().toLowerCase());
+    } catch {
+      // Offline — still show the local confirmation after validation below.
+    }
     await this.wait(RESET_DELAY);
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
       this.loadingStage.set('idle');
@@ -309,20 +454,49 @@ export class AuthService {
     this.logoutConfirming.set(false);
     this.loadingStage.set('signing-out');
     this.runSigningOutCopy();
+    try {
+      await this.backend.supabase.auth.signOut();
+    } catch {
+      // Backend unreachable — local sign-out still applies below.
+    }
     await this.wait(LOGOUT_DELAY);
     this.user.set(null);
+    this.transactions.set([]);
     this.closeAuth();
   }
 
   /**
-   * Mock password change: checks the current password against the demo
-   * account, then plays the signature loader while "re-securing" the account.
-   * Nothing is persisted — there is no backend yet.
+   * Real password change via Supabase when a backend session exists;
+   * demo check otherwise. Nothing else changes about the ceremony.
    */
   async changePassword(current: string, next: string): Promise<void> {
     this.loadingStage.set('updating-password');
     this.runPasswordCopy();
+    const backendAttempt = (async (): Promise<'ok' | 'skip' | 'bad'> => {
+      try {
+        const { data } = await this.backend.supabase.auth.getSession();
+        if (!data.session?.user?.email) return 'skip';
+        const { error: signInError } = await this.backend.supabase.auth.signInWithPassword({
+          email: data.session.user.email,
+          password: current,
+        });
+        if (signInError) return 'bad';
+        const { error: updateError } = await this.backend.supabase.auth.updateUser({ password: next });
+        return updateError ? 'bad' : 'ok';
+      } catch {
+        return 'skip';
+      }
+    })();
     await this.wait(PASSWORD_DELAY);
+    const backendResult = await backendAttempt;
+    if (backendResult === 'ok') {
+      this.loadingStage.set('idle');
+      return;
+    }
+    if (backendResult === 'bad') {
+      this.loadingStage.set('idle');
+      throw new Error('That current password does not match our records.');
+    }
     const owner = this.user();
     if (!owner) {
       this.loadingStage.set('idle');
@@ -344,12 +518,72 @@ export class AuthService {
     this.loadingStage.set('idle');
   }
 
-  /** Patches the profile from the Profile page. No server round-trip — just
-   *  applies the patch and returns the new merged user. */
-  updateProfile(patch: Partial<AuthUser>): AuthUser {
+  /** Patches the profile (local + Supabase row when a backend session exists). */
+  async updateProfile(patch: Partial<AuthUser>): Promise<AuthUser> {
     const next = { ...this.user(), ...patch } as AuthUser;
     this.user.set(next);
+    try {
+      const { data } = await this.backend.supabase.auth.getSession();
+      const uid = data.session?.user?.id;
+      if (uid) {
+        await this.backend.supabase.from('profiles').upsert({
+          user_id: uid,
+          name: next.name ?? '',
+          email: (next.email ?? '').toLowerCase(),
+          phone: next.phone ?? '',
+          company: next.company ?? '',
+          avatar_url: next.avatarUrl ?? '',
+          member_tier: next.memberTier ?? 'Standard',
+          shipping: next.shipping ?? {},
+          billing: next.billing ?? {},
+        });
+      }
+    } catch {
+      // Offline — local session still applies.
+    }
     return next;
+  }
+
+  /**
+   * Upload a user avatar into the private avatars bucket and point the
+   * profile row at it. Non-admins can only write under their own uid folder
+   * (see RLS); the header shows avatarUrl when set, initial otherwise.
+   */
+  async uploadAvatar(file: File): Promise<string> {
+    const { data } = await this.backend.supabase.auth.getSession();
+    const uid = data.session?.user?.id;
+    if (!uid) throw new Error('You need to be signed in to upload a photo.');
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().slice(0, 4);
+    const path = `${uid}/avatar.${ext}`;
+    const { error: uploadError } = await this.backend.supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
+    if (uploadError) throw new Error(uploadError.message);
+    const { data: urlData } = await this.backend.supabase.storage.from('avatars').createSignedUrl(path, 31536000);
+    const url = urlData?.signedUrl ?? '';
+    await this.updateProfile({ avatarUrl: url });
+    return url;
+  }
+
+  /**
+   * Whether this email is an admin. The bootstrap email bundled with the app
+   * counts, and so does any row in the `app_admins` table - so an admin can be
+   * added straight in Supabase without a redeploy. RLS lets any signed-in user
+   * read that table, which is what makes the lookup possible before the row is
+   * ever used to unlock anything.
+   */
+  private async resolveAdmin(email: string): Promise<boolean> {
+    if (this.backend.isAdminEmail(email)) return true;
+    try {
+      const { data } = await this.backend.supabase
+        .from('app_admins')
+        .select('email')
+        .ilike('email', email)
+        .maybeSingle();
+      return Boolean(data);
+    } catch {
+      return false;
+    }
   }
 
   private setUser(profile: AuthUser): void {

@@ -16,6 +16,9 @@ import { AccountProfile } from './pages/account/profile/profile';
 import { Payments } from './pages/account/payments/payments';
 import { AccountSettings } from './pages/account/settings/settings';
 import { AccountPassword } from './pages/account/password/password';
+import { Admin } from './pages/admin/admin';
+import { Checkout } from './pages/checkout/checkout';
+import { AdminGuard } from './services/admin.guard';
 import { trail } from './components/breadcrumb/breadcrumb';
 
 /**
@@ -106,7 +109,7 @@ export const routes: Routes = [
     component: Shipping,
     title: 'Shipping & Logistics, China to Nigeria | Izuire',
     data: {
-      desc: 'Air and sea freight from China to Nigeria, CBM explained, a CBM calculator, and destination coverage across Africa.',
+      desc: 'Air and sea freight from China to Nigeria, CBM explained, and destination coverage across Africa.',
       crumb: trail({ label: 'Shipping & Logistics' }),
     },
   },
@@ -188,5 +191,22 @@ export const routes: Routes = [
       crumb: trail({ label: 'Account', link: '/account' }, { label: 'Change password' }),
     },
   },
+  {
+    path: 'checkout',
+    component: Checkout,
+    title: 'Checkout, Izuire',
+    data: {
+      desc: 'Confirm your basket, choose a payment method and place your Izuire order.',
+      crumb: trail({ label: 'Checkout' }),
+    },
+  },
   { path: '**', redirectTo: '' },
+  /* /admin — catalogue manager. AdminGuard admits NG_ADMIN_EMAIL only. */
+  {
+    path: 'admin',
+    component: Admin,
+    canActivate: [AdminGuard],
+    title: 'Admin, Catalogue Manager | Izuire',
+    data: { desc: 'Admin catalogue manager: prices, featured products and visibility.' },
+  },
 ];
