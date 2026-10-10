@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, HostListener, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { EmailImage, renderEmailHtml } from './email-content';
 
@@ -25,7 +25,7 @@ const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-admin-email-drafts',
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink, RouterLinkActive],
   templateUrl: './admin-email-drafts.html',
   styles: [`
     :host{display:block;font-family:var(--font-b)}

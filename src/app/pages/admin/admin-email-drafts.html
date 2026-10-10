@@ -2,6 +2,11 @@
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
   Back
 </button>
+<nav class="email-workspace-nav" aria-label="Email workspace">
+  <a routerLink="/admin/email-follow-up" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Compose</a>
+  <a routerLink="/admin/email-drafts" routerLinkActive="active">Drafts</a>
+  <a routerLink="/admin/email-history" routerLinkActive="active">History</a>
+</nav>
 <span class="kicker">Outreach</span>
 <h1>Email drafts</h1>
 <p class="lede">Saved follow-up messages, recipients, and image links.</p>

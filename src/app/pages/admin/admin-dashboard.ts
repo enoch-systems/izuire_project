@@ -1,7 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, computed, inject, signal, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Chart, registerables } from 'chart.js';
 import { AdminAuthService } from '../../services/admin-auth.service';
+
+Chart.register(...registerables);
 
 /** A count shown on the dashboard, or a dash when it could not be read. */
 interface Stat {
@@ -41,6 +44,13 @@ interface AdminOrder {
   status: string;
   method: string;
   created_at: string;
+}
+
+interface ActivitySeries {
+  labels: string[];
+  registrations: number[];
+  orders: number[];
+  tiers: number[];
 }
 
 const USERS_PER_PAGE = 20;
@@ -165,49 +175,6 @@ const ORDERS_PER_PAGE = 20;
         .user { grid-template-columns: minmax(0, 1fr); }
         .user-email,.user-detail,.user-date,.user-tier { grid-column: 1; grid-row: auto; text-align: left; }
       }
-      .links {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .links a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 18px;
-        font-family: var(--font-d);
-        font-weight: 600;
-        font-size: 0.82rem;
-        letter-spacing: 0.01em;
-        text-decoration: none;
-        border-radius: 5px;
-        border: 1.5px solid var(--ink);
-        background: transparent;
-        color: var(--ink);
-        transition:
-          transform 0.22s var(--ease),
-          background 0.22s var(--ease),
-          color 0.22s var(--ease);
-      }
-      .links a:hover {
-        background: var(--ink);
-        color: var(--white);
-      }
-      .links a.primary {
-        background: var(--orange);
-        color: var(--white);
-        border-color: transparent;
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
-      }
-      .links a.primary:hover {
-        background: var(--orange-deep);
-        transform: translateY(-1px);
-      }
-      .links a:focus-visible {
-        outline: 2.5px solid var(--orange-deep);
-        outline-offset: 2px;
-      }
       .status {
         margin: 0 0 28px;
         padding: 12px 14px;
@@ -230,16 +197,28 @@ const ORDERS_PER_PAGE = 20;
     `,
   ],
 })
-export class AdminDashboard {
+export class AdminDashboard implements AfterViewInit, OnDestroy {
   /** Read by the template, which needs the signed-in admin's email. */
   protected readonly admin = inject(AdminAuthService);
 
   protected readonly loading = signal(true);
   protected readonly stats = signal<Stat[]>([]);
+  protected readonly catalogueIsEmpty = computed(() =>
+    this.stats().find((stat) => stat.label === 'Products')?.value === 0,
+  );
   protected readonly users = signal<RegisteredUser[]>([]);
   protected readonly orders = signal<AdminOrder[]>([]);
   protected readonly ordersLoading = signal(true);
   protected readonly ordersError = signal('');
+  protected readonly chartLoading = signal(true);
+  protected readonly chartError = signal('');
+  protected readonly activity = signal<ActivitySeries>({ labels: [], registrations: [], orders: [], tiers: [0, 0, 0] });
+  protected readonly hasActivity = computed(() =>
+    this.activity().registrations.some(Boolean) || this.activity().orders.some(Boolean),
+  );
+  protected readonly hasTierActivity = computed(() => this.activity().tiers.some(Boolean));
+  protected readonly tierTotal = computed(() => this.activity().tiers.reduce((sum, count) => sum + count, 0));
+  protected readonly welcomeName = computed(() => this.admin.session()?.name.trim().split(/\s+/)[0] || 'Admin');
   protected readonly usersPage = signal(0);
   protected readonly usersLoading = signal(true);
   protected readonly usersError = signal('');
@@ -249,6 +228,11 @@ export class AdminDashboard {
   });
   /** Set when a table could not be read at all — usually not yet migrated. */
   protected readonly schemaMissing = signal(false);
+  @ViewChild('activityCanvas') private activityCanvas?: ElementRef<HTMLCanvasElement>;
+  @ViewChild('tierCanvas') private tierCanvas?: ElementRef<HTMLCanvasElement>;
+  private activityChart?: Chart<'line', number[], string>;
+  private tierChart?: Chart<'doughnut', number[], string>;
+  private chartViewReady = false;
 
   constructor() {
     this.admin.supabase
@@ -257,11 +241,26 @@ export class AdminDashboard {
         if (payload.eventType === 'INSERT') this.usersPage.set(0);
         void this.loadUsersPage();
         void this.refreshUserCount();
+        void this.loadActivity();
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => void this.loadOrders())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        void this.loadOrders();
+        void this.loadActivity();
+      })
       .subscribe();
     void this.load();
     void this.loadOrders();
+    void this.loadActivity();
+  }
+
+  ngAfterViewInit(): void {
+    this.chartViewReady = true;
+    this.renderCharts();
+  }
+
+  ngOnDestroy(): void {
+    this.activityChart?.destroy();
+    this.tierChart?.destroy();
   }
 
   private async load(): Promise<void> {
@@ -315,6 +314,133 @@ export class AdminDashboard {
 
   protected formatOrderAmount(amountKobo: number, currency: string): string {
     return new Intl.NumberFormat('en-NG', { style: 'currency', currency }).format(amountKobo / 100);
+  }
+
+  private async loadActivity(): Promise<void> {
+    this.chartLoading.set(true);
+    this.chartError.set('');
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const dates = Array.from({ length: 14 }, (_, index) => {
+      const date = new Date(today);
+      date.setUTCDate(today.getUTCDate() - (13 - index));
+      return date;
+    });
+    try {
+      const [profilesResult, ordersResult] = await Promise.all([
+        this.admin.supabase.from('profiles').select('created_at,member_tier').gte('created_at', dates[0].toISOString()).limit(5000),
+        this.admin.supabase.from('orders').select('created_at').gte('created_at', dates[0].toISOString()).limit(5000),
+      ]);
+      if (profilesResult.error) throw profilesResult.error;
+      if (ordersResult.error) throw ordersResult.error;
+
+      const registrationsByDay = new Map<string, number>();
+      const ordersByDay = new Map<string, number>();
+      const registrationsByTier = new Map([['Standard', 0], ['Verified', 0], ['Enterprise', 0]]);
+      for (const profile of profilesResult.data ?? []) {
+        const day = new Date(profile.created_at).toISOString().slice(0, 10);
+        registrationsByDay.set(day, (registrationsByDay.get(day) ?? 0) + 1);
+        const tier = registrationsByTier.has(profile.member_tier) ? profile.member_tier : 'Standard';
+        registrationsByTier.set(tier, (registrationsByTier.get(tier) ?? 0) + 1);
+      }
+      for (const order of ordersResult.data ?? []) {
+        const day = new Date(order.created_at).toISOString().slice(0, 10);
+        ordersByDay.set(day, (ordersByDay.get(day) ?? 0) + 1);
+      }
+
+      const formatter = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+      this.activity.set({
+        labels: dates.map((date) => formatter.format(date)),
+        registrations: dates.map((date) => registrationsByDay.get(date.toISOString().slice(0, 10)) ?? 0),
+        orders: dates.map((date) => ordersByDay.get(date.toISOString().slice(0, 10)) ?? 0),
+        tiers: ['Standard', 'Verified', 'Enterprise'].map((tier) => registrationsByTier.get(tier) ?? 0),
+      });
+    } catch {
+      this.chartError.set('Activity data could not be loaded.');
+    } finally {
+      this.chartLoading.set(false);
+      this.renderActivityChart();
+    }
+  }
+
+  private renderCharts(): void {
+    this.renderActivityChart();
+    this.renderTierChart();
+  }
+
+  private renderActivityChart(): void {
+    const canvas = this.activityCanvas?.nativeElement;
+    if (!this.chartViewReady || !canvas) return;
+    const series = this.activity();
+    const colors = this.chartColors();
+    if (!this.activityChart) {
+      this.activityChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: series.labels,
+          datasets: [
+            { label: 'New users', data: series.registrations, borderColor: '#247A5A', backgroundColor: 'transparent', fill: false, tension: .3, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
+            { label: 'Orders', data: series.orders, borderColor: '#F5821F', backgroundColor: 'transparent', fill: false, tension: .3, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { intersect: false, mode: 'index' },
+          plugins: {
+            legend: { position: 'bottom', labels: { color: colors.text, usePointStyle: true, pointStyle: 'circle', boxWidth: 7, padding: 18, font: { size: 11 } } },
+            tooltip: { backgroundColor: colors.tooltip, titleColor: colors.tooltipText, bodyColor: colors.tooltipText, borderColor: colors.grid, borderWidth: 1, padding: 10, cornerRadius: 6, displayColors: true },
+          },
+          scales: {
+            x: { grid: { display: false }, border: { display: false }, ticks: { color: colors.muted, maxTicksLimit: 7, font: { size: 10 } } },
+            y: { beginAtZero: true, border: { display: false }, grid: { color: colors.grid }, ticks: { color: colors.muted, precision: 0, stepSize: 1, font: { size: 10 }, padding: 8 } },
+          },
+        },
+      });
+      return;
+    }
+    this.activityChart.data.labels = series.labels;
+    this.activityChart.data.datasets[0].data = series.registrations;
+    this.activityChart.data.datasets[1].data = series.orders;
+    this.activityChart.update('none');
+  }
+
+  private renderTierChart(): void {
+    const canvas = this.tierCanvas?.nativeElement;
+    if (!this.chartViewReady || !canvas) return;
+    const colors = this.chartColors();
+    if (!this.tierChart) {
+      this.tierChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: ['Standard', 'Verified', 'Enterprise'],
+          datasets: [{ data: this.activity().tiers, backgroundColor: ['#7C8799', '#247A5A', '#F5821F'], borderWidth: 0, hoverOffset: 5 }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: {
+            legend: { position: 'bottom', labels: { color: colors.text, usePointStyle: true, pointStyle: 'circle', boxWidth: 7, padding: 13, font: { size: 10 } } },
+            tooltip: { backgroundColor: colors.tooltip, titleColor: colors.tooltipText, bodyColor: colors.tooltipText, borderColor: colors.grid, borderWidth: 1, padding: 10, cornerRadius: 6 },
+          },
+        },
+      });
+      return;
+    }
+    this.tierChart.data.datasets[0].data = this.activity().tiers;
+    this.tierChart.update('none');
+  }
+
+  private chartColors(): { text: string; muted: string; grid: string; tooltip: string; tooltipText: string } {
+    const styles = getComputedStyle(document.documentElement);
+    return {
+      text: styles.getPropertyValue('--ink').trim() || '#111111',
+      muted: styles.getPropertyValue('--ink-60').trim() || 'rgba(17,17,17,.62)',
+      grid: styles.getPropertyValue('--line').trim() || '#E7E2D8',
+      tooltip: styles.getPropertyValue('--ink').trim() || '#111111',
+      tooltipText: styles.getPropertyValue('--white').trim() || '#FFFFFF',
+    };
   }
 
   private async loadOrders(): Promise<void> {

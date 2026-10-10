@@ -18,7 +18,6 @@ import { AccountSettings } from './pages/account/settings/settings';
 import { AccountPassword } from './pages/account/password/password';
 import { AdminLogin } from './pages/admin/admin-login';
 import { AdminShell } from './pages/admin/admin-shell';
-import { AdminDashboard } from './pages/admin/admin-dashboard';
 import { AdminProducts } from './pages/admin/admin-products';
 import { Checkout } from './pages/checkout/checkout';
 import { AdminGuard } from './services/admin.guard';
@@ -224,7 +223,11 @@ export const routes: Routes = [
     canActivate: [AdminGuard],
     canActivateChild: [AdminGuard],
     children: [
-      { path: '', component: AdminDashboard, title: 'Admin Dashboard | Izuire' },
+      {
+        path: '',
+        loadComponent: () => import('./pages/admin/admin-dashboard').then((page) => page.AdminDashboard),
+        title: 'Admin Dashboard | Izuire',
+      },
       {
         path: 'products',
         component: AdminProducts,
@@ -245,6 +248,11 @@ export const routes: Routes = [
         path: 'email-drafts',
         loadComponent: () => import('./pages/admin/admin-email-drafts').then((page) => page.AdminEmailDrafts),
         title: 'Admin, Email Drafts | Izuire',
+      },
+      {
+        path: 'email-history',
+        loadComponent: () => import('./pages/admin/admin-email-history').then((page) => page.AdminEmailHistory),
+        title: 'Admin, Email History | Izuire',
       },
       {
         path: 'newsletter-signups',

@@ -8,18 +8,38 @@
     <h1>Email follow-up</h1>
     <p class="lede">Choose your audience, personalize the message, and preview the email before sending.</p>
   </div>
-  <a class="draft-link" routerLink="/admin/email-drafts">Open saved drafts</a>
 </div>
+<nav class="email-workspace-nav" aria-label="Email workspace">
+  <a routerLink="/admin/email-follow-up" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Compose</a>
+  <a routerLink="/admin/email-drafts" routerLinkActive="active">Drafts</a>
+  <a routerLink="/admin/email-history" routerLinkActive="active">History</a>
+</nav>
 
 <div class="compose-bar">
   <span class="count">{{ selectedRecipients().length }} recipients selected</span>
   <div class="actions">
     <button type="button" class="action" [disabled]="saving() || sending() || uploading()" (click)="saveDraft()">{{ saving() ? 'Saving…' : 'Save as Draft' }}</button>
-    <button type="button" class="action action--primary" [disabled]="saving() || sending() || uploading()" (click)="sendMail()">{{ sending() ? 'Sending…' : 'Send Mail' }}</button>
+    <button type="button" class="action action--primary" [disabled]="saving() || sending() || uploading() || selectedRecipients().length === 0" (click)="sendMail()">{{ sending() ? 'Sending…' : 'Send Mail' }}</button>
   </div>
+  @if (sendProgress(); as progress) {
+    <div class="send-progress" aria-live="polite">
+      <div class="send-progress-summary"><strong>{{ sending() ? 'Sending email' : 'Send complete' }}</strong><span>{{ progress.processed }} / {{ progress.total }} processed</span></div>
+      <div class="send-progress-track" role="progressbar" [attr.aria-valuenow]="progress.processed" [attr.aria-valuemin]="0" [attr.aria-valuemax]="progress.total"><span [style.width.%]="progressPercent()"></span></div>
+      <div class="send-progress-counts"><span>{{ progress.sent }} sent</span><span>{{ progress.failed }} failed</span></div>
+      @if (progress.current) { <p class="send-current"><span class="send-pulse"></span>Processing {{ progress.current }}</p> }
+    </div>
+  }
 </div>
 @if (error()) { <p class="status" role="alert">{{ error() }}</p> }
 @if (status()) { <p class="status" role="status">{{ status() }}</p> }
+@if (sendFailures().length) {
+  <section class="send-failures" aria-labelledby="sendFailuresHeading">
+    <h2 id="sendFailuresHeading">Could not confirm delivery</h2>
+    @for (failure of sendFailures(); track failure.email) {
+      <p><strong>{{ failure.name }}</strong> · {{ failure.email }}<span>{{ failure.status === 'unknown' ? 'Delivery unconfirmed. Check history before retrying.' : failure.message }}</span></p>
+    }
+  </section>
+}
 
 <div class="layout">
   <section class="recipients" aria-labelledby="recipientsHeading">
@@ -42,16 +62,37 @@
         }
       </div>
     }
+    @if (manualSelectedRecipients().length) {
+      <div class="manual-selected" aria-label="Added recipients">
+        <span class="count">Added recipients</span>
+        @for (recipient of manualSelectedRecipients(); track recipient.email) {
+          <div class="manual-selected-row">
+            <span>{{ recipient.name || recipient.email }}</span>
+            <button type="button" [attr.aria-label]="'Remove ' + recipient.email" (click)="removeManualRecipient(recipient)">×</button>
+          </div>
+        }
+      </div>
+    }
+    <div class="manual-tool">
+      <h3>Add another recipient</h3>
+      <div class="manual-fields">
+        <div class="field"><label for="manualRecipientEmail">Recipient email</label><input id="manualRecipientEmail" type="email" autocomplete="email" placeholder="name@example.com" [value]="manualEmail()" [disabled]="checkingEmail()" (input)="onManualEmailChange($any($event.target).value)" (blur)="checkManualEmail()" /></div>
+        <div class="field"><label for="manualRecipientName">Recipient name <span aria-hidden="true">*</span></label><input id="manualRecipientName" type="text" autocomplete="given-name" placeholder="First name" required [value]="manualName()" (input)="manualName.set($any($event.target).value)" /></div>
+      </div>
+      @if (manualEmailMessage()) { <p class="manual-check-status" [class.manual-check-status--valid]="manualEmailState() === 'valid'" [class.manual-check-status--invalid]="manualEmailState() === 'invalid'" role="status">{{ manualEmailMessage() }}</p> }
+      <button type="button" class="action action--primary" [disabled]="checkingEmail() || !manualName().trim() || manualName().trim().length > 160 || manualEmailState() !== 'valid' || checkedManualEmail() !== manualEmail().trim().toLowerCase()" (click)="addManualRecipient()">{{ checkingEmail() ? 'Checking…' : 'Add recipient' }}</button>
+    </div>
   </section>
 
   <section class="composer" aria-labelledby="composerHeading">
     <div class="section-head"><h2 id="composerHeading">Compose</h2><span class="count">{{ images().length }} / 10 images</span></div>
     <div class="template-row">
-      <label for="emailTemplate">Start with</label>
+      <label for="emailTemplate">Email type</label>
       <select id="emailTemplate" [value]="selectedTemplate()" (change)="applyTemplate($any($event.target).value)">
+        <option value="welcome">Welcome email</option>
+        <option value="newsletter">Newsletter email</option>
         <option value="check-in">Sourcing check-in</option>
         <option value="quote">Quote follow-up</option>
-        <option value="welcome">Welcome email</option>
       </select>
     </div>
     <div class="field"><label for="followupSubject">Subject</label><input id="followupSubject" type="text" [value]="subject()" (input)="subject.set($any($event.target).value)" /></div>
@@ -59,7 +100,7 @@
       <label for="followupBody">Message</label>
       <textarea id="followupBody" placeholder="Write your email message here…" [value]="body()" (input)="body.set($any($event.target).value)"></textarea>
     </div>
-    <p class="editor-hint">Links become clickable automatically. Add up to 10 images below.</p>
+    <p class="editor-hint">Use <span ngNonBindable>{{first_name}}</span> to greet each recipient personally. Links become clickable automatically; add up to 10 images below.</p>
     <label class="upload" for="emailImageInput">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" /></svg>
       {{ uploading() ? 'Uploading…' : 'Add image' }}

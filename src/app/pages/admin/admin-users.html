@@ -36,19 +36,41 @@
 
 @if (selected(); as user) {
   <div class="scrim" (click)="closeDetails()" aria-hidden="true"></div>
-  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="userDetailsTitle">
+  <aside class="drawer admin-user-drawer" role="dialog" aria-modal="true" aria-labelledby="userDetailsTitle">
     <div class="drawer-head">
-      <div><span class="kicker">Registered user</span><h2 id="userDetailsTitle">{{ user.name || 'New customer' }}</h2></div>
+      <span class="drawer-kicker">USER PROFILE</span>
       <button type="button" class="close" (click)="closeDetails()" aria-label="Close user details">×</button>
     </div>
-    <dl class="detail-grid">
-      <div class="detail"><dt>Email</dt><dd><a [href]="'mailto:' + user.email">{{ user.email }}</a></dd></div>
-      <div class="detail"><dt>Registered</dt><dd><time [attr.datetime]="user.created_at">{{ user.created_at | date: 'EEEE, MMMM d, y, HH:mm:ss':'+0000' }} UTC</time></dd></div>
-      <div class="detail"><dt>Member tier</dt><dd>{{ user.member_tier }}</dd></div>
-      @if (user.phone) { <div class="detail"><dt>Phone</dt><dd>{{ user.phone }}</dd></div> }
-      @if (user.company) { <div class="detail"><dt>Company</dt><dd>{{ user.company }}</dd></div> }
-      @if (address(user.shipping)) { <div class="detail"><dt>Shipping address</dt><dd>{{ address(user.shipping) }}</dd></div> }
-      @if (address(user.billing)) { <div class="detail"><dt>Billing address</dt><dd>{{ address(user.billing) }}</dd></div> }
-    </dl>
+    <section class="profile-summary">
+      <span class="profile-avatar" aria-hidden="true">{{ userInitials(user.name || user.email) }}</span>
+      <h2 id="userDetailsTitle">{{ user.name || 'New customer' }}</h2>
+      <span class="tier">{{ user.member_tier || 'Standard' }}</span>
+      <a class="profile-email" [href]="'mailto:' + user.email">{{ user.email }}</a>
+      <time class="joined" [attr.datetime]="user.created_at">Joined {{ user.created_at | date: 'MMM d, y':'+0000' }}</time>
+    </section>
+
+    <section class="detail-section" aria-labelledby="contactDetailsTitle">
+      <h3 id="contactDetailsTitle">Contact</h3>
+      @if (user.phone || user.company) {
+        <dl class="detail-grid">
+          @if (user.phone) { <div class="detail"><dt>Phone</dt><dd>{{ user.phone }}</dd></div> }
+          @if (user.company) { <div class="detail"><dt>Company</dt><dd>{{ user.company }}</dd></div> }
+        </dl>
+      } @else {
+        <p class="detail-empty">No additional contact details.</p>
+      }
+    </section>
+
+    <section class="detail-section" aria-labelledby="shippingDetailsTitle">
+      <h3 id="shippingDetailsTitle">Shipping address</h3>
+      @if (address(user.shipping)) { <p class="address-value">{{ address(user.shipping) }}</p> }
+      @else { <p class="detail-empty">No shipping address saved.</p> }
+    </section>
+
+    <section class="detail-section" aria-labelledby="billingDetailsTitle">
+      <h3 id="billingDetailsTitle">Billing address</h3>
+      @if (address(user.billing)) { <p class="address-value">{{ address(user.billing) }}</p> }
+      @else { <p class="detail-empty">No billing address saved.</p> }
+    </section>
   </aside>
 }

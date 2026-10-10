@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { EmailImage, renderEmailHtml } from './email-content';
 
@@ -8,9 +8,25 @@ interface Recipient {
   user_id: string;
   name: string;
   email: string;
+  manual?: boolean;
 }
 
-type FollowupTemplate = 'check-in' | 'quote' | 'welcome';
+interface SendProgress {
+  total: number;
+  processed: number;
+  sent: number;
+  failed: number;
+  current: string;
+}
+
+interface SendFailure {
+  email: string;
+  name: string;
+  message: string;
+  status: 'failed' | 'unknown';
+}
+
+type FollowupTemplate = 'check-in' | 'quote' | 'welcome' | 'newsletter';
 
 const EMAIL_TEMPLATES: Record<FollowupTemplate, { subject: string; body: string }> = {
   'check-in': {
@@ -23,19 +39,23 @@ const EMAIL_TEMPLATES: Record<FollowupTemplate, { subject: string; body: string 
   },
   welcome: {
     subject: 'Welcome to Izuire',
-    body: 'Hello,\n\nThanks for joining Izuire. We help African businesses source products from China, verify suppliers, and coordinate delivery.\n\nTell us what you are looking for and your destination, and our team will help you plan the next step.\n\nExplore the marketplace: https://izuire.com/marketplace\n\nBest,\nIzuire Sourcing Team',
+    body: 'Hello {{first_name}},\n\nWelcome to Izuire. We help African businesses source products from China, verify suppliers, and coordinate delivery.\n\nTell us what you are looking for and your destination, and our team will help you plan the next step.\n\nExplore the marketplace: https://izuire.com/marketplace\n\nBest,\nIzuire Sourcing Team',
+  },
+  newsletter: {
+    subject: 'Sourcing notes from Izuire',
+    body: 'Hello {{first_name}},\n\nHere is the latest from Izuire. We are here to make sourcing from China clearer, from finding reliable suppliers to arranging inspections and delivery.\n\nHave a product in mind? Reply to this email and tell us what you need. Our team would be glad to help you explore the next step.\n\nExplore the marketplace: https://izuire.com/marketplace\n\nWarm regards,\nThe Izuire Team',
   },
 };
 
 @Component({
   selector: 'app-admin-email-followup',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './admin-email-followup.html',
   styles: [`
     :host{display:block;font-family:var(--font-b)}
     .kicker{font-family:var(--font-d);font-size:.7rem;font-weight:600;text-transform:uppercase;color:var(--orange-deep)}
     h1{margin:8px 0 6px;font-family:var(--font-d);font-size:28px}.lede{margin:0 0 22px;color:var(--ink-60);font-size:.9rem}
-    .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}.page-title{min-width:0}
+    .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}.page-title{min-width:0}.page-links{display:flex;gap:14px;flex-wrap:wrap}
     .layout{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr);gap:18px;align-items:start}
     .recipients,.composer{min-width:0;padding:18px;border:1px solid var(--line);border-radius:8px;background:var(--white)}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
     h2{margin:0;font-family:var(--font-d);font-size:16px}.count{color:var(--ink-60);font-size:.8rem;white-space:nowrap}
@@ -48,7 +68,7 @@ const EMAIL_TEMPLATES: Record<FollowupTemplate, { subject: string; body: string 
     .images{display:flex;flex-wrap:wrap;gap:10px}.image{position:relative;width:104px;border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--paper)}.image img{display:block;width:100%;height:76px;object-fit:cover}.image span{display:block;padding:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.68rem}.image button{position:absolute;top:4px;right:4px;border:0;border-radius:50%;background:rgba(0,0,0,.7);color:white;cursor:pointer}
     .email-preview{min-height:160px;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink);line-height:1.6;overflow:auto}.email-preview img{max-width:100%;height:auto}.email-preview a{color:var(--orange-deep);text-decoration:underline}.preview-empty{margin:0;padding:22px;color:var(--ink-60);font-size:.82rem}
     .editor-hint{margin:-7px 0 12px;color:var(--ink-60);font-size:.76rem}.compose-bar{position:sticky;top:12px;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 16px;padding:10px 12px;border:1px solid var(--line);background:var(--white)}.actions{display:flex;flex-wrap:wrap;gap:9px}.action{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 13px;border:1px solid var(--line);border-radius:5px;background:var(--white);color:var(--ink);font-family:var(--font-d);font-weight:700;cursor:pointer;text-decoration:none}.action--primary{border-color:var(--orange);background:var(--orange);color:var(--white)}.action:disabled{opacity:.45;cursor:default}.status{margin:0}.draft-link{color:var(--ink-60);font-size:.8rem}
-    @media(max-width:760px){.page-head{align-items:flex-start;flex-direction:column;gap:12px}.layout{grid-template-columns:1fr;gap:14px}.recipient-list{max-height:300px}.compose-bar{top:8px;align-items:flex-start;flex-direction:column}}
+    @media(max-width:760px){.page-head{align-items:flex-start;flex-direction:column;gap:12px}.layout{grid-template-columns:1fr;gap:14px}.recipient-list{max-height:300px}.compose-bar{top:8px;align-items:flex-start;flex-direction:column}.page-links{gap:10px}}
   `],
 })
 export class AdminEmailFollowup {
@@ -58,7 +78,14 @@ export class AdminEmailFollowup {
   private readonly sanitizer = inject(DomSanitizer);
   protected readonly recipients = signal<Recipient[]>([]);
   protected readonly selectedRecipients = signal<Recipient[]>([]);
+  protected readonly manualSelectedRecipients = computed(() => this.selectedRecipients().filter((recipient) => recipient.manual));
   protected readonly search = signal('');
+  protected readonly manualEmail = signal('');
+  protected readonly manualName = signal('');
+  protected readonly checkedManualEmail = signal('');
+  protected readonly manualEmailState = signal<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  protected readonly manualEmailMessage = signal('');
+  protected readonly checkingEmail = signal(false);
   protected readonly selectedTemplate = signal<FollowupTemplate>('check-in');
   protected readonly subject = signal(EMAIL_TEMPLATES['check-in'].subject);
   protected readonly body = signal(EMAIL_TEMPLATES['check-in'].body);
@@ -67,11 +94,25 @@ export class AdminEmailFollowup {
   protected readonly uploading = signal(false);
   protected readonly saving = signal(false);
   protected readonly sending = signal(false);
+  protected readonly sendProgress = signal<SendProgress | null>(null);
+  protected readonly sendFailures = signal<SendFailure[]>([]);
+  protected readonly progressPercent = computed(() => {
+    const progress = this.sendProgress();
+    return progress ? Math.round((progress.processed / progress.total) * 100) : 0;
+  });
   protected readonly error = signal('');
   protected readonly status = signal('');
   protected readonly draftId = signal<string | null>(null);
+  private readonly previewName = computed(() => {
+    const recipient = this.selectedRecipients()[0];
+    return recipient ? (recipient.name === 'Newsletter subscriber' ? '' : recipient.name) : 'Amina';
+  });
   protected readonly previewHtml = computed(() => this.sanitizer.bypassSecurityTrustHtml(
-    renderEmailHtml(this.body(), this.images(), this.subject()),
+    renderEmailHtml(
+      this.personalize(this.body(), this.previewName()),
+      this.images(),
+      this.personalize(this.subject(), this.previewName()),
+    ),
   ));
   protected readonly filtered = computed(() => {
     const search = this.search().trim().toLowerCase();
@@ -85,6 +126,7 @@ export class AdminEmailFollowup {
     const audience = this.route.snapshot.queryParamMap.get('audience');
     const signupIds = this.route.snapshot.queryParamMap.get('signupIds');
     if (audience === 'newsletter' && signupIds) {
+      this.applyTemplate('newsletter');
       void this.loadNewsletterRecipients(signupIds.split(','));
     } else {
       void this.load();
@@ -127,7 +169,98 @@ export class AdminEmailFollowup {
     this.subject.set(template.subject);
     this.body.set(template.body);
     this.error.set('');
-    this.status.set('Starter email loaded. Edit it before sending.');
+    this.status.set('Email template loaded. Personalize it before sending.');
+  }
+
+  private personalize(value: string, name: string): string {
+    const firstName = name.trim().split(/\s+/)[0] || 'there';
+    return value.replace(/\{\{\s*first_name\s*\}\}/gi, firstName);
+  }
+
+  protected onManualEmailChange(value: string): void {
+    this.manualEmail.set(value);
+    this.checkedManualEmail.set('');
+    this.manualEmailState.set('idle');
+    this.manualEmailMessage.set('');
+  }
+
+  protected async checkManualEmail(): Promise<void> {
+    const email = this.manualEmail().trim().toLowerCase();
+    if (!email) {
+      this.checkedManualEmail.set('');
+      this.manualEmailState.set('idle');
+      this.manualEmailMessage.set('');
+      return;
+    }
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.checkedManualEmail.set('');
+      this.manualEmailState.set('invalid');
+      this.manualEmailMessage.set('Enter a valid email address.');
+      return;
+    }
+    if (this.selectedRecipients().some((recipient) => recipient.email.toLowerCase() === email)) {
+      this.checkedManualEmail.set('');
+      this.manualEmailState.set('invalid');
+      this.manualEmailMessage.set('That address is already selected.');
+      return;
+    }
+
+    this.checkingEmail.set(true);
+    this.manualEmailState.set('checking');
+    this.manualEmailMessage.set('Checking the email domain…');
+    try {
+      const { data, error } = await this.admin.supabase.functions.invoke('check-email-recipient', { body: { email } });
+      if (error) {
+        let message = error.message;
+        if ('context' in error && error.context instanceof Response) {
+          const response = await error.context.json().catch(() => null) as { error?: string } | null;
+          message = response?.error ?? message;
+        }
+        throw new Error(message);
+      }
+      if (this.manualEmail().trim().toLowerCase() !== email) return;
+      this.checkedManualEmail.set(email);
+      this.manualEmailState.set('valid');
+      this.manualEmailMessage.set('Valid address format and mail-enabled domain. The specific inbox is not confirmed.');
+    } catch (error) {
+      if (this.manualEmail().trim().toLowerCase() !== email) return;
+      this.checkedManualEmail.set('');
+      this.manualEmailState.set('invalid');
+      this.manualEmailMessage.set(error instanceof Error ? error.message : 'Could not check this email domain.');
+    } finally {
+      this.checkingEmail.set(false);
+    }
+  }
+
+  protected addManualRecipient(): void {
+    const email = this.manualEmail().trim().toLowerCase();
+    if (this.manualEmailState() !== 'valid' || this.checkedManualEmail() !== email) return;
+    const name = this.manualName().trim();
+    if (!name) {
+      this.error.set('Enter the recipient name before adding this address.');
+      return;
+    }
+    if (this.selectedRecipients().length >= 50) {
+      this.error.set('Send to no more than 50 recipients at a time.');
+      return;
+    }
+    this.selectedRecipients.update((selected) => [...selected, {
+      user_id: `manual:${email}`,
+      email,
+      name,
+      manual: true,
+    }]);
+    this.manualEmail.set('');
+    this.manualName.set('');
+    this.checkedManualEmail.set('');
+    this.manualEmailState.set('idle');
+    this.manualEmailMessage.set('');
+    this.error.set('');
+    this.status.set(`${email} added. The selected email type will be used when you send.`);
+  }
+
+  protected removeManualRecipient(recipient: Recipient): void {
+    this.selectedRecipients.update((selected) => selected.filter((item) => item.email !== recipient.email));
   }
 
   protected async uploadImage(event: Event): Promise<void> {
@@ -200,38 +333,100 @@ export class AdminEmailFollowup {
 
   protected async sendMail(): Promise<void> {
     if (!this.validMessage()) return;
+    const recipients = [...this.selectedRecipients()];
+    const total = recipients.length;
+    const failedRecipients: Recipient[] = [];
+    let sent = 0;
+    let failed = 0;
     this.sending.set(true);
     this.status.set('');
     this.error.set('');
+    this.sendFailures.set([]);
+    this.sendProgress.set({ total, processed: 0, sent, failed, current: recipients[0].email });
     try {
-      const { data, error } = await this.admin.supabase.functions.invoke('send-admin-email', {
-        body: {
-          recipients: this.selectedRecipients().map((recipient) => recipient.email),
-          subject: this.subject(),
-          body: this.body(),
-          images: this.images().map(({ name, url }) => ({ name, url })),
-        },
-      });
-      if (error) {
-        let message = error.message;
-        if ('context' in error && error.context instanceof Response) {
-          const response = await error.context.json().catch(() => null) as { error?: string } | null;
-          message = response?.error ?? message;
+      for (const [index, recipient] of recipients.entries()) {
+        this.sendProgress.update((progress) => progress ? { ...progress, current: recipient.email } : progress);
+        let failure: SendFailure | null = null;
+        try {
+          const { data, error } = await this.admin.supabase.functions.invoke('send-admin-email', {
+            body: {
+              recipients: [{ email: recipient.email, name: recipient.name, manual: recipient.manual === true }],
+              subject: this.subject(),
+              body: this.body(),
+              emailType: this.selectedTemplate(),
+              images: this.images().map(({ name, url }) => ({ name, url })),
+            },
+          });
+          if (error) {
+            let message = error.message;
+            if ('context' in error && error.context instanceof Response) {
+              const response = await error.context.json().catch(() => null) as { error?: string } | null;
+              message = response?.error ?? message;
+            }
+            throw new Error(message);
+          }
+          if (data?.sent === true) {
+            sent += 1;
+          } else {
+            failure = {
+              email: recipient.email,
+              name: recipient.name,
+              message: data?.error ?? 'Delivery failed.',
+              status: data?.status === 'unknown' ? 'unknown' : 'failed',
+            };
+          }
+        } catch (error) {
+          failure = {
+            email: recipient.email,
+            name: recipient.name,
+            message: error instanceof Error ? error.message : 'Delivery could not be confirmed.',
+            status: 'unknown',
+          };
+          await this.recordUnconfirmedSend(recipient, failure.message);
         }
-        throw new Error(message);
+        if (failure) {
+          failed += 1;
+          if (failure.status === 'failed') failedRecipients.push(recipient);
+          this.sendFailures.update((items) => [...items, failure!]);
+        }
+        this.sendProgress.set({ total, processed: index + 1, sent, failed, current: '' });
       }
-      this.status.set(`Email sent to ${data?.sent ?? this.selectedRecipients().length} recipients.`);
+
+      this.selectedRecipients.set(failedRecipients);
       const draftId = this.draftId();
       if (draftId) {
-        await this.admin.supabase.from('email_followup_drafts').delete().eq('id', draftId);
-        this.draftId.set(null);
+        if (failedRecipients.length) {
+          await this.admin.supabase.from('email_followup_drafts').update({
+            recipients: failedRecipients,
+            updated_at: new Date().toISOString(),
+          }).eq('id', draftId);
+        } else {
+          await this.admin.supabase.from('email_followup_drafts').delete().eq('id', draftId);
+          this.draftId.set(null);
+        }
       }
-      this.selectedRecipients.set([]);
-    } catch (error) {
-      this.error.set(error instanceof Error ? error.message : 'Email could not be sent.');
+      this.status.set(failed
+        ? `${sent} of ${total} delivered. ${failed} failed or unconfirmed; confirmed failures remain selected for retry.`
+        : `All ${sent} emails sent successfully.`);
     } finally {
       this.sending.set(false);
     }
+  }
+
+  private async recordUnconfirmedSend(recipient: Recipient, message: string): Promise<void> {
+    const { data } = await this.admin.supabase.auth.getUser();
+    if (!data.user) return;
+    await this.admin.supabase.from('email_send_history').insert({
+      admin_user_id: data.user.id,
+      recipient_email: recipient.email,
+      recipient_name: recipient.name || 'there',
+      email_type: this.selectedTemplate(),
+      subject: this.personalize(this.subject(), recipient.name),
+      body: this.personalize(this.body(), recipient.name),
+      images: this.images().map(({ name, url }) => ({ name, url })),
+      status: 'unknown',
+      error_message: message,
+    });
   }
 
   private validMessage(): boolean {

@@ -1,0 +1,73 @@
+<button type="button" class="backbtn" (click)="goBack()" aria-label="Back to dashboard">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+  Back
+</button>
+<div class="page-head">
+  <div>
+    <span class="kicker">Outreach</span>
+    <h1>Email history</h1>
+    <p class="lede">Delivery results and a copy of every message attempted from the console.</p>
+  </div>
+</div>
+<nav class="email-workspace-nav" aria-label="Email workspace">
+  <a routerLink="/admin/email-follow-up" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Compose</a>
+  <a routerLink="/admin/email-drafts" routerLinkActive="active">Drafts</a>
+  <a routerLink="/admin/email-history" routerLinkActive="active">History</a>
+</nav>
+
+<div class="toolbar">
+  <input type="search" aria-label="Search email history" placeholder="Search recipient or subject" [value]="search()" (input)="onSearch($any($event.target).value)" />
+  <select aria-label="Filter delivery status" [value]="statusFilter()" (change)="onStatusFilter($any($event.target).value)">
+    <option value="all">All statuses</option>
+    <option value="sent">Sent</option>
+    <option value="failed">Failed</option>
+    <option value="unknown">Unconfirmed</option>
+    <option value="sending">Processing</option>
+  </select>
+  <span class="count">{{ total() }} emails</span>
+</div>
+
+@if (loading()) {
+  <p class="empty">Loading email history…</p>
+} @else if (error()) {
+  <p class="empty" role="alert">{{ error() }}</p>
+} @else if (filtered().length === 0) {
+  <p class="empty">No matching email history.</p>
+} @else {
+  <div class="history-list" aria-live="polite">
+    @for (item of filtered(); track item.id) {
+      <button type="button" class="history-row" (click)="selected.set(item)">
+        <span class="row-main">
+          <span class="row-title">{{ item.recipient_name }} <span class="row-email">{{ item.recipient_email }}</span></span>
+          <span class="row-subject">{{ item.subject }}</span>
+          <span class="row-meta">{{ emailTypeLabel(item.email_type) }} · {{ item.created_at | date: 'MMM d, y, HH:mm':'+0000' }} UTC</span>
+        </span>
+        <span class="status" [class.status--sent]="item.status === 'sent'" [class.status--failed]="item.status === 'failed'" [class.status--unknown]="item.status === 'unknown'">{{ statusLabel(item.status) }}</span>
+      </button>
+    }
+  </div>
+  <nav class="pager" aria-label="Email history pages">
+    <button type="button" (click)="changePage(-1)" [disabled]="page() === 0">Previous</button>
+    <span>Page {{ page() + 1 }} of {{ maxPage() }}</span>
+    <button type="button" (click)="changePage(1)" [disabled]="page() + 1 >= maxPage()">Next</button>
+  </nav>
+}
+
+@if (selected(); as item) {
+  <div class="scrim" (click)="selected.set(null)" aria-hidden="true"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+    <div class="drawer-head">
+      <div><span class="kicker">{{ emailTypeLabel(item.email_type) }}</span><h2 id="historyTitle">{{ item.subject }}</h2></div>
+      <button type="button" class="close" (click)="selected.set(null)" aria-label="Close email details">×</button>
+    </div>
+    <dl class="details">
+      <div><dt>To</dt><dd>{{ item.recipient_name }} &lt;{{ item.recipient_email }}&gt;</dd></div>
+      <div><dt>Status</dt><dd><span class="status" [class.status--sent]="item.status === 'sent'" [class.status--failed]="item.status === 'failed'" [class.status--unknown]="item.status === 'unknown'">{{ statusLabel(item.status) }}</span></dd></div>
+      <div><dt>Attempted</dt><dd>{{ item.created_at | date: 'EEEE, MMMM d, y, HH:mm:ss':'+0000' }} UTC</dd></div>
+      @if (item.completed_at) { <div><dt>Completed</dt><dd>{{ item.completed_at | date: 'MMM d, y, HH:mm:ss':'+0000' }} UTC</dd></div> }
+      @if (item.provider_message_id) { <div><dt>Provider ID</dt><dd>{{ item.provider_message_id }}</dd></div> }
+    </dl>
+    @if (item.error_message) { <p class="delivery-error"><strong>Delivery detail</strong>{{ item.error_message }}</p> }
+    <div class="email-preview" [innerHTML]="preview(item)"></div>
+  </aside>
+}

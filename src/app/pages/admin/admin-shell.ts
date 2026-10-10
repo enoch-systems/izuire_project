@@ -241,14 +241,15 @@ import { ThemeToggle } from '../../components/theme-toggle/theme-toggle';
          of the console's shared sheet CSS, so this component stays under its
          style budget. Its classes are unique to this template. */
       main {
-        padding: 34px 36px 56px;
+        padding: 28px 28px 48px;
         min-width: 0;
-        max-width: 1100px;
-        margin: 0 auto;
+        width: 100%;
+        max-width: none;
+        margin: 0;
       }
       @media (max-width: 720px) {
         main {
-          padding: 24px 16px 40px;
+          padding: 20px 14px 36px;
         }
       }
       /* Desktop: the sidebar is the layout, not a drawer. It stops hiding
@@ -268,7 +269,7 @@ import { ThemeToggle } from '../../components/theme-toggle/theme-toggle';
           padding-left: 264px;
         }
         main {
-          padding-top: 40px;
+          padding-top: 32px;
         }
       }
     `,
@@ -281,6 +282,18 @@ export class AdminShell {
   /** Drawer + preview state. The console stays put: the preview is an overlay. */
   protected readonly menuOpen = signal(false);
   protected readonly previewOpen = signal(false);
+  protected readonly signOutConfirming = signal(false);
+  protected readonly signingOut = signal(false);
+
+  protected isEmailWorkspace(): boolean {
+    return ['/admin/email-follow-up', '/admin/email-drafts', '/admin/email-history']
+      .some((path) => this.router.url.startsWith(path));
+  }
+
+  protected adminInitials(): string {
+    const name = this.admin.session()?.name?.trim() || this.admin.session()?.email || 'Admin';
+    return name.split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map((part) => part[0].toUpperCase()).join('');
+  }
 
   protected toggleMenu(): void {
     this.menuOpen.update((open) => !open);
@@ -304,6 +317,32 @@ export class AdminShell {
     document.body.style.overflow = '';
   }
 
+  protected requestSignOut(): void {
+    if (this.signingOut()) return;
+    this.closeMenu();
+    this.signOutConfirming.set(true);
+    document.body.style.overflow = 'hidden';
+  }
+
+  protected cancelSignOut(): void {
+    if (this.signingOut()) return;
+    this.signOutConfirming.set(false);
+    if (!this.previewOpen() && !this.menuOpen()) document.body.style.overflow = '';
+  }
+
+  protected async confirmSignOut(): Promise<void> {
+    if (this.signingOut()) return;
+    this.signingOut.set(true);
+    try {
+      await this.admin.signOut();
+      await this.router.navigateByUrl('/admin/login');
+    } finally {
+      this.signingOut.set(false);
+      this.signOutConfirming.set(false);
+      document.body.style.overflow = '';
+    }
+  }
+
   protected async signOut(): Promise<void> {
     this.closeMenu();
     await this.admin.signOut();
@@ -313,6 +352,7 @@ export class AdminShell {
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
     if (this.previewOpen()) this.closePreview();
+    else if (this.signOutConfirming()) this.cancelSignOut();
     else this.closeMenu();
   }
 

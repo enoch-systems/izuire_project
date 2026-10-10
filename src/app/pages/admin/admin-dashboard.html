@@ -1,9 +1,14 @@
-<span class="kicker">Console</span>
-<h1>Dashboard</h1>
-<p class="lede">
-  Signed in as {{ admin.session()?.email }}. Product and registration changes stream through Supabase
-  Realtime, so the storefront and this dashboard stay current without a reload.
-</p>
+<header class="dashboard-head">
+  <div>
+    <span class="kicker">Operations</span>
+    <h1>Welcome back, {{ welcomeName() }}</h1>
+    <p class="lede">A live view of customers, catalogue, and orders.</p>
+  </div>
+  <div class="dashboard-actions">
+    <a class="action-secondary" routerLink="/admin/email-follow-up">Compose email</a>
+    <a class="action-primary" routerLink="/admin/products">Open catalogue</a>
+  </div>
+</header>
 
 @if (schemaMissing()) {
   <p class="status">
@@ -15,10 +20,12 @@
 
 <div class="grid">
   @if (loading()) {
-    <div class="card"><div class="n">—</div><div class="l">Loading…</div></div>
+    @for (item of [1, 2, 3, 4, 5]; track item) {
+      <div class="card card--loading"><div class="n">—</div><div class="l">Loading…</div></div>
+    }
   } @else {
     @for (stat of stats(); track stat.label) {
-      <div class="card">
+      <div class="card" [class.card--empty]="stat.value === 0">
         <div class="n">{{ stat.value === null ? '—' : stat.value }}</div>
         <div class="l">{{ stat.label }}</div>
         <div class="h">{{ stat.hint }}</div>
@@ -27,17 +34,58 @@
   }
 </div>
 
+@if (!loading() && catalogueIsEmpty()) {
+  <section class="first-listing" aria-labelledby="firstListingHeading">
+    <span class="first-listing-number" aria-hidden="true">01</span>
+    <div class="first-listing-copy">
+      <span class="panel-kicker">YOUR NEXT STEP</span>
+      <h2 id="firstListingHeading">Start your catalogue</h2>
+      <p>Add a listing to make your first products visible in the marketplace.</p>
+    </div>
+    <a routerLink="/admin/products">Add first product <span aria-hidden="true">→</span></a>
+  </section>
+}
+
+<div class="analytics-grid">
+  <section class="analytics-panel activity-panel" aria-labelledby="activityHeading">
+    <div class="panel-head">
+      <div><span class="panel-kicker">LAST 14 DAYS</span><h2 id="activityHeading">Customer activity</h2></div>
+      <span class="panel-note">Registrations and orders</span>
+    </div>
+    <div class="chart-frame" [class.chart-frame--empty]="!chartLoading() && !chartError() && !hasActivity()" [attr.aria-busy]="chartLoading()">
+      <canvas #activityCanvas role="img" aria-label="Daily registrations and orders over the last 14 days"></canvas>
+      @if (chartLoading()) { <div class="chart-message"><span class="chart-spinner"></span>Loading activity</div> }
+      @else if (chartError()) { <div class="chart-message chart-message--error">{{ chartError() }}</div> }
+      @else if (!hasActivity()) { <div class="chart-message"><strong>Quiet for now</strong><span>New registrations and orders will appear here.</span></div> }
+    </div>
+  </section>
+
+  <section class="analytics-panel status-panel" aria-labelledby="statusHeading">
+    <div class="panel-head">
+      <div><span class="panel-kicker">LAST 14 DAYS</span><h2 id="statusHeading">New sign-ups</h2></div>
+      <span class="panel-note">By member tier</span>
+    </div>
+    <div class="status-chart-frame" [class.status-chart-frame--empty]="!chartLoading() && !chartError() && !hasTierActivity()" [attr.aria-busy]="chartLoading()">
+      <canvas #tierCanvas role="img" aria-label="New registrations by membership tier in the last 14 days"></canvas>
+      @if (chartLoading()) { <div class="chart-message"><span class="chart-spinner"></span>Loading sign-ups</div> }
+      @else if (chartError()) { <div class="chart-message chart-message--error">{{ chartError() }}</div> }
+      @else if (!hasTierActivity()) { <div class="chart-message"><strong>No recent sign-ups</strong><span>New customers will appear here.</span></div> }
+      @else { <div class="doughnut-center"><strong>{{ tierTotal() }}</strong><span>new users</span></div> }
+    </div>
+  </section>
+</div>
+
+<div class="recent-grid">
 <section class="registrations" aria-labelledby="ordersHeading">
   <div class="registrations-head">
-    <h2 id="ordersHeading">Recent orders</h2>
-    <span class="live">LIVE</span>
+    <div><span class="panel-kicker">LATEST {{ orders().length }}</span><h2 id="ordersHeading">Recent orders</h2></div>
   </div>
   @if (ordersLoading()) {
     <p class="users-empty">Loading orders…</p>
   } @else if (ordersError()) {
     <p class="status" role="alert">{{ ordersError() }}</p>
   } @else if (orders().length === 0) {
-    <p class="users-empty">No orders yet.</p>
+    <p class="users-empty">No orders yet. New orders will appear here.</p>
   } @else {
     <div class="users" aria-live="polite">
       @for (order of orders(); track order.id) {
@@ -56,8 +104,7 @@
 
 <section class="registrations" aria-labelledby="registrationsHeading">
   <div class="registrations-head">
-    <h2 id="registrationsHeading">Registered users</h2>
-    <span class="live">LIVE</span>
+    <div><span class="panel-kicker">{{ stats()[0]?.value ?? '—' }} TOTAL</span><h2 id="registrationsHeading">Registered users</h2></div>
   </div>
   @if (usersLoading()) {
     <p class="users-empty">Loading registrations…</p>
@@ -89,9 +136,4 @@
     </nav>
   }
 </section>
-
-<h2>Manage</h2>
-<div class="links">
-  <a class="primary" routerLink="/admin/products">Open the catalogue</a>
-  <a routerLink="/marketplace">View marketplace ↗</a>
 </div>
