@@ -10,7 +10,11 @@
         <div class="pd-gallery">
           <div class="pd-media">
             @if (activeImage(); as shot) {
-              <img [src]="shot.src" [alt]="p.title">
+              @if (shot.kind === 'video') {
+                <video [src]="shot.src" controls playsinline preload="metadata" [attr.aria-label]="p.title + ' video'"></video>
+              } @else {
+                <img [src]="shot.src" [alt]="p.title">
+              }
             } @else {
               <span class="pd-media-fallback">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
@@ -28,7 +32,9 @@
                 </svg>
               </span>
             }
-            @if (p.badge) {
+            @if (p.soldOut) {
+              <span class="pd-badge pd-badge--soldout">Sold out</span>
+            } @else if (p.badge) {
               <span class="pd-badge">{{ p.badge }}</span>
             }
           </div>
@@ -45,7 +51,11 @@
                   [attr.aria-selected]="activeShot() === t.index"
                   (click)="setShot(t.index)"
                   [attr.aria-label]="t.shot.label">
-                  <img [src]="t.shot.src" [alt]="p.title + ', ' + t.shot.label" loading="lazy">
+                  @if (t.shot.kind === 'video') {
+                    <video [src]="t.shot.src" muted playsinline preload="metadata" [attr.aria-label]="p.title + ', ' + t.shot.label"></video>
+                  } @else {
+                    <img [src]="t.shot.src" [alt]="p.title + ', ' + t.shot.label" loading="lazy">
+                  }
                 </button>
               }
             </div>
@@ -69,6 +79,9 @@
           </div>
 
           <p class="pd-specs">{{ p.specs }}</p>
+          @if (p.description) {
+            <p class="pd-description">{{ p.description }}</p>
+          }
 
           <div class="pd-price-row">
             <span class="pd-price">{{ money(p.unitPrice) }}</span>
@@ -97,12 +110,15 @@
           </div>
 
           <div class="pd-actions">
-            <button type="button" class="btn btn-primary pd-buy" (click)="buyNow()">
+            @if (p.soldOut) {
+              <p class="pd-soldout-note" role="status">Sold out — check back soon or request a quote.</p>
+            }
+            <button type="button" class="btn btn-primary pd-buy" (click)="buyNow()" [disabled]="p.soldOut">
               Buy now
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             </button>
-            <button type="button" class="btn btn-outline pd-add" (click)="addToCart()" [class.is-added]="cart.addedId() === p.id">
-              <span>{{ cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
+            <button type="button" class="btn btn-outline pd-add" (click)="addToCart()" [disabled]="p.soldOut" [class.is-added]="cart.addedId() === p.id">
+              <span>{{ p.soldOut ? 'Sold out' : cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
             </button>
           </div>
 

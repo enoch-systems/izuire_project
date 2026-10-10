@@ -1,0 +1,97 @@
+<span class="kicker">Console</span>
+<h1>Dashboard</h1>
+<p class="lede">
+  Signed in as {{ admin.session()?.email }}. Product and registration changes stream through Supabase
+  Realtime, so the storefront and this dashboard stay current without a reload.
+</p>
+
+@if (schemaMissing()) {
+  <p class="status">
+    The database tables could not be read. Push the schema and seed the database before using the
+    console:
+    <br /><code>supabase db push</code> then <code>npm run db:seed</code>.
+  </p>
+}
+
+<div class="grid">
+  @if (loading()) {
+    <div class="card"><div class="n">—</div><div class="l">Loading…</div></div>
+  } @else {
+    @for (stat of stats(); track stat.label) {
+      <div class="card">
+        <div class="n">{{ stat.value === null ? '—' : stat.value }}</div>
+        <div class="l">{{ stat.label }}</div>
+        <div class="h">{{ stat.hint }}</div>
+      </div>
+    }
+  }
+</div>
+
+<section class="registrations" aria-labelledby="ordersHeading">
+  <div class="registrations-head">
+    <h2 id="ordersHeading">Recent orders</h2>
+    <span class="live">LIVE</span>
+  </div>
+  @if (ordersLoading()) {
+    <p class="users-empty">Loading orders…</p>
+  } @else if (ordersError()) {
+    <p class="status" role="alert">{{ ordersError() }}</p>
+  } @else if (orders().length === 0) {
+    <p class="users-empty">No orders yet.</p>
+  } @else {
+    <div class="users" aria-live="polite">
+      @for (order of orders(); track order.id) {
+        <article class="user">
+          <strong class="user-name">{{ order.number }} · {{ order.title }}</strong>
+          <time class="user-date" [attr.datetime]="order.created_at">
+            {{ order.created_at | date: 'yyyy-MM-dd HH:mm:ss':'+0000' }} UTC
+          </time>
+          <span class="user-email">{{ order.items_summary }}</span>
+          <span class="user-detail">{{ formatOrderAmount(order.subtotal_kobo, order.currency) }} · {{ order.status }} · {{ order.method }}</span>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+<section class="registrations" aria-labelledby="registrationsHeading">
+  <div class="registrations-head">
+    <h2 id="registrationsHeading">Registered users</h2>
+    <span class="live">LIVE</span>
+  </div>
+  @if (usersLoading()) {
+    <p class="users-empty">Loading registrations…</p>
+  } @else if (usersError()) {
+    <p class="status" role="alert">{{ usersError() }}</p>
+  } @else if (users().length === 0) {
+    <p class="users-empty">No registered accounts yet.</p>
+  } @else {
+    <div class="users" aria-live="polite">
+      @for (user of users(); track user.user_id) {
+        <article class="user">
+          <strong class="user-name">{{ user.name || 'New customer' }}</strong>
+          <time class="user-date" [attr.datetime]="user.created_at">
+            Registered {{ user.created_at | date: 'yyyy-MM-dd HH:mm:ss':'+0000' }} UTC
+          </time>
+          <span class="user-email">{{ user.email }}</span>
+          @if (user.phone) { <span class="user-detail">Phone: {{ user.phone }}</span> }
+          @if (user.company) { <span class="user-detail">Company: {{ user.company }}</span> }
+          @if (formatAddress(user.shipping); as address) { <span class="user-detail">Shipping: {{ address }}</span> }
+          @if (formatAddress(user.billing); as address) { <span class="user-detail">Billing: {{ address }}</span> }
+          <span class="user-tier">{{ user.member_tier }}</span>
+        </article>
+      }
+    </div>
+    <nav class="user-pages" aria-label="Registered user pages">
+      <button type="button" (click)="previousUsersPage()" [disabled]="usersPage() === 0">Previous</button>
+      <span>Page {{ usersPage() + 1 }} of {{ usersPageCount() }}</span>
+      <button type="button" (click)="nextUsersPage()" [disabled]="usersPage() >= usersPageCount() - 1">Next</button>
+    </nav>
+  }
+</section>
+
+<h2>Manage</h2>
+<div class="links">
+  <a class="primary" routerLink="/admin/products">Open the catalogue</a>
+  <a routerLink="/marketplace">View marketplace ↗</a>
+</div>

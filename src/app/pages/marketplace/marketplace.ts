@@ -60,13 +60,25 @@ export class Marketplace {
    *  it, so the choice survives leaving the page and follows the shopper to the
    *  payments page, a product page and home alike. */
   private readonly fx = inject(DisplayCurrencyService);
-  /** The catalogue backend: Supabase rows when live, the bundled list otherwise. */
+  /** The database-backed catalogue. */
   private readonly catalogue = inject(ProductService);
-  /** The whole catalogue, live from Supabase (or the bundled list offline). */
+  /** The whole catalogue from Supabase. */
   protected readonly products = this.catalogue.all;
+  protected readonly catalogueLoading = this.catalogue.loading;
+  protected readonly catalogueError = this.catalogue.error;
   /** The featured rail at the top of the page, fed by the same rows as home. */
   protected readonly featured = this.catalogue.featured;
-  protected readonly categories = CATEGORIES;
+  protected readonly categories = computed(() => {
+    const labels = new Map(CATEGORIES.map((category) => [category.id, category.label]));
+    const ids = [...new Set(this.products().map((product) => product.cat))].sort();
+    return [
+      { id: 'all', label: 'All' },
+      ...ids.map((id) => ({
+        id,
+        label: labels.get(id) ?? id.replace(/[-_]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
+      })),
+    ];
+  });
   protected readonly currencies = this.fx.currencies;
   protected readonly pageSize = PAGE_SIZE;
   protected readonly priceBands = [
@@ -297,6 +309,7 @@ export class Marketplace {
   }
 
   protected addToCart(product: Product, event: Event): void {
+    if (product.soldOut) return;
     this.cart.addQty(product, this.qtyFor(product.id));
     const card = (event.currentTarget as HTMLElement | null)?.closest<HTMLElement>('.product-card');
     if (card) this.flyToCart.flyFrom(card, product);

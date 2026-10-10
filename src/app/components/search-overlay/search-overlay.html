@@ -32,7 +32,7 @@
             <span class="search-block-hint">Wholesale lines moving this week</span>
           </div>
           <div class="search-rec-row">
-            @for (p of recommended; track p.id) {
+            @for (p of recommended(); track p.id) {
               <a class="search-rec" [routerLink]="['/product', p.id]" (click)="close()">
                 <span class="search-rec-media" [class.is-photo]="p.image">
                   @if (p.image; as img) {

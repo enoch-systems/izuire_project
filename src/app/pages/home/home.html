@@ -214,9 +214,8 @@
 </section>
 
 <!-- ============ FEATURED PRODUCTS ============ -->
-<!-- The four on show are read from the marketplace catalogue rather than written
-     out again here (see FEATURED in marketplace-data), so the price and MOQ on
-     these cards can never drift from the listing they link to.
+<!-- Product cards are read only from the live Supabase catalogue, so prices and
+  minimums always match the listing they link to.
 
      Each card adds straight to the cart instead of routing out to the quote
      form; the cart then carries the basket through to the quote page. Adding
@@ -228,13 +227,14 @@
     <div class="section-head">
       <div><span class="eyebrow">Trending this month</span><h2>Featured products</h2></div>
     </div>
+    @if (catalogueRows().length) {
     <div class="product-pager">
       <div class="product-pager-viewport">
         <div class="product-pager-track" [style.transform]="'translateX(-' + page() * 100 + '%)'">
           @for (group of pages(); track $index) {
             <div class="product-grid product-grid--featured">
               @for (p of group; track p.id) {
-                <article class="product-card">
+                <article class="product-card" [class.is-soldout]="p.soldOut">
                   <a class="product-link product-link--media" [routerLink]="['/product', p.id]" [attr.aria-label]="'Open ' + p.title">
                     <div class="product-media" [class.product-media--photo]="p.image">
                       @if (p.image; as img) {
@@ -257,7 +257,9 @@
                         }
                       </svg>
                       }
-                      @if (p.badge) {
+                      @if (p.soldOut) {
+                        <span class="product-badge product-badge--soldout">Sold out</span>
+                      } @else if (p.badge) {
                         <span class="product-badge">{{ p.badge }}</span>
                       }
                     </div>
@@ -279,14 +281,14 @@
                       </button>
                       <span class="product-qty-unit" aria-hidden="true">units</span>
                     </div>
-                    <button type="button" class="btn btn-primary product-add" (click)="addToCart(p, $event)" [class.is-added]="cart.addedId() === p.id" [attr.aria-label]="cart.addedId() === p.id ? p.title + ' added to cart' : 'Add ' + p.title + ' to cart'">
+                    <button type="button" class="btn btn-primary product-add" (click)="addToCart(p, $event)" [disabled]="p.soldOut" [class.is-added]="cart.addedId() === p.id" [attr.aria-label]="p.soldOut ? p.title + ' is sold out' : cart.addedId() === p.id ? p.title + ' added to cart' : 'Add ' + p.title + ' to cart'">
                       <!-- Two icons in one box so the swap is a cross-fade: the plus
                            fades out as the tick draws itself in. -->
                       <span class="product-add-icons" aria-hidden="true">
                         <svg class="product-add-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                         <svg class="product-add-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
                       </span>
-                      <span>{{ cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
+                      <span>{{ p.soldOut ? 'Sold out' : cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
                     </button>
                   </div>
                 </article>
@@ -315,6 +317,13 @@
         </button>
       </div>
     </div>
+    } @else {
+      <p class="catalogue-empty" role="status">
+        @if (catalogueLoading()) { Loading listings… }
+        @else if (catalogueError()) { {{ catalogueError() }} }
+        @else if (catalogueLive()) { No listings yet. Check back soon. }
+      </p>
+    }
 
     <!-- Under the cards rather than beside the heading: the grid is the thing
          being introduced, so "see the rest of it" reads as the next step after. -->

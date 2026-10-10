@@ -1,0 +1,54 @@
+<button type="button" class="backbtn" (click)="goBack()" aria-label="Back to dashboard">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+  Back
+</button>
+<span class="kicker">People</span>
+<h1>Users</h1>
+<p class="lede">Registered customer and administrator accounts.</p>
+
+<div class="toolbar">
+  <input type="search" aria-label="Filter users by email" placeholder="Filter by email" [value]="filter()" (input)="onFilter($any($event.target).value)" />
+  <span class="total">{{ total() }} registered users</span>
+</div>
+
+@if (loading()) {
+  <p class="empty">Loading users…</p>
+} @else if (error()) {
+  <p class="empty" role="alert">{{ error() }}</p>
+} @else if (users().length === 0) {
+  <p class="empty">No users match this filter.</p>
+} @else {
+  <div class="rows" aria-live="polite">
+    @for (user of users(); track user.user_id) {
+      <article class="row">
+        <div class="identity"><strong>{{ user.name || 'New customer' }}</strong><span>{{ user.email }}</span></div>
+        <time class="date" [attr.datetime]="user.created_at">Registered {{ user.created_at | date: 'MMM d, y, HH:mm':'+0000' }} UTC</time>
+        <button type="button" class="view" (click)="selected.set(user)">View</button>
+      </article>
+    }
+  </div>
+  <nav class="pager" aria-label="User pages">
+    <button type="button" (click)="changePage(-1)" [disabled]="page() === 0">Previous</button>
+    <span>Page {{ page() + 1 }} of {{ maxPage() }}</span>
+    <button type="button" (click)="changePage(1)" [disabled]="page() + 1 >= maxPage()">Next</button>
+  </nav>
+}
+
+@if (selected(); as user) {
+  <div class="scrim" (click)="closeDetails()" aria-hidden="true"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="userDetailsTitle">
+    <div class="drawer-head">
+      <div><span class="kicker">Registered user</span><h2 id="userDetailsTitle">{{ user.name || 'New customer' }}</h2></div>
+      <button type="button" class="close" (click)="closeDetails()" aria-label="Close user details">×</button>
+    </div>
+    <dl class="detail-grid">
+      <div class="detail"><dt>Email</dt><dd><a [href]="'mailto:' + user.email">{{ user.email }}</a></dd></div>
+      <div class="detail"><dt>Registered</dt><dd><time [attr.datetime]="user.created_at">{{ user.created_at | date: 'EEEE, MMMM d, y, HH:mm:ss':'+0000' }} UTC</time></dd></div>
+      <div class="detail"><dt>Member tier</dt><dd>{{ user.member_tier }}</dd></div>
+      @if (user.phone) { <div class="detail"><dt>Phone</dt><dd>{{ user.phone }}</dd></div> }
+      @if (user.company) { <div class="detail"><dt>Company</dt><dd>{{ user.company }}</dd></div> }
+      @if (address(user.shipping)) { <div class="detail"><dt>Shipping address</dt><dd>{{ address(user.shipping) }}</dd></div> }
+      @if (address(user.billing)) { <div class="detail"><dt>Billing address</dt><dd>{{ address(user.billing) }}</dd></div> }
+    </dl>
+  </aside>
+}

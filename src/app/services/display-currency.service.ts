@@ -22,9 +22,12 @@ import { SupabaseService } from './supabase.service';
 export class DisplayCurrencyService {
   /** Where the pick is kept between visits. Bump if the shape ever changes. */
   private static readonly STORAGE_KEY = 'izuire.currency.v1';
+  private static readonly ACCOUNT_STORAGE_PREFIX = 'izuire.currency.v2.';
 
   private readonly backend = inject(SupabaseService);
-  /** The ISO code picked on this device. NGN unless a visit chose otherwise. */
+  private readonly userId = signal<string | null>(null);
+  private requestId = 0;
+  /** The ISO code for the current account, or the guest device. */
   private readonly code = signal<string>(DisplayCurrencyService.restore());
 
   /** The nine currencies the rate ticker quotes — the dropdown's options. */
@@ -38,44 +41,81 @@ export class DisplayCurrencyService {
   /** True outside NGN, so a page can explain the indicative conversion. */
   readonly converted = computed(() => this.currency().code !== 'NGN');
 
+  constructor() {
+    const restoreSessionCurrency = (id: string | null) => void this.restoreForUser(id);
+    void this.backend.supabase.auth.getSession().then(({ data }) => {
+      restoreSessionCurrency(data.session?.user.id ?? null);
+    });
+    this.backend.supabase.auth.onAuthStateChange((_event, session) => {
+      restoreSessionCurrency(session?.user.id ?? null);
+    });
+  }
+
   /** Pick a currency; persists to device + Supabase row when signed in. */
   set(code: string): void {
     if (!CURRENCIES.some((c) => c.code === code)) return;
+    this.requestId++;
     this.code.set(code);
-    try {
-      localStorage.setItem(DisplayCurrencyService.STORAGE_KEY, code);
-    } catch {
-      // Storage unavailable. The pick then lasts for this visit only.
-    }
-    void this.persistCurrency(code);
+    this.cache(code, this.userId());
+    if (this.userId()) void this.persistCurrency(code, this.userId()!);
   }
 
-  /** Load the server-side pick once a backend session exists. */
-  async pullFromServer(): Promise<void> {
+  private async restoreForUser(userId: string | null): Promise<void> {
+    const requestId = ++this.requestId;
+    this.userId.set(userId);
+    if (!userId) {
+      this.code.set(DisplayCurrencyService.restore());
+      return;
+    }
+
+    const cached = this.restoreAccount(userId);
+    const currency = cached ?? 'NGN';
+    this.code.set(currency);
     try {
-      const { data: session } = await this.backend.supabase.auth.getSession();
-      const uid = session.session?.user?.id;
-      if (!uid) return;
       const { data } = await this.backend.supabase
         .from('user_settings')
         .select('currency')
-        .eq('user_id', uid)
+        .eq('user_id', userId)
         .maybeSingle();
       const server = data?.['currency'] as string | undefined;
-      if (server && CURRENCIES.some((c) => c.code === server)) this.code.set(server);
+      if (requestId !== this.requestId) return;
+      if (server && CURRENCIES.some((c) => c.code === server)) {
+        this.code.set(server);
+        this.cache(server, userId);
+      } else {
+        await this.persistCurrency(currency, userId);
+      }
     } catch {
-      // user_settings not migrated yet — device pick still applies.
+      // Keep this account's device cache if settings are temporarily unavailable.
     }
   }
 
-  private async persistCurrency(code: string): Promise<void> {
+  private async persistCurrency(code: string, userId: string): Promise<void> {
     try {
-      const { data: session } = await this.backend.supabase.auth.getSession();
-      const uid = session.session?.user?.id;
-      if (!uid) return;
-      await this.backend.supabase.from('user_settings').upsert({ user_id: uid, currency: code });
+      await this.backend.supabase.from('user_settings').upsert({ user_id: userId, currency: code });
     } catch {
-      // Offline — device pick still applies.
+      // The current display preference remains active for this visit.
+    }
+  }
+
+  private cache(code: string, userId: string | null): void {
+    try {
+      if (userId) {
+        localStorage.setItem(`${DisplayCurrencyService.ACCOUNT_STORAGE_PREFIX}${userId}`, code);
+      } else {
+        localStorage.setItem(DisplayCurrencyService.STORAGE_KEY, code);
+      }
+    } catch {
+      // The current display preference remains active for this visit.
+    }
+  }
+
+  private restoreAccount(userId: string): string | null {
+    try {
+      const saved = localStorage.getItem(`${DisplayCurrencyService.ACCOUNT_STORAGE_PREFIX}${userId}`);
+      return saved && CURRENCIES.some((c) => c.code === saved) ? saved : null;
+    } catch {
+      return null;
     }
   }
 

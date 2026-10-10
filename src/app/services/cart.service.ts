@@ -1,5 +1,7 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Product, ProductBadge } from '../pages/marketplace/marketplace-data';
+import { SupabaseService } from './supabase.service';
+import { fromKobo, toKobo } from './money';
 
 /** One line of the cart. */
 export interface CartLine {
@@ -24,6 +26,7 @@ export interface CartLine {
 
 /** Where the cart is kept between visits. Bump if `CartLine` ever changes shape. */
 const STORAGE_KEY = 'izuire.cart.v2';
+const ACCOUNT_STORAGE_PREFIX = 'izuire.cart.v3.';
 
 /** Grouping done here rather than by `Intl` currency style, which some environments
  *  render as "NGN" instead of the naira sign. */
@@ -51,7 +54,12 @@ export function naira(value: number): string {
  */
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  private readonly lines = signal<CartLine[]>(this.restore());
+  private readonly backend = inject(SupabaseService);
+  private readonly lines = signal<CartLine[]>(this.restoreLocal(null));
+  private readonly userId = signal<string | null>(null);
+  private readonly switching = signal(false);
+  private requestId = 0;
+  private remoteWrite = Promise.resolve();
 
   /** The lines, newest last. */
   readonly items = this.lines.asReadonly();
@@ -69,7 +77,20 @@ export class CartService {
   private clearAddedTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
-    effect(() => this.persist(this.lines()));
+    effect(() => {
+      const lines = this.lines();
+      const userId = this.userId();
+      if (this.switching()) return;
+      this.persistLocal(lines, userId);
+      if (userId) this.queueRemoteSave(userId, lines);
+    });
+    const restoreSessionCart = (id: string | null) => void this.restoreForUser(id);
+    void this.backend.supabase.auth.getSession().then(({ data }) => {
+      restoreSessionCart(data.session?.user.id ?? null);
+    });
+    this.backend.supabase.auth.onAuthStateChange((_event, session) => {
+      restoreSessionCart(session?.user.id ?? null);
+    });
   }
 
   /** Put a product in the cart at its MOQ. */
@@ -166,22 +187,106 @@ export class CartService {
     this.clearAddedTimer = setTimeout(() => this.justAdded.set(null), 1800);
   }
 
-  private persist(lines: CartLine[]): void {
+  private persistLocal(lines: CartLine[], userId: string | null): void {
+    const key = userId ? `${ACCOUNT_STORAGE_PREFIX}${userId}` : STORAGE_KEY;
     try {
       if (lines.length === 0) {
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(key);
         return;
       }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
+      localStorage.setItem(key, JSON.stringify(lines));
     } catch {
       // Storage is unavailable or full. The cart still works for this session.
     }
   }
 
-  /** Read the saved cart, discarding anything malformed rather than throwing. */
-  private restore(): CartLine[] {
+  private async restoreForUser(userId: string | null): Promise<void> {
+    const requestId = ++this.requestId;
+    this.switching.set(true);
+    this.userId.set(userId);
+    if (!userId) {
+      this.lines.set(this.restoreLocal(null));
+      this.switching.set(false);
+      return;
+    }
+
+    let restored: CartLine[] | null = null;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const { data, error } = await this.backend.supabase
+        .from('cart_lines')
+        .select('product_id,qty,unit_price_kobo,snapshot')
+        .eq('user_id', userId);
+      if (!error && data) {
+        restored = data.map((row) => {
+          const snapshot = (row['snapshot'] ?? {}) as Partial<CartLine>;
+          return {
+            id: String(row['product_id']),
+            title: String(snapshot.title ?? row['product_id']),
+            icon: snapshot.icon ?? 'box',
+            image: snapshot.image,
+            badge: snapshot.badge,
+            unitPrice: fromKobo(Number(row['unit_price_kobo'] ?? 0)),
+            unit: snapshot.unit ?? '/ unit',
+            minQty: Number(snapshot.minQty ?? 1) || 1,
+            qty: Number(row['qty'] ?? 1) || 1,
+          };
+        });
+      }
+    } catch {
+      // Keep this user's local cache if the backend is temporarily unavailable.
+    }
+    if (requestId !== this.requestId) return;
+    const lines = restored ?? this.restoreLocal(userId);
+    this.lines.set(lines);
+    this.switching.set(false);
+    if (restored === null) this.queueRemoteSave(userId, lines);
+  }
+
+  private queueRemoteSave(userId: string, lines: CartLine[]): void {
+    const snapshot = lines.map((line) => ({ ...line }));
+    this.remoteWrite = this.remoteWrite
+      .catch(() => undefined)
+      .then(async () => {
+        const { data: existing, error: selectError } = await this.backend.supabase
+          .from('cart_lines')
+          .select('product_id')
+          .eq('user_id', userId);
+        if (selectError || !existing) return;
+        const keep = new Set(snapshot.map((line) => line.id));
+        const stale = existing.map((row) => String(row['product_id'])).filter((id) => !keep.has(id));
+        if (stale.length) {
+          await this.backend.supabase
+            .from('cart_lines')
+            .delete()
+            .eq('user_id', userId)
+            .in('product_id', stale);
+        }
+        if (!snapshot.length) return;
+        await this.backend.supabase.from('cart_lines').upsert(
+          snapshot.map((line) => ({
+            user_id: userId,
+            product_id: line.id,
+            qty: line.qty,
+            unit_price_kobo: toKobo(line.unitPrice),
+            snapshot: {
+              title: line.title,
+              icon: line.icon,
+              image: line.image ?? null,
+              badge: line.badge ?? null,
+              unit: line.unit,
+              minQty: line.minQty,
+            },
+          })),
+          { onConflict: 'user_id,product_id' },
+        );
+      });
+  }
+
+  /** Read saved cart lines, discarding malformed data rather than throwing. */
+  private restoreLocal(userId: string | null): CartLine[] {
+    const key = userId ? `${ACCOUNT_STORAGE_PREFIX}${userId}` : STORAGE_KEY;
+    try {
+      const raw = localStorage.getItem(key);
       if (!raw) return [];
 
       const parsed: unknown = JSON.parse(raw);

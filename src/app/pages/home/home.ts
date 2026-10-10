@@ -11,7 +11,7 @@ import {
   viewChildren,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FEATURED, Product } from '../marketplace/marketplace-data';
+import { Product } from '../marketplace/marketplace-data';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
@@ -238,6 +238,9 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
   /** The showcase pages through the whole live catalogue. */
   protected readonly catalogueRows = this.catalogue.all;
+  protected readonly catalogueLive = this.catalogue.live;
+  protected readonly catalogueLoading = this.catalogue.loading;
+  protected readonly catalogueError = this.catalogue.error;
 
   /** A catalogue price in the site's picked display currency. */
   protected price(naira: number): string {
@@ -253,7 +256,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     const rows = this.catalogueRows();
     const chunked: Product[][] = [];
     for (let i = 0; i < rows.length; i += PAGE_SIZE) chunked.push(rows.slice(i, i + PAGE_SIZE));
-    return chunked.length > 0 ? chunked : [FEATURED];
+    return chunked;
   });
   protected readonly page = signal(0);
 
@@ -301,6 +304,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
    * own.
    */
   protected addToCart(product: Product, event: Event): void {
+    if (product.soldOut) return;
     this.cart.addQty(product, this.qtyFor(product.id));
     // closest() is typed as Element; the card really is an HTMLElement, and the
     // service only ever reads a rect off it.

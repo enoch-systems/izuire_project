@@ -86,7 +86,7 @@ export class SearchOverlay {
   protected readonly open = this.ui.searchOpen;
   protected readonly query = signal('');
   /** Rows offered while the field is empty. */
-  protected readonly recommended = this.buildRecommended();
+  protected readonly recommended = computed(() => this.buildRecommended());
   protected readonly popular = POPULAR;
   protected readonly fallbacks = FALLBACKS;
 

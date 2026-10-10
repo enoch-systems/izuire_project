@@ -13,43 +13,22 @@ import { AuthService } from '../../services/auth.service';
 interface GalleryShot {
   src: string;
   label: string;
+  kind: 'image' | 'video';
 }
 
-/**
- * The image the listing card shows is a single Cloudinary URL. To give the
- * product page the "several shots" feel without an image pipeline yet, this
- * derives a handful of branded views from that one file — the source, a closer
- * crop, a slight rotation, a tighter product crop — by chaining Cloudinary
- * transform segments into the URL. They are real service transforms, not fake
- * files, so every thumbnail loads. Listings without a photo keep their icon.
- *
- * `src` looks like `.../upload/c_limit,w_720,q_auto:good/v<id>/<public-id>.jpg`.
- * A transform inserted before the `/v<id>` segment is applied first, so the
- * URL still resolves to the same public image.
- */
+/** Build the gallery from the actual image and video assets saved on the row. */
 function deriveGallery(product: Product): GalleryShot[] {
-  // Prefer the gallery stored against the row (products.gallery). Only a listing
-  // that carries a single photo falls back to derived Cloudinary views.
-  const stored = (product as { gallery?: { src: string }[] }).gallery;
-  if (stored && stored.length > 0) {
-    return stored.map((shot, i) => ({ src: shot.src, label: i === 0 ? 'Front' : `View ${i + 1}` }));
-  }
-  if (!product.image) return [];
-  const base = product.image.src;
-  const marker = /\/v\d+(?=\/)/;
-  if (!marker.test(base)) return [{ src: base, label: 'Front' }];
-
-  const views: [string, string][] = [
-    ['', 'Front'],                       // the source as-is
-    ['c_limit,w_720,q_auto:good', 'Detail'],
-    ['c_crop,g_center,w_720,h_900', 'Close crop'],
-    ['a_15,q_auto:good', 'Angle'],
-    ['c_crop,g_faces,w_720,h_720', 'Focus'],
-  ];
-  return views.map(([transform, label]) => ({
-    src: transform ? base.replace(marker, `/${transform.replace(/\s+/g, ',')}/v$&`) : base,
-    label,
+  const stored = (product as Product & { gallery?: { src: string }[] }).gallery ?? [];
+  const images = [product.image, ...stored]
+    .filter((shot): shot is NonNullable<typeof shot> => !!shot?.src)
+    .filter((shot, index, all) => all.findIndex((item) => item.src === shot.src) === index)
+    .map((shot, index) => ({ src: shot.src, label: index === 0 ? 'Cover' : `Photo ${index + 1}`, kind: 'image' as const }));
+  const videos = (product.videos ?? []).map((video, index) => ({
+    src: video.src,
+    label: `Video ${index + 1}`,
+    kind: 'video' as const,
   }));
+  return [...images, ...videos];
 }
 
 /**
@@ -148,13 +127,11 @@ export class ProductDetail {
    */
   protected readonly rating = computed(() => {
     const p = this.product() as (Product & { ratingValue?: number; ratingCount?: number }) | null;
-    if (!p) return { value: 4.7, count: 0 };
-    if (typeof p.ratingValue === 'number' && p.ratingCount) {
-      return { value: p.ratingValue, count: p.ratingCount };
-    }
-    let hash = 0;
-    for (const ch of p.id) hash = (hash * 31 + ch.charCodeAt(0)) % 1000;
-    return { value: 4.4 + (hash % 6) / 10, count: this.reviews().length || 12 + (hash % 14) * 3 };
+    if (!p) return { value: 0, count: 0 };
+    return {
+      value: typeof p.ratingValue === 'number' ? p.ratingValue : 0,
+      count: typeof p.ratingCount === 'number' ? p.ratingCount : this.reviews().length,
+    };
   });
 
   constructor() {
@@ -203,14 +180,14 @@ export class ProductDetail {
   /** Put the chosen quantity in the cart. */
   protected addToCart(): void {
     const p = this.product();
-    if (!p) return;
+    if (!p || p.soldOut) return;
     this.cart.addQty(p, this.qty());
   }
 
   /** Put the chosen quantity in the cart and move to the cart page. */
   protected buyNow(): void {
     const p = this.product();
-    if (!p) return;
+    if (!p || p.soldOut) return;
     this.cart.addQty(p, this.qty());
     void this.router.navigate(['/cart']);
   }

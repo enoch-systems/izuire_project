@@ -64,7 +64,7 @@
     <div class="mk-bar-cats">
       <div class="container">
         <div class="filter-bar" id="filterBar" role="group" aria-label="Filter by category">
-          @for (c of categories; track c.id) {
+          @for (c of categories(); track c.id) {
             <button type="button" class="filter-chip" [class.active]="filter() === c.id" [attr.aria-pressed]="filter() === c.id" (click)="setFilter(c.id)">{{ c.label }}<span class="filter-count">{{ count(c.id) }}</span></button>
           }
         </div>
@@ -121,7 +121,7 @@
 
       <div class="product-grid product-grid--market" id="productGrid">
         @for (p of visible(); track p.id) {
-          <article class="product-card">
+          <article class="product-card" [class.is-soldout]="p.soldOut">
             <!-- The photo and the facts are the way into a listing: clicking them
                  opens the product page. The quantity and add-to-cart controls
                  below are the only part of the card that must not, so they live
@@ -148,7 +148,9 @@
                   }
                 </svg>
                 }
-                @if (p.badge) {
+                @if (p.soldOut) {
+                  <span class="product-badge product-badge--soldout">Sold out</span>
+                } @else if (p.badge) {
                   <span class="product-badge">{{ p.badge }}</span>
                 }
               </div>
@@ -178,12 +180,12 @@
                 <span class="product-qty-unit" aria-hidden="true">units</span>
               </div>
 
-              <button type="button" class="btn btn-primary product-add" (click)="addToCart(p, $event)" [class.is-added]="cart.addedId() === p.id" [attr.aria-label]="cart.addedId() === p.id ? p.title + ' added to cart' : 'Add ' + p.title + ' to cart'">
+              <button type="button" class="btn btn-primary product-add" (click)="addToCart(p, $event)" [disabled]="p.soldOut" [class.is-added]="cart.addedId() === p.id" [attr.aria-label]="p.soldOut ? p.title + ' is sold out' : cart.addedId() === p.id ? p.title + ' added to cart' : 'Add ' + p.title + ' to cart'">
                 <span class="product-add-icons" aria-hidden="true">
                   <svg class="product-add-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                   <svg class="product-add-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
                 </span>
-                <span>{{ cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
+                <span>{{ p.soldOut ? 'Sold out' : cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
               </button>
             </div>
           </article>
@@ -212,8 +214,18 @@
         <span class="no-results-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </span>
-        <strong>Nothing matches that</strong>
-        <p>No listing carries that name. Most orders are sourced to request, so <a routerLink="/quote">tell us what you need</a> and we will price it.</p>
+        <strong>
+          @if (products().length) { Nothing matches that }
+          @else if (catalogueLoading()) { Loading listings }
+          @else if (catalogueError()) { Listings unavailable }
+          @else { No products yet }
+        </strong>
+        <p>
+          @if (products().length) { No listing carries that name. Most orders are sourced to request, so <a routerLink="/quote">tell us what you need</a> and we will price it. }
+          @else if (catalogueLoading()) { The live catalog is loading. }
+          @else if (catalogueError()) { {{ catalogueError() }} }
+          @else { New listings will appear here once they are added in the admin catalog. }
+        </p>
       </div>
 
       <!-- The sourcing request, which used to be a sentence in the hero. It
@@ -263,7 +275,7 @@
         <section class="mk-set" id="mkSetCat">
           <h3 class="mk-set-head">Category</h3>
           <div class="mk-rows" role="group" aria-label="Filter by category">
-            @for (c of categories; track c.id) {
+            @for (c of categories(); track c.id) {
               <button type="button" class="mk-row" [class.on]="filter() === c.id" [attr.aria-pressed]="filter() === c.id" (click)="setFilter(c.id)">
                 <span>{{ c.label }}</span>
                 <span class="mk-row-n">{{ count(c.id) }}</span>

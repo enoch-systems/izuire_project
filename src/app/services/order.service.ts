@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { CartLine } from './cart.service';
-import { fromKobo, toKobo } from './money';
+import { fromKobo } from './money';
 import { SupabaseService } from './supabase.service';
 import type { Transaction, TxStatus } from './auth.service';
 
@@ -30,8 +30,14 @@ export interface OrderRow {
 
 /** What `placeOrder` needs to write an order from a built basket. */
 export interface PlaceOrderInput {
-  lines: CartLine[];
-  method: string;
+  lines: Pick<CartLine, 'id' | 'qty'>[];
+}
+
+export interface PlacedOrder {
+  id: string;
+  number: string;
+  subtotalKobo: number;
+  lines: { title: string; qty: number; unitPriceKobo: number }[];
 }
 
 const DAY = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -101,71 +107,38 @@ export class OrderService {
       this.rows.set((data as Record<string, unknown>[]).map((r) => this.mapRow(r)));
       this.synced.set(true);
     } catch {
-      // Table unmigrated / offline: the page falls back to its bundled history.
+      // Keep the last successful result if the backend is temporarily unavailable.
     }
   }
 
-  /**
-   * Write a basket as an order. The order starts `pending`; `pay()` flips it to
-   * `successful`. Prices go to integer kobo here so nothing is lost to a float.
-   */
-  async placeOrder(input: PlaceOrderInput): Promise<string> {
-    const { data: session } = await this.backend.supabase.auth.getSession();
-    const uid = session.session?.user?.id;
-    if (!uid) throw new Error('Sign in to place an order.');
-    const lines = input.lines;
-    if (lines.length === 0) throw new Error('Your cart is empty.');
-
-    const subtotalKobo = lines.reduce((sum, line) => sum + line.qty * toKobo(line.unitPrice), 0);
-    const number = this.nextNumber();
-    const title = lines.length === 1 ? lines[0].title : `${lines[0].title} + ${lines.length - 1} more`;
-    const items = lines.map((line) => `${line.qty} x ${line.title}`).join(' - ');
-
-    const { data, error } = await this.backend.supabase
-      .from('orders')
-      .insert({
-        user_id: uid,
-        number,
-        title,
-        items_summary: items,
-        subtotal_kobo: subtotalKobo,
-        currency: 'NGN',
-        status: 'pending',
-        method: input.method,
-      })
-      .select('id')
-      .single();
+  /** The database validates current product prices and writes atomically. */
+  async placeOrder(input: PlaceOrderInput): Promise<PlacedOrder> {
+    if (input.lines.length === 0) throw new Error('Your cart is empty.');
+    const { data, error } = await this.backend.supabase.rpc('place_whatsapp_order', {
+      p_lines: input.lines.map((line) => ({ id: line.id, qty: line.qty })),
+    });
     if (error || !data) throw new Error(error?.message ?? 'Could not place the order.');
-
-    const orderId = String((data as Record<string, unknown>)['id']);
-    await this.backend.supabase.from('order_lines').insert(
-      lines.map((line) => ({
-        order_id: orderId,
-        product_id: line.id,
-        title: line.title,
-        qty: line.qty,
-        unit_price_kobo: toKobo(line.unitPrice),
-        snapshot: { unit: line.unit, image: line.image ?? null, badge: line.badge ?? null },
+    const result = (Array.isArray(data) ? data[0] : data) as {
+      order_id?: string;
+      order_number?: string;
+      subtotal_kobo?: number;
+    } | null;
+    if (!result?.order_id || !result.order_number) throw new Error('The order was not confirmed by the database.');
+    const { data: lines } = await this.backend.supabase
+      .from('order_lines')
+      .select('title,qty,unit_price_kobo')
+      .eq('order_id', result.order_id);
+    await this.refresh();
+    return {
+      id: result.order_id,
+      number: result.order_number,
+      subtotalKobo: Number(result.subtotal_kobo ?? 0),
+      lines: (lines ?? []).map((line) => ({
+        title: String(line['title'] ?? ''),
+        qty: Number(line['qty'] ?? 0),
+        unitPriceKobo: Number(line['unit_price_kobo'] ?? 0),
       })),
-    );
-    await this.refresh();
-    return orderId;
-  }
-
-  /**
-   * Mark an order paid. The seam a real gateway callback would sit behind: with
-   * no live payment keys yet, checkout calls it directly and the row flips to
-   * `successful` with a reference, exactly as a callback would leave it.
-   */
-  async pay(orderId: string, method: string): Promise<string> {
-    const reference = `PSTK_${Math.random().toString(36).slice(2, 10)}`;
-    const { error } = await this.backend.supabase
-      .from('orders')
-      .update({ status: 'successful', method, reference })
-      .eq('id', orderId);
-    if (error) throw new Error(error.message);
-    await this.refresh();
-    return reference;
+    };
   }
 
   private mapRow(r: Record<string, unknown>): OrderRow {
@@ -189,11 +162,5 @@ export class OrderService {
     const date = new Date(iso);
     if (Number.isNaN(date.getTime())) return '';
     return `${DAY.format(date)} - ${TIME.format(date)}`;
-  }
-
-  private nextNumber(): string {
-    const year = new Date().getFullYear();
-    const tail = Math.floor(1000 + Math.random() * 9000);
-    return `IZU-${year}-${tail}`;
   }
 }

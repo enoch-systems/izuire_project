@@ -82,6 +82,22 @@
       </div>
     </div>
 
+    <section class="footer-newsletter" aria-labelledby="newsletterHeading">
+      <div>
+        <h2 id="newsletterHeading">Get Izuire sourcing notes</h2>
+        <p>Product finds and practical updates from China-to-Africa sourcing.</p>
+      </div>
+      <form class="newsletter-form" (submit)="subscribe($event)">
+        <label class="sr-only" for="newsletterEmail">Email address</label>
+        <input id="newsletterEmail" type="email" maxlength="254" autocomplete="email" placeholder="Email address" required [value]="newsletterEmail()" (input)="newsletterEmail.set($any($event.target).value)" />
+        <button type="submit" [disabled]="newsletterBusy()">{{ newsletterBusy() ? 'Saving…' : 'Sign up' }}</button>
+        <label class="consent"><input type="checkbox" [checked]="newsletterConsent()" (change)="newsletterConsent.set($any($event.target).checked)" /> I agree to receive Izuire email updates.</label>
+        @if (newsletterMessage()) {
+          <p class="newsletter-status" [class.is-error]="newsletterError()" role="status">{{ newsletterMessage() }}</p>
+        }
+      </form>
+    </section>
+
     <div class="footer-bottom">
       <span class="footer-copy">&copy; {{ year }} <strong>Izuire Co. Ltd.</strong> All rights reserved.</span>
       <!-- Terms and Privacy read in a modal rather than routing away: they are

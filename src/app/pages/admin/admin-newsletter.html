@@ -1,0 +1,42 @@
+<button type="button" class="backbtn" (click)="goBack()" aria-label="Back to dashboard">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+  Back
+</button>
+<span class="kicker">Audience</span>
+<h1>Newsletter sign-ups</h1>
+<p class="lede">People who opted in to Izuire sourcing notes.</p>
+
+<div class="toolbar">
+  <input type="search" aria-label="Filter newsletter sign-ups by email" placeholder="Filter by email" [value]="filter()" (input)="onFilter($any($event.target).value)" />
+  <div class="toolbar-actions">
+    <span class="count">{{ total() }} subscribers</span>
+    <button type="button" class="compose" [disabled]="selectedIds().length === 0" (click)="emailSelected()">Email selected ({{ selectedIds().length }})</button>
+  </div>
+</div>
+
+@if (loading()) {
+  <p class="empty">Loading sign-ups…</p>
+} @else if (error()) {
+  <p class="empty" role="alert">{{ error() }}</p>
+} @else if (signups().length === 0) {
+  <div class="empty-state">
+    <span class="empty-mark" aria-hidden="true">@</span>
+    <h2>No sign-ups yet</h2>
+    <p>Newsletter addresses appear here after a visitor opts in from the storefront footer.</p>
+    <button type="button" class="compose" (click)="openSignupForm()">View signup form</button>
+  </div>
+} @else {
+  <div aria-live="polite">
+    @for (signup of signups(); track signup.id) {
+      <article class="row">
+        <label class="signup-select"><input type="checkbox" [checked]="isSelected(signup.id)" (change)="toggleSignup(signup.id, $any($event.target).checked)" /><a class="email" [href]="'mailto:' + signup.email">{{ signup.email }}</a></label>
+        <time class="date" [attr.datetime]="signup.created_at">Joined {{ signup.created_at | date: 'MMM d, y, HH:mm':'+0000' }} UTC</time>
+      </article>
+    }
+  </div>
+  <nav class="pager" aria-label="Newsletter pages">
+    <button type="button" (click)="changePage(-1)" [disabled]="page() === 0">Previous</button>
+    <span>Page {{ page() + 1 }} of {{ maxPage() }}</span>
+    <button type="button" (click)="changePage(1)" [disabled]="page() + 1 >= maxPage()">Next</button>
+  </nav>
+}

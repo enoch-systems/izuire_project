@@ -1,0 +1,70 @@
+<div class="shell">
+  <div class="topbar">
+    <button
+      type="button"
+      class="burger"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="adminNav"
+      aria-label="Admin menu"
+    >
+      <span></span><span></span><span></span>
+    </button>
+    <span class="topmark">Izuire · Console</span>
+  </div>
+
+  <aside id="adminNav" [class.open]="menuOpen()">
+    <span class="mark">Izuire · Console</span>
+
+    <nav>
+      <a
+        routerLink="/admin"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeMenu()"
+        >Dashboard</a
+      >
+      <a routerLink="/admin/products" routerLinkActive="active" (click)="closeMenu()">Catalog</a>
+        <a routerLink="/admin/users" routerLinkActive="active" (click)="closeMenu()">Users</a>
+        <a routerLink="/admin/email-follow-up" routerLinkActive="active" (click)="closeMenu()">Email follow-up</a>
+        <a routerLink="/admin/email-drafts" routerLinkActive="active" (click)="closeMenu()">Email drafts</a>
+        <a routerLink="/admin/newsletter-signups" routerLinkActive="active" (click)="closeMenu()">Newsletter sign-ups</a>
+    </nav>
+
+    <div class="theme-row">
+      <span>Appearance</span>
+      <app-theme-toggle />
+    </div>
+
+    <div class="who">
+      <strong>{{ admin.session()?.email }}</strong>
+      <span>Signed in to the console</span>
+      <div class="actions">
+        <button type="button" (click)="openPreview()">View storefront</button>
+        <button type="button" (click)="signOut()">Sign out</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="backdrop" [class.show]="menuOpen()" (click)="closeMenu()"></div>
+
+  <main>
+    <router-outlet />
+  </main>
+
+  @if (previewOpen()) {
+    <div class="preview" role="dialog" aria-modal="true" aria-label="Storefront preview">
+      <div class="preview-bg" (click)="closePreview()"></div>
+      <div class="preview-box">
+        <div class="preview-head">
+          <div>
+            <strong>Storefront preview</strong>
+            <span>You are still in the admin console</span>
+          </div>
+          <button type="button" (click)="closePreview()">Close</button>
+        </div>
+        <iframe src="/" title="Storefront preview"></iframe>
+      </div>
+    </div>
+  }
+</div>

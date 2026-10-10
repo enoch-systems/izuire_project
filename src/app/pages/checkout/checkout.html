@@ -8,7 +8,7 @@
           <span class="cart-head-count">{{ cart.count() }} <span class="cart-head-count-unit">units</span></span>
         }
       </div>
-      <p>Confirm your basket and pay. Freight, insurance and import duty are quoted once your goods are consolidated.</p>
+      <p>Review your items and send your order request. Freight, insurance and import duty are quoted separately.</p>
     </div>
   </section>
 
@@ -22,7 +22,7 @@
             <div class="cart-empty-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/></svg>
             </div>
-            <h2>Nothing to pay for yet</h2>
+            <h2>Your cart is empty</h2>
             <p>Your cart is empty. Build a basket in the marketplace, then come back to check out.</p>
             <div class="cart-empty-actions">
               <a routerLink="/marketplace" class="btn btn-primary">Browse the marketplace</a>
@@ -54,17 +54,8 @@
 
             <aside class="cart-summary">
               <div class="cart-summary-head">
-                <h2>Payment</h2>
+                <h2>Order details</h2>
                 <span class="cart-summary-items">{{ cart.items().length }} {{ cart.items().length === 1 ? 'item' : 'items' }}</span>
-              </div>
-
-              <div class="co-methods" role="radiogroup" aria-label="Payment method">
-                @for (m of methods; track m.id) {
-                  <button type="button" class="co-method" role="radio" [attr.aria-checked]="method() === m.id" [class.active]="method() === m.id" (click)="setMethod(m.id)">
-                    <strong>{{ m.label }}</strong>
-                    <span>{{ m.hint }}</span>
-                  </button>
-                }
               </div>
 
               <div class="cart-summary-rows">
@@ -81,14 +72,11 @@
               @if (error()) { <p role="alert" class="cart-summary-fine">{{ error() }}</p> }
 
               <button type="button" class="btn btn-primary cart-summary-cta" (click)="placeOrder()" [disabled]="busy()">
-                {{ busy() ? 'Placing your order…' : 'Place order & pay' }}
+                {{ busy() ? 'Saving your order…' : 'Send order on WhatsApp' }}
               </button>
               <a routerLink="/cart" class="cart-summary-more">Back to cart</a>
 
-              <ul class="cart-summary-trust">
-                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Secure checkout</li>
-                <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Verified suppliers</li>
-              </ul>
+              <p class="cart-summary-fine">Your order is saved before WhatsApp opens.</p>
             </aside>
           </div>
         }

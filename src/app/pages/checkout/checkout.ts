@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { AccountGate } from '../../components/account-gate/account-gate';
 import { AccountNav } from '../../components/account-nav/account-nav';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
@@ -8,28 +7,17 @@ import { CartService, naira } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 
 /**
- * /checkout - the step between the basket and the payment history.
+ * /checkout - saves a trusted order, then hands the customer to WhatsApp.
  *
  * Gated by AccountGate like the rest of the signed-in side: an order is written
- * against a user_id, so there has to be a user to write it against. On "Place
- * order" it writes the order, marks it paid (see OrderService.pay for why that
- * is local for now), empties the cart and lands on the Payments page, where the
- * new row appears and updates live.
+ * against a user_id. The database validates availability and current prices;
+ * WhatsApp opens only after the pending order has been saved.
  */
 @Component({
   selector: 'app-checkout',
   imports: [AccountGate, AccountNav, Breadcrumb],
   templateUrl: './checkout.html',
   styles: [`
-    .co-methods { display: grid; gap: 8px; margin: 4px 0 18px; }
-    .co-method {
-      display: flex; flex-direction: column; gap: 2px; text-align: left;
-      padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px;
-      background: var(--white); color: inherit; cursor: pointer;
-    }
-    .co-method strong { font-size: .95rem; }
-    .co-method span { font-size: .76rem; color: var(--ink-60); }
-    .co-method.active { border-color: var(--orange); box-shadow: inset 0 0 0 1px var(--orange); }
     .co-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
     .co-line { display: flex; justify-content: space-between; gap: 12px; font-size: .9rem; }
     .co-line span { color: var(--ink-60); }
@@ -39,32 +27,36 @@ export class Checkout {
   protected readonly auth = inject(AuthService);
   protected readonly cart = inject(CartService);
   private readonly orders = inject(OrderService);
-  private readonly router = inject(Router);
   protected readonly money = naira;
-
-  /** The payment methods on offer. Both settle the same way for now. */
-  protected readonly methods = [
-    { id: 'Paystack', label: 'Card / Paystack', hint: 'Pay online now' },
-    { id: 'Bank transfer', label: 'Bank transfer', hint: 'We send the account details' },
-  ];
-  protected readonly method = signal(this.methods[0].id);
   protected readonly busy = signal(false);
   protected readonly error = signal('');
 
-  protected setMethod(id: string): void {
-    this.method.set(id);
-  }
-
-  /** Write the order, settle it, empty the cart, show the history. */
+  /** Save a pending order, then send its canonical details to the business. */
   protected async placeOrder(): Promise<void> {
     this.error.set('');
     if (this.cart.isEmpty()) return;
     this.busy.set(true);
     try {
-      const orderId = await this.orders.placeOrder({ lines: this.cart.items(), method: this.method() });
-      await this.orders.pay(orderId, this.method());
+      const cartLines = this.cart.items();
+      const order = await this.orders.placeOrder({
+        lines: this.cart.items().map(({ id, qty }) => ({ id, qty })),
+      });
+      const user = this.auth.user();
+      const lines = order.lines.length
+        ? order.lines.map((line) => `- ${line.qty} x ${line.title}`).join('\n')
+        : cartLines.map((line) => `- ${line.qty} x ${line.title}`).join('\n');
+      const message = [
+        'Hello Izuire, I would like to confirm this order.',
+        `Order: ${order.number}`,
+        user?.name ? `Name: ${user.name}` : '',
+        user?.email ? `Email: ${user.email}` : '',
+        user?.phone ? `Phone: ${user.phone}` : '',
+        'Items:',
+        lines,
+        `Goods subtotal: ${this.money(order.subtotalKobo / 100)} (freight quoted separately)`,
+      ].filter(Boolean).join('\n');
       this.cart.clear();
-      await this.router.navigate(['/account/payments']);
+      globalThis.location.assign(`https://wa.me/2349162919586?text=${encodeURIComponent(message)}`);
     } catch (e) {
       this.error.set(e instanceof Error ? e.message : 'Could not complete the order.');
     } finally {

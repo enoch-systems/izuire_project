@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { FEATURED, Product, PRODUCTS } from '../pages/marketplace/marketplace-data';
+import { Product } from '../pages/marketplace/marketplace-data';
 import { SupabaseService } from './supabase.service';
 import { fromKobo, toKobo } from './money';
 
@@ -23,6 +23,8 @@ export interface DbProduct extends Product {
   featured: boolean;
   featuredRank: number;
   sortRank: number;
+  /** True while sold out: visible in the shop with a pill, cart button disabled. */
+  soldOut: boolean;
 }
 
 /** One customer review of a product. */
@@ -44,28 +46,28 @@ export const FEATURED_LIMIT = 5;
 const grouped = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 
 /**
- * Products backend. Reads the public `products` table (realtime-subscribed,
- * so price/featured edits land without a reload) and falls back to the
- * bundled PRODUCTS catalogue when the table is unreachable or unmigrated —
- * the home + marketplace never render empty.
+ * Products backend. The database is the sole catalogue source; an empty or
+ * unreachable database stays empty rather than presenting stale sample rows.
  */
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   private readonly backend = inject(SupabaseService);
   private readonly rows = signal<DbProduct[] | null>(null);
+  readonly loading = signal(true);
+  readonly error = signal<string | null>(null);
 
   /** True once Supabase has answered with rows — i.e. the catalogue is live. */
   readonly live = computed(() => this.rows() !== null);
 
-  /** The whole catalogue: Supabase rows when available, the bundled list otherwise. */
-  readonly all = computed<Product[]>(() => this.rows() ?? PRODUCTS);
+  /** The whole catalogue, or an empty list until Supabase returns rows. */
+  readonly all = computed<Product[]>(() => this.rows() ?? []);
 
   /** The four-to-five on show under "Featured products" and atop the marketplace. */
   readonly featured = computed<Product[]>(() => {
     const rows = this.rows();
-    if (!rows) return FEATURED;
+    if (!rows) return [];
     const picked = rows.filter((r) => r.featured).sort((a, b) => a.featuredRank - b.featuredRank);
-    return (picked.length > 0 ? picked : rows).slice(0, FEATURED_LIMIT);
+    return picked.slice(0, FEATURED_LIMIT);
   });
 
   constructor() {
@@ -165,18 +167,25 @@ export class ProductService {
   }
 
   private async load(): Promise<void> {
+    this.loading.set(true);
+    this.error.set(null);
     try {
       const { data, error } = await this.backend.supabase
         .from('products')
         .select('*')
         .eq('active', true)
         .order('sort_rank', { ascending: true });
-      if (error || !data) return;
+      if (error || !data) {
+        this.error.set(error?.message ?? 'Could not load products.');
+        return;
+      }
       this.rows.set(
         (data as Record<string, unknown>[]).map((r) => this.mapRow(r)),
       );
     } catch {
-      // Table unmigrated / offline — callers use the bundled catalogue.
+      this.error.set('Could not reach the product catalog. Check your connection and try again.');
+    } finally {
+      this.loading.set(false);
     }
   }
 
@@ -196,10 +205,12 @@ export class ProductService {
       rmb: (r['rmb'] as string) || '',
       unit: String(r['unit'] ?? '/ unit'),
       specs: String(r['specs'] ?? ''),
+      description: String(r['description'] ?? ''),
       moq: String(r['moq'] ?? ''),
       unitPrice: naira,
       minQty: Number(r['min_qty'] ?? 1) || 1,
       image,
+      videos: Array.isArray(r['videos']) ? (r['videos'] as { src: string; duration?: number }[]) : [],
       priceKobo: kobo,
       gallery,
       ratingValue: Number(r['rating'] ?? 4.5) || 4.5,
@@ -207,6 +218,8 @@ export class ProductService {
       featured: Boolean(r['featured']),
       featuredRank: Number(r['featured_rank'] ?? 0) || 0,
       sortRank: Number(r['sort_rank'] ?? 0) || 0,
+      // Rows written before the sold_out migration carry no column — read as available.
+      soldOut: Boolean((r as Record<string, unknown>)['sold_out'] ?? false),
     };
   }
 

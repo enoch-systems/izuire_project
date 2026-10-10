@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { filter } from 'rxjs';
@@ -20,6 +20,15 @@ import { MediaMuteService } from './services/media-mute.service';
   templateUrl: './app.html',
 })
 export class App {
+  /** The URL as it stands, so the chrome can stand down inside the admin. */
+  private readonly url = signal('/');
+
+  /** True anywhere under /admin — the console is its own application, so the
+   *  storefront header, rate ticker, footer and shopper overlays are all held
+   *  back there. Without this the console renders inside the shop's nav, which
+   *  is what made it read as a stray customer page. */
+  protected readonly isAdmin = computed(() => this.url().startsWith('/admin'));
+
   constructor() {
     const router = inject(Router);
     const meta = inject(Meta);
@@ -34,6 +43,7 @@ export class App {
     router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe(() => {
+        this.url.set(router.url);
         let route: ActivatedRoute | null = router.routerState.root;
         while (route.firstChild) route = route.firstChild;
         const desc = route.snapshot.data['desc'];

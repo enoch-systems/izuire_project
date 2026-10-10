@@ -40,16 +40,8 @@ export class Payments {
   protected readonly fx = inject(DisplayCurrencyService);
   protected readonly money = (value: number): string => this.fx.price(value);
 
-  /**
-   * The history this page reads. Real orders whenever the account has them (or
-   * the backend is live and simply has none yet), otherwise the bundled demo
-   * list - so a visitor previewing the page is not shown an empty shell, and a
-   * signed-in buyer only ever sees their own rows.
-   */
-  protected readonly list = computed(() => {
-    const live = this.orders.transactions();
-    return live.length > 0 || this.orders.ready() ? live : this.auth.transactions();
-  });
+  /** Payment history comes only from the signed-in account's database rows. */
+  protected readonly list = this.orders.transactions;
 
   protected readonly tab = signal<Tab>('all');
   protected readonly tabs: { id: Tab; label: string }[] = [

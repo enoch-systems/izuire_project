@@ -1,0 +1,86 @@
+<button type="button" class="backbtn" (click)="goBack()" aria-label="Back to dashboard">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+  Back
+</button>
+<div class="page-head">
+  <div class="page-title">
+    <span class="kicker">Outreach</span>
+    <h1>Email follow-up</h1>
+    <p class="lede">Choose your audience, personalize the message, and preview the email before sending.</p>
+  </div>
+  <a class="draft-link" routerLink="/admin/email-drafts">Open saved drafts</a>
+</div>
+
+<div class="compose-bar">
+  <span class="count">{{ selectedRecipients().length }} recipients selected</span>
+  <div class="actions">
+    <button type="button" class="action" [disabled]="saving() || sending() || uploading()" (click)="saveDraft()">{{ saving() ? 'Saving…' : 'Save as Draft' }}</button>
+    <button type="button" class="action action--primary" [disabled]="saving() || sending() || uploading()" (click)="sendMail()">{{ sending() ? 'Sending…' : 'Send Mail' }}</button>
+  </div>
+</div>
+@if (error()) { <p class="status" role="alert">{{ error() }}</p> }
+@if (status()) { <p class="status" role="status">{{ status() }}</p> }
+
+<div class="layout">
+  <section class="recipients" aria-labelledby="recipientsHeading">
+    <div class="section-head"><h2 id="recipientsHeading">Recipients</h2><button type="button" class="draft-link" [disabled]="loading() || filtered().length === 0" (click)="selectVisibleRecipients()">{{ allVisibleSelected() ? 'Clear visible' : 'Select visible' }}</button></div>
+    <p class="count recipient-count">{{ selectedRecipients().length }} selected · {{ recipients().length }} registered users</p>
+    <input type="search" aria-label="Search recipients" placeholder="Search name or email" [value]="search()" (input)="search.set($any($event.target).value)" />
+    @if (loading()) {
+      <p class="empty">Loading registered users…</p>
+    } @else if (error()) {
+      <p class="empty" role="alert">{{ error() }}</p>
+    } @else if (filtered().length === 0) {
+      <p class="empty">No matching users.</p>
+    } @else {
+      <div class="recipient-list">
+        @for (recipient of filtered(); track recipient.user_id) {
+          <label class="recipient">
+            <input type="checkbox" [checked]="isSelected(recipient.user_id)" (change)="toggleRecipient(recipient, $any($event.target).checked)" />
+            <span><strong>{{ recipient.name || 'New customer' }}</strong><small>{{ recipient.email }}</small></span>
+          </label>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="composer" aria-labelledby="composerHeading">
+    <div class="section-head"><h2 id="composerHeading">Compose</h2><span class="count">{{ images().length }} / 10 images</span></div>
+    <div class="template-row">
+      <label for="emailTemplate">Start with</label>
+      <select id="emailTemplate" [value]="selectedTemplate()" (change)="applyTemplate($any($event.target).value)">
+        <option value="check-in">Sourcing check-in</option>
+        <option value="quote">Quote follow-up</option>
+        <option value="welcome">Welcome email</option>
+      </select>
+    </div>
+    <div class="field"><label for="followupSubject">Subject</label><input id="followupSubject" type="text" [value]="subject()" (input)="subject.set($any($event.target).value)" /></div>
+    <div class="field">
+      <label for="followupBody">Message</label>
+      <textarea id="followupBody" placeholder="Write your email message here…" [value]="body()" (input)="body.set($any($event.target).value)"></textarea>
+    </div>
+    <p class="editor-hint">Links become clickable automatically. Add up to 10 images below.</p>
+    <label class="upload" for="emailImageInput">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v5h14v-5" /></svg>
+      {{ uploading() ? 'Uploading…' : 'Add image' }}
+    </label>
+    <input id="emailImageInput" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif" [disabled]="uploading()" (change)="uploadImage($event)" />
+
+    @if (images().length) {
+      <div class="images" aria-label="Email images">
+        @for (image of images(); track image.path) {
+          <div class="image">
+            <a [href]="image.url" target="_blank" rel="noopener noreferrer"><img [src]="image.url" [alt]="image.name" /><span>IMG {{ image.name }}</span></a>
+            <button type="button" [attr.aria-label]="'Remove ' + image.name" (click)="removeImage(image)">×</button>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="field">
+      <label>Email preview</label>
+      <div class="email-preview" [innerHTML]="previewHtml()"></div>
+      @if (!body().trim() && images().length === 0) { <p class="preview-empty">Your email preview will appear here as you write.</p> }
+    </div>
+  </section>
+</div>

@@ -60,62 +60,73 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## Supabase backend
 
-The app runs entirely on Supabase: auth, catalogue, orders, reviews and the
-per-user settings. Nothing sensitive is committed — the anon key is public, and
-the service_role key lives only in the git-ignored `.env`.
+The app uses Supabase for Auth, products, orders, reviews and user settings. The
+Angular environment files are compiled into the app; `.env` is used by local
+CLI/seed scripts and is not read by Angular. Only the public anon key belongs in
+the frontend. Keep `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env` only.
+
+Product photos and videos upload directly to Cloudinary through the unsigned
+`izuire_catalog_unsigned_v1` preset. Its name is public; the Cloudinary API
+secret is never used by frontend code. Product media URLs are stored on product
+rows. Account avatars stay in the private Supabase `avatars` bucket.
 
 ### One-time setup
 
-1. Fill in `.env` (copy `.env.example`). At minimum set the real values for
+1. Set these values in the git-ignored `.env`:
    `NG_SUPABASE_URL`, `NG_SUPABASE_ANON_KEY`, `NG_ADMIN_EMAIL`,
    `NG_ADMIN_PASSWORD` and `SUPABASE_SERVICE_ROLE_KEY`.
-2. Push the schema. The Supabase CLI needs either a personal access token
-   (`supabase login`) **or** the database password:
+   The Angular client config is maintained in `src/environments/environment.ts`
+   and `environment.prod.ts`; changing `.env` alone does not alter an Angular
+   build. Only public values go in those files.
+2. Link and push migrations with the project-local Supabase CLI:
 
    ```bash
-   npm run db:link -- --password "<db-password>"   # or: export SUPABASE_ACCESS_TOKEN=sbp_...
-   npm run db:push                                 # tables, RLS, triggers, seed rows, realtime
+   npm exec supabase -- login
+   npm run db:link
+   npm run db:status
+   npm run db:push
    ```
 
-   Without a login you can push straight over a connection string:
-
-   ```bash
-   supabase db push --db-url "postgresql://postgres:<db-password>@db.pzjhjauzjljtigpgexdr.supabase.co:5432/postgres"
-   ```
-3. Create the admin and register the admin email:
+3. Create the admin Auth account and register it in `public.app_admins`:
 
    ```bash
    npm run db:seed
    ```
 
-   That creates the admin auth user from `NG_ADMIN_EMAIL` / `NG_ADMIN_PASSWORD`
-   (if missing) and adds the email to `public.app_admins`. Only emails in that
-   table (or `NG_ADMIN_EMAIL`) can open `/admin`; every other signed-in user is
-   bounced home.
+   The script creates or updates the Auth user using `NG_ADMIN_EMAIL` /
+   `NG_ADMIN_PASSWORD`, then adds it to `public.app_admins`. RLS requires the
+   email to be in that table for admin database access. The catalog intentionally
+   starts empty; add the first listing from `/admin/products`.
 
 ### What is wired to the database
 
 | Surface | Source of truth |
 | --- | --- |
-| Home featured rail, Marketplace grid, Search | `public.products` (realtime) |
-| Product page gallery / thumbnails | `products.image` + `products.gallery` |
+| Home, Marketplace, Search | `public.products` only (realtime; no bundled product fallback) |
+| Product page media | Cloudinary URLs in `products.image`, `products.gallery`, and `products.videos` |
 | Product rating + reviews | `public.reviews` (realtime), rating kept by a trigger |
 | Payments / transaction history | `public.orders` for the signed-in `auth.uid()` (realtime) |
-| Checkout (`/checkout`) | writes `orders` + `order_lines`, then settles the order |
-| Profile, addresses, avatar | `public.profiles` + the private `avatars` bucket |
+| Checkout (`/checkout`) | calls `public.place_order`; Postgres validates current catalog prices and atomically writes pending `orders` + `order_lines` |
+| Registration and profile | `auth.users` + `public.profiles`; a database trigger creates each profile |
+| Profile avatar | `public.profiles` + the private `avatars` bucket |
 | Display currency | `public.user_settings` |
 
-Prices settle in **integer kobo** (`products.price_kobo`), so a price typed in
-cents is exact — display divides by 100 only for the reading.
+Order prices come only from `products.price_kobo` inside the database RPC; the
+browser submits product IDs and quantities, never authoritative prices. Amounts
+remain integer kobo, with display divided by 100 only for the reading.
 
 Realtime requires the tables to be in the `supabase_realtime` publication; the
 `20251003000007_izuire_realtime` migration adds `products`, `orders` and
 `reviews` so the rails and histories move without a reload.
 
+`20261007000000_izuire_fresh_catalog.sql` adds product videos, creates profiles
+for new Auth users, and removes the historical starter listings so a clean
+migration reset does not populate demo products.
+
 ### Payment note
 
-`OrderService.pay()` is the seam a gateway callback (Paystack, etc.) would sit
-behind. With no live payment keys configured it marks the order `successful`
-with a reference locally, so the checkout and history are fully exercised. Drop
-a real callback in there and nothing else has to change.
+Checkout creates a `pending` order request only. It does not collect payment or
+mark an order successful. Customer clients cannot insert orders directly or
+change order status; enable payment only after adding a trusted payment-provider
+verification callback.
 

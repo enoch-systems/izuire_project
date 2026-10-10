@@ -16,7 +16,10 @@ import { AccountProfile } from './pages/account/profile/profile';
 import { Payments } from './pages/account/payments/payments';
 import { AccountSettings } from './pages/account/settings/settings';
 import { AccountPassword } from './pages/account/password/password';
-import { Admin } from './pages/admin/admin';
+import { AdminLogin } from './pages/admin/admin-login';
+import { AdminShell } from './pages/admin/admin-shell';
+import { AdminDashboard } from './pages/admin/admin-dashboard';
+import { AdminProducts } from './pages/admin/admin-products';
 import { Checkout } from './pages/checkout/checkout';
 import { AdminGuard } from './services/admin.guard';
 import { trail } from './components/breadcrumb/breadcrumb';
@@ -200,13 +203,55 @@ export const routes: Routes = [
       crumb: trail({ label: 'Checkout' }),
     },
   },
-  { path: '**', redirectTo: '' },
-  /* /admin — catalogue manager. AdminGuard admits NG_ADMIN_EMAIL only. */
+  /* ── Admin console ───────────────────────────────────────────────────────
+     A separate application rather than another page of the shop: its own sign-in,
+     its own session, its own chrome. `/admin/login` sits outside the shell so
+     the signed-out view has no sidebar to render.
+
+     THE CATCH-ALL MUST STAY LAST. It used to sit here, above the admin block,
+     which made /admin unreachable — `**` matched first and redirected home, so
+     the admin route below it was dead code. Angular matches routes in
+     declaration order, so nothing may be added after this line. */
+  {
+    path: 'admin/login',
+    component: AdminLogin,
+    title: 'Admin Sign In | Izuire',
+    data: { desc: 'Staff sign in to the Izuire admin console.' },
+  },
   {
     path: 'admin',
-    component: Admin,
+    component: AdminShell,
     canActivate: [AdminGuard],
-    title: 'Admin, Catalogue Manager | Izuire',
-    data: { desc: 'Admin catalogue manager: prices, featured products and visibility.' },
+    canActivateChild: [AdminGuard],
+    children: [
+      { path: '', component: AdminDashboard, title: 'Admin Dashboard | Izuire' },
+      {
+        path: 'products',
+        component: AdminProducts,
+        title: 'Admin, Catalogue Manager | Izuire',
+        data: { desc: 'Admin catalogue manager: prices, featured products and visibility.' },
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./pages/admin/admin-users').then((page) => page.AdminUsers),
+        title: 'Admin, Users | Izuire',
+      },
+      {
+        path: 'email-follow-up',
+        loadComponent: () => import('./pages/admin/admin-email-followup').then((page) => page.AdminEmailFollowup),
+        title: 'Admin, Email Follow-up | Izuire',
+      },
+      {
+        path: 'email-drafts',
+        loadComponent: () => import('./pages/admin/admin-email-drafts').then((page) => page.AdminEmailDrafts),
+        title: 'Admin, Email Drafts | Izuire',
+      },
+      {
+        path: 'newsletter-signups',
+        loadComponent: () => import('./pages/admin/admin-newsletter').then((page) => page.AdminNewsletter),
+        title: 'Admin, Newsletter Sign-ups | Izuire',
+      },
+    ],
   },
+  { path: '**', redirectTo: '' },
 ];
