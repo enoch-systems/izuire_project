@@ -2,51 +2,83 @@
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
   Back
 </button>
-<span class="kicker">People</span>
-<h1>Users</h1>
-<p class="lede">Registered customer and administrator accounts.</p>
-
-<div class="toolbar">
-  <input type="search" aria-label="Filter users by email" placeholder="Filter by email" [value]="filter()" (input)="onFilter($any($event.target).value)" />
-  <span class="total">{{ total() }} registered users</span>
-</div>
-
-@if (loading()) {
-  <p class="empty">Loading users…</p>
-} @else if (error()) {
-  <p class="empty" role="alert">{{ error() }}</p>
-} @else if (users().length === 0) {
-  <p class="empty">No users match this filter.</p>
-} @else {
-  <div class="rows" aria-live="polite">
-    @for (user of users(); track user.user_id) {
-      <article class="row">
-        <div class="identity"><strong>{{ user.name || 'New customer' }}</strong><span>{{ user.email }}</span></div>
-        <time class="date" [attr.datetime]="user.created_at">Registered {{ user.created_at | date: 'MMM d, y, HH:mm':'+0000' }} UTC</time>
-        <button type="button" class="view" (click)="selected.set(user)">View</button>
-      </article>
-    }
+<header class="page-head">
+  <div class="heading-copy">
+    <span class="kicker">People / Accounts</span>
+    <h1>Users</h1>
+    <p class="lede">Customer and administrator accounts.</p>
   </div>
-  <nav class="pager" aria-label="User pages">
-    <button type="button" (click)="changePage(-1)" [disabled]="page() === 0">Previous</button>
-    <span>Page {{ page() + 1 }} of {{ maxPage() }}</span>
-    <button type="button" (click)="changePage(1)" [disabled]="page() + 1 >= maxPage()">Next</button>
-  </nav>
-}
+  <div class="count-mark" aria-label="Registered users">
+    <strong>{{ total() }}</strong>
+    <span>registered</span>
+  </div>
+</header>
+
+<section class="directory" aria-label="User directory">
+  <div class="toolbar">
+    <label class="searchbox">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 4.5 4.5" /></svg>
+      <input type="search" aria-label="Filter users by email" placeholder="Search by email" [value]="filter()" (input)="onFilter($any($event.target).value)" />
+    </label>
+    <span class="total">Newest registrations first</span>
+  </div>
+
+  @if (loading()) {
+    <p class="empty">Loading users…</p>
+  } @else if (error()) {
+    <p class="empty" role="alert">{{ error() }}</p>
+  } @else if (users().length === 0) {
+    <p class="empty">No users match this filter.</p>
+  } @else {
+    <div class="column-head" aria-hidden="true">
+      <span>Member</span><span>Tier</span><span>Registered</span><span></span>
+    </div>
+    <div class="rows" aria-live="polite">
+      @for (user of users(); track user.user_id) {
+        <article class="row">
+          <div class="identity">
+            <img class="avatar" [src]="defaultUserImage" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <div class="identity-copy"><strong>{{ user.name || 'New customer' }}</strong><span>{{ user.email }}</span></div>
+          </div>
+          <div class="row-meta">
+            <span class="tier">{{ user.member_tier || 'Standard' }}</span>
+            <time class="date" [attr.datetime]="user.created_at">{{ user.created_at | date: 'EEE, MMM d, y':'+0100' }}</time>
+          </div>
+          <button type="button" class="view" (click)="openDetails(user)" aria-label="View {{ user.name || user.email }} profile" title="View profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+          </button>
+        </article>
+      }
+    </div>
+    <nav class="pager" aria-label="User pages">
+      <span class="page-status">Page {{ page() + 1 }} of {{ maxPage() }}</span>
+      <button type="button" (click)="changePage(-1)" [disabled]="page() === 0" aria-label="Previous page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+      </button>
+      <button type="button" (click)="changePage(1)" [disabled]="page() + 1 >= maxPage()" aria-label="Next page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+      </button>
+    </nav>
+  }
+</section>
 
 @if (selected(); as user) {
-  <div class="scrim" (click)="closeDetails()" aria-hidden="true"></div>
-  <aside class="drawer admin-user-drawer" role="dialog" aria-modal="true" aria-labelledby="userDetailsTitle">
+  <div class="scrim" [class.closing]="closing()" (click)="closeDetails()" aria-hidden="true"></div>
+  <aside class="drawer admin-user-drawer" [class.closing]="closing()" role="dialog" aria-modal="true" aria-labelledby="userDetailsTitle">
     <div class="drawer-head">
       <span class="drawer-kicker">USER PROFILE</span>
       <button type="button" class="close" (click)="closeDetails()" aria-label="Close user details">×</button>
     </div>
     <section class="profile-summary">
-      <span class="profile-avatar" aria-hidden="true">{{ userInitials(user.name || user.email) }}</span>
+      <img class="profile-avatar" [src]="defaultUserImage" alt="" aria-hidden="true" />
       <h2 id="userDetailsTitle">{{ user.name || 'New customer' }}</h2>
       <span class="tier">{{ user.member_tier || 'Standard' }}</span>
       <a class="profile-email" [href]="'mailto:' + user.email">{{ user.email }}</a>
-      <time class="joined" [attr.datetime]="user.created_at">Joined {{ user.created_at | date: 'MMM d, y':'+0000' }}</time>
+      <time class="joined" [attr.datetime]="user.created_at">
+        <span>Joined</span>
+        <br />
+        <span>{{ user.created_at | date: 'EEEE, MMM d, y, h:mm a':'+0100' }}</span>
+      </time>
     </section>
 
     <section class="detail-section" aria-labelledby="contactDetailsTitle">

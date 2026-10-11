@@ -51,25 +51,556 @@ const EMAIL_TEMPLATES: Record<FollowupTemplate, { subject: string; body: string 
   selector: 'app-admin-email-followup',
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './admin-email-followup.html',
-  styles: [`
-    :host{display:block;font-family:var(--font-b)}
-    .kicker{font-family:var(--font-d);font-size:.7rem;font-weight:600;text-transform:uppercase;color:var(--orange-deep)}
-    h1{margin:8px 0 6px;font-family:var(--font-d);font-size:28px}.lede{margin:0 0 22px;color:var(--ink-60);font-size:.9rem}
-    .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:20px}.page-title{min-width:0}.page-links{display:flex;gap:14px;flex-wrap:wrap}
-    .layout{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr);gap:18px;align-items:start}
-    .recipients,.composer{min-width:0;padding:18px;border:1px solid var(--line);border-radius:8px;background:var(--white)}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-    h2{margin:0;font-family:var(--font-d);font-size:16px}.count{color:var(--ink-60);font-size:.8rem;white-space:nowrap}
-    input[type=search],input[type=text],textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:5px;background:var(--white);color:var(--ink);font:inherit}input:focus,textarea:focus,select:focus{outline:2px solid rgba(245,130,31,.28);border-color:var(--orange)}
-    input[type=search]{margin-bottom:12px}.recipient-list{max-height:470px;overflow:auto}
-    .recipient{display:flex;align-items:center;gap:10px;padding:11px 3px;border-bottom:1px solid var(--line);cursor:pointer}.recipient input{width:17px;height:17px;accent-color:var(--orange);flex:none}
-    .recipient strong,.recipient small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.recipient strong{font-size:.84rem}.recipient small{margin-top:3px;color:var(--ink-60);font-size:.76rem}
-    .empty,.status{padding:16px 0;color:var(--ink-60);font-size:.85rem}.field{display:grid;gap:6px}.field label{font-size:.8rem;font-weight:600}.field textarea{min-height:210px;resize:vertical;line-height:1.5}.template-row{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:12px;margin:0 0 14px}.template-row label{font-size:.8rem;font-weight:600}.template-row select{padding:9px 11px}
-    .upload{display:inline-flex;align-items:center;gap:8px;width:max-content;padding:8px 10px;border:1px solid var(--line);border-radius:5px;background:var(--white);color:var(--ink);font-size:.82rem;font-weight:600;cursor:pointer}.upload svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-    .images{display:flex;flex-wrap:wrap;gap:10px}.image{position:relative;width:104px;border:1px solid var(--line);border-radius:5px;overflow:hidden;background:var(--paper)}.image img{display:block;width:100%;height:76px;object-fit:cover}.image span{display:block;padding:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.68rem}.image button{position:absolute;top:4px;right:4px;border:0;border-radius:50%;background:rgba(0,0,0,.7);color:white;cursor:pointer}
-    .email-preview{min-height:160px;padding:0;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink);line-height:1.6;overflow:auto}.email-preview img{max-width:100%;height:auto}.email-preview a{color:var(--orange-deep);text-decoration:underline}.preview-empty{margin:0;padding:22px;color:var(--ink-60);font-size:.82rem}
-    .editor-hint{margin:-7px 0 12px;color:var(--ink-60);font-size:.76rem}.compose-bar{position:sticky;top:12px;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 16px;padding:10px 12px;border:1px solid var(--line);background:var(--white)}.actions{display:flex;flex-wrap:wrap;gap:9px}.action{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 13px;border:1px solid var(--line);border-radius:5px;background:var(--white);color:var(--ink);font-family:var(--font-d);font-weight:700;cursor:pointer;text-decoration:none}.action--primary{border-color:var(--orange);background:var(--orange);color:var(--white)}.action:disabled{opacity:.45;cursor:default}.status{margin:0}.draft-link{color:var(--ink-60);font-size:.8rem}
-    @media(max-width:760px){.page-head{align-items:flex-start;flex-direction:column;gap:12px}.layout{grid-template-columns:1fr;gap:14px}.recipient-list{max-height:300px}.compose-bar{top:8px;align-items:flex-start;flex-direction:column}.page-links{gap:10px}}
-  `],
+  styles: [
+    `
+      :host {
+        display: block;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 0 32px;
+        color: var(--ink);
+        font-family: var(--font-b);
+      }
+      .kicker {
+        font-family: var(--font-d);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--orange-deep);
+      }
+      h1 {
+        margin: 8px06px;
+        font-family: var(--font-d);
+        font-size: clamp(1.7rem, 3vw, 2.4rem);
+        line-height: 1.15;
+      }
+      .lede {
+        margin: 0018px;
+        color: var(--ink-60);
+        font-size: 0.93rem;
+        line-height: 1.6;
+      }
+      .page-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+      .page-title {
+        min-width: 0;
+        width: 100%;
+      }
+      .email-workspace-nav {
+        display: flex;
+        gap: 8px;
+        margin: 0 0 18px;
+        padding: 4px;
+        border: 1pxsolidvar (--line);
+        border-radius: 999px;
+        background: var(--paper);
+      }
+      .email-workspace-nava {
+        flex: 10auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: max-content;
+        padding: 9px14px;
+        border-radius: 999px;
+        color: var(--ink-70);
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .email-workspace-nava.active {
+        background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+        color: var(--white);
+      }
+      .compose-bar {
+        position: sticky;
+        top: 12px;
+        z-index: 8;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        margin: 0018px;
+        padding: 12px14px;
+        border: 1pxsolidvar (--line);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.9);
+      }
+      .compose-bar.count {
+        font-size: 0.82rem;
+        color: var(--ink-70);
+        white-space: nowrap;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        justify-content: flex-end;
+      }
+      .action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 016px;
+        border: 1pxsolidvar (--line);
+        border-radius: 10px;
+        background: var(--white);
+        color: var(--ink);
+        font-family: var(--font-d);
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .action--primary {
+        border-color: var(--orange);
+        background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+        color: var(--white);
+      }
+      .action:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(290px, 0.82fr) minmax(0, 1.18fr);
+        gap: 18px;
+        align-items: start;
+      }
+      .recipients,
+      .composer {
+        min-width: 0;
+        padding: 18px;
+        border: 1pxsolidvar (--line);
+        border-radius: 18px;
+        background: var(--white);
+      }
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .section-headh2 {
+        margin: 0;
+        font-family: var(--font-d);
+        font-size: 1rem;
+        text-align: left;
+      }
+      .count {
+        color: var(--ink-60);
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+      .recipient-count {
+        margin: 0012px;
+        text-align: left;
+      }
+      input[type='search'],
+      input[type='text'],
+      textarea,
+      select {
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--white);
+        color: var(--ink);
+        font: inherit;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      input[type='search'] {
+        margin-bottom: 12px;
+      }
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--orange);
+        box-shadow: 0 0 0 4px rgba(245, 130, 31, 0.14);
+      }
+      .recipient-list {
+        max-height: 440px;
+        overflow: auto;
+        padding-right: 4px;
+      }
+      .recipient {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--white);
+        margin-bottom: 8px;
+        cursor: pointer;
+        text-align: left;
+      }
+      .recipient:last-child {
+        margin-bottom: 0;
+      }
+      .recipient input {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--orange);
+        flex: none;
+        margin-top: 3px;
+      }
+      .recipient-copy {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        gap: 3px;
+      }
+      .recipient-name,
+      .recipient-email {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .recipient-name {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .recipient-email {
+        margin: 0;
+        color: var(--ink-60);
+        font-size: 0.76rem;
+      }
+      .empty,
+      .status {
+        padding: 16px0;
+        color: var(--ink-60);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        text-align: left;
+      }
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+      .fieldlabel,
+      .template-rowlabel {
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+      .fieldtextarea {
+        min-height: 220px;
+        resize: vertical;
+        line-height: 1.5;
+      }
+      .template-row {
+        display: grid;
+        grid-template-columns: autominmax(0, 1fr);
+        align-items: center;
+        gap: 12px;
+        margin: 0014px;
+      }
+      .template-rowselect {
+        padding: 9px11px;
+      }
+      .upload {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: max-content;
+        max-width: 100%;
+        padding: 9px12px;
+        border: 1pxsolidvar (--line);
+        border-radius: 10px;
+        background: var(--white);
+        color: var(--ink);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .uploadsvg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .images {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .image {
+        position: relative;
+        width: 110px;
+        border: 1pxsolidvar (--line);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--paper);
+      }
+      .imageimg {
+        display: block;
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+      }
+      .imagespan {
+        display: block;
+        padding: 5px7px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.68rem;
+        color: var(--ink-70);
+      }
+      .imagebutton {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.7);
+        color: var(--white);
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+      }
+      .email-preview {
+        min-height: 160px;
+        padding: 0;
+        border: 1pxsolidvar (--line);
+        border-radius: 10px;
+        background: var(--paper);
+        color: var(--ink);
+        line-height: 1.6;
+        overflow: auto;
+      }
+      .email-previewimg {
+        max-width: 100%;
+        height: auto;
+      }
+      .email-previewa {
+        color: var(--orange-deep);
+        text-decoration: underline;
+      }
+      .preview-empty {
+        margin: 0;
+        padding: 20px;
+        color: var(--ink-60);
+        font-size: 0.82rem;
+        text-align: left;
+      }
+      .editor-hint {
+        margin: -4px012px;
+        color: var(--ink-60);
+        font-size: 0.76rem;
+        line-height: 1.5;
+        text-align: left;
+      }
+      .status {
+        margin: 0;
+      }
+      .manual-selected {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1pxsolidvar (--line);
+        text-align: left;
+      }
+      .manual-selected-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 8px;
+        padding: 8px10px;
+        border: 1pxsolidvar (--line);
+        border-radius: 10px;
+        background: var(--paper);
+        font-size: 0.82rem;
+      }
+      .manual-selected-value {
+        display: block;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 600;
+        text-align: left;
+      }
+      .manual-tool {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1pxsolidvar (--line);
+      }
+      .manual-toolh3 {
+        margin: 0012px;
+        font-family: var(--font-d);
+        font-size: 1rem;
+        text-align: left;
+      }
+      .manual-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .manual-check-status {
+        margin: 10px012px;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: var(--ink-60);
+        text-align: left;
+      }
+      .send-progress {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1pxsolidvar (--line);
+        border-radius: 12px;
+        background: var(--paper);
+      }
+      .send-progress-summary,
+      .send-progress-counts {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 0.78rem;
+        color: var(--ink-70);
+      }
+      .send-progress-summary {
+        margin-bottom: 8px;
+      }
+      .send-progress-track {
+        position: relative;
+        width: 100%;
+        height: 8px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+      }
+      .send-progress-trackspan {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--orange), var(--orange-deep));
+      }
+      .send-progress-counts {
+        margin-top: 8px;
+      }
+      .send-current {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 10px00;
+        color: var(--ink-70);
+        font-size: 0.78rem;
+      }
+      .send-pulse {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--orange);
+        box-shadow: 0000rgba (245, 130, 31, 0.5);
+        animation: pulse1.6sinfinite;
+      }
+      @keyframespulse {
+        0% {
+          box-shadow: 0000rgba (245, 130, 31, 0.45);
+        }
+        70% {
+          box-shadow: 0008pxrgba (245, 130, 31, 0);
+        }
+        100% {
+          box-shadow: 0000rgba (245, 130, 31, 0);
+        }
+      }
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+          gap: 14px;
+        }
+        .compose-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .actions {
+          justify-content: stretch;
+        }
+        .actions.action {
+          flex: 110;
+        }
+      }
+      @media (max-width: 640px) {
+        :host {
+          padding-bottom: 22px;
+        }
+        .page-head {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .email-workspace-nav {
+          margin-bottom: 14px;
+          border-radius: 999px;
+        }
+        .email-workspace-nava {
+          padding: 9px12px;
+          font-size: 0.75rem;
+        }
+        .compose-bar {
+          top: 8px;
+          padding: 12px;
+          border-radius: 16px;
+        }
+        .compose-bar.count {
+          white-space: normal;
+        }
+        .actions {
+          display: grid;
+          grid-template-columns: 1fr;
+          width: 100%;
+        }
+        .recipients,
+        .composer {
+          padding: 12px 10px;
+          border-radius: 16px;
+        }
+        .manual-fields,
+        .template-row {
+          grid-template-columns: 1fr;
+        }
+        .recipient-list {
+          max-height: 300px;
+        }
+        .fieldtextarea {
+          min-height: 180px;
+        }
+        .recipient {
+          padding: 11px 10px;
+        }
+        .recipient-name {
+          font-size: 0.82rem;
+        }
+        .recipient-email {
+          font-size: 0.72rem;
+        }
+      }
+    `,
+  ],
 })
 export class AdminEmailFollowup {
   private readonly admin = inject(AdminAuthService);
@@ -78,7 +609,9 @@ export class AdminEmailFollowup {
   private readonly sanitizer = inject(DomSanitizer);
   protected readonly recipients = signal<Recipient[]>([]);
   protected readonly selectedRecipients = signal<Recipient[]>([]);
-  protected readonly manualSelectedRecipients = computed(() => this.selectedRecipients().filter((recipient) => recipient.manual));
+  protected readonly manualSelectedRecipients = computed(() =>
+    this.selectedRecipients().filter((recipient) => recipient.manual),
+  );
   protected readonly search = signal('');
   protected readonly manualEmail = signal('');
   protected readonly manualName = signal('');
@@ -92,7 +625,6 @@ export class AdminEmailFollowup {
   protected readonly images = signal<EmailImage[]>([]);
   protected readonly loading = signal(true);
   protected readonly uploading = signal(false);
-  protected readonly saving = signal(false);
   protected readonly sending = signal(false);
   protected readonly sendProgress = signal<SendProgress | null>(null);
   protected readonly sendFailures = signal<SendFailure[]>([]);
@@ -102,27 +634,30 @@ export class AdminEmailFollowup {
   });
   protected readonly error = signal('');
   protected readonly status = signal('');
-  protected readonly draftId = signal<string | null>(null);
   private readonly previewName = computed(() => {
     const recipient = this.selectedRecipients()[0];
     return recipient ? (recipient.name === 'Newsletter subscriber' ? '' : recipient.name) : 'Amina';
   });
-  protected readonly previewHtml = computed(() => this.sanitizer.bypassSecurityTrustHtml(
-    renderEmailHtml(
-      this.personalize(this.body(), this.previewName()),
-      this.images(),
-      this.personalize(this.subject(), this.previewName()),
+  protected readonly previewHtml = computed(() =>
+    this.sanitizer.bypassSecurityTrustHtml(
+      renderEmailHtml(
+        this.personalize(this.body(), this.previewName()),
+        this.images(),
+        this.personalize(this.subject(), this.previewName()),
+      ),
     ),
-  ));
+  );
   protected readonly filtered = computed(() => {
     const search = this.search().trim().toLowerCase();
-    return this.recipients().filter((recipient) =>
-      !search || recipient.email.toLowerCase().includes(search) || recipient.name.toLowerCase().includes(search),
+    return this.recipients().filter(
+      (recipient) =>
+        !search ||
+        recipient.email.toLowerCase().includes(search) ||
+        recipient.name.toLowerCase().includes(search),
     );
   });
 
   constructor() {
-    const draftId = this.route.snapshot.queryParamMap.get('draft');
     const audience = this.route.snapshot.queryParamMap.get('audience');
     const signupIds = this.route.snapshot.queryParamMap.get('signupIds');
     if (audience === 'newsletter' && signupIds) {
@@ -131,7 +666,6 @@ export class AdminEmailFollowup {
     } else {
       void this.load();
     }
-    if (draftId) void this.loadDraft(draftId);
   }
 
   protected goBack(): void {
@@ -143,23 +677,31 @@ export class AdminEmailFollowup {
   }
 
   protected toggleRecipient(recipient: Recipient, checked: boolean): void {
-    this.selectedRecipients.update((selected) => checked
-      ? [...selected.filter((item) => item.user_id !== recipient.user_id), recipient]
-      : selected.filter((item) => item.user_id !== recipient.user_id));
+    this.selectedRecipients.update((selected) =>
+      checked
+        ? [...selected.filter((item) => item.user_id !== recipient.user_id), recipient]
+        : selected.filter((item) => item.user_id !== recipient.user_id),
+    );
     this.status.set('');
   }
 
   protected selectVisibleRecipients(): void {
     const visible = this.filtered();
     const visibleIds = new Set(visible.map((recipient) => recipient.user_id));
-    const allSelected = visible.length > 0 && visible.every((recipient) => this.isSelected(recipient.user_id));
-    this.selectedRecipients.update((selected) => allSelected
-      ? selected.filter((recipient) => !visibleIds.has(recipient.user_id))
-      : [...selected, ...visible.filter((recipient) => !this.isSelected(recipient.user_id))]);
+    const allSelected =
+      visible.length > 0 && visible.every((recipient) => this.isSelected(recipient.user_id));
+    this.selectedRecipients.update((selected) =>
+      allSelected
+        ? selected.filter((recipient) => !visibleIds.has(recipient.user_id))
+        : [...selected, ...visible.filter((recipient) => !this.isSelected(recipient.user_id))],
+    );
   }
 
   protected allVisibleSelected(): boolean {
-    return this.filtered().length > 0 && this.filtered().every((recipient) => this.isSelected(recipient.user_id));
+    return (
+      this.filtered().length > 0 &&
+      this.filtered().every((recipient) => this.isSelected(recipient.user_id))
+    );
   }
 
   protected applyTemplate(value: FollowupTemplate): void {
@@ -209,11 +751,15 @@ export class AdminEmailFollowup {
     this.manualEmailState.set('checking');
     this.manualEmailMessage.set('Checking the email domain…');
     try {
-      const { data, error } = await this.admin.supabase.functions.invoke('check-email-recipient', { body: { email } });
+      const { data, error } = await this.admin.supabase.functions.invoke('check-email-recipient', {
+        body: { email },
+      });
       if (error) {
         let message = error.message;
         if ('context' in error && error.context instanceof Response) {
-          const response = await error.context.json().catch(() => null) as { error?: string } | null;
+          const response = (await error.context.json().catch(() => null)) as {
+            error?: string;
+          } | null;
           message = response?.error ?? message;
         }
         throw new Error(message);
@@ -221,12 +767,16 @@ export class AdminEmailFollowup {
       if (this.manualEmail().trim().toLowerCase() !== email) return;
       this.checkedManualEmail.set(email);
       this.manualEmailState.set('valid');
-      this.manualEmailMessage.set('Valid address format and mail-enabled domain. The specific inbox is not confirmed.');
+      this.manualEmailMessage.set(
+        'Valid address format and mail-enabled domain. The specific inbox is not confirmed.',
+      );
     } catch (error) {
       if (this.manualEmail().trim().toLowerCase() !== email) return;
       this.checkedManualEmail.set('');
       this.manualEmailState.set('invalid');
-      this.manualEmailMessage.set(error instanceof Error ? error.message : 'Could not check this email domain.');
+      this.manualEmailMessage.set(
+        error instanceof Error ? error.message : 'Could not check this email domain.',
+      );
     } finally {
       this.checkingEmail.set(false);
     }
@@ -244,12 +794,15 @@ export class AdminEmailFollowup {
       this.error.set('Send to no more than 50 recipients at a time.');
       return;
     }
-    this.selectedRecipients.update((selected) => [...selected, {
-      user_id: `manual:${email}`,
-      email,
-      name,
-      manual: true,
-    }]);
+    this.selectedRecipients.update((selected) => [
+      ...selected,
+      {
+        user_id: `manual:${email}`,
+        email,
+        name,
+        manual: true,
+      },
+    ]);
     this.manualEmail.set('');
     this.manualName.set('');
     this.checkedManualEmail.set('');
@@ -260,7 +813,9 @@ export class AdminEmailFollowup {
   }
 
   protected removeManualRecipient(recipient: Recipient): void {
-    this.selectedRecipients.update((selected) => selected.filter((item) => item.email !== recipient.email));
+    this.selectedRecipients.update((selected) =>
+      selected.filter((item) => item.email !== recipient.email),
+    );
   }
 
   protected async uploadImage(event: Event): Promise<void> {
@@ -272,7 +827,10 @@ export class AdminEmailFollowup {
       this.error.set('Add no more than 10 images to one email.');
       return;
     }
-    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+    if (
+      !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type) ||
+      file.size > 5 * 1024 * 1024
+    ) {
       this.error.set('Choose a JPG, PNG, WebP, or GIF image up to 5 MB.');
       return;
     }
@@ -281,10 +839,12 @@ export class AdminEmailFollowup {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-100) || 'image';
     const path = `${crypto.randomUUID()}-${safeName}`;
     try {
-      const { error } = await this.admin.supabase.storage.from('admin-email-assets').upload(path, file, {
-        contentType: file.type,
-        upsert: false,
-      });
+      const { error } = await this.admin.supabase.storage
+        .from('admin-email-assets')
+        .upload(path, file, {
+          contentType: file.type,
+          upsert: false,
+        });
       if (error) throw error;
       const { data } = this.admin.supabase.storage.from('admin-email-assets').getPublicUrl(path);
       this.images.update((images) => [...images, { name: file.name, path, url: data.publicUrl }]);
@@ -296,39 +856,14 @@ export class AdminEmailFollowup {
   }
 
   protected async removeImage(image: EmailImage): Promise<void> {
-    const { error } = await this.admin.supabase.storage.from('admin-email-assets').remove([image.path]);
+    const { error } = await this.admin.supabase.storage
+      .from('admin-email-assets')
+      .remove([image.path]);
     if (error) {
       this.error.set('Could not remove the uploaded image.');
       return;
     }
     this.images.update((items) => items.filter((item) => item.path !== image.path));
-  }
-
-  protected async saveDraft(): Promise<void> {
-    if (!this.validContent()) return;
-    this.saving.set(true);
-    this.status.set('');
-    this.error.set('');
-    const payload = {
-      subject: this.subject().trim(),
-      body: this.body(),
-      recipients: this.selectedRecipients(),
-      images: this.images(),
-      updated_at: new Date().toISOString(),
-    };
-    try {
-      const draftId = this.draftId();
-      const result = draftId
-        ? await this.admin.supabase.from('email_followup_drafts').update(payload).eq('id', draftId).select('id').single()
-        : await this.admin.supabase.from('email_followup_drafts').insert(payload).select('id').single();
-      if (result.error) throw result.error;
-      this.draftId.set(result.data.id);
-      this.status.set('Draft saved.');
-    } catch {
-      this.error.set('Could not save this draft. Check the email drafts migration and admin access.');
-    } finally {
-      this.saving.set(false);
-    }
   }
 
   protected async sendMail(): Promise<void> {
@@ -345,12 +880,16 @@ export class AdminEmailFollowup {
     this.sendProgress.set({ total, processed: 0, sent, failed, current: recipients[0].email });
     try {
       for (const [index, recipient] of recipients.entries()) {
-        this.sendProgress.update((progress) => progress ? { ...progress, current: recipient.email } : progress);
+        this.sendProgress.update((progress) =>
+          progress ? { ...progress, current: recipient.email } : progress,
+        );
         let failure: SendFailure | null = null;
         try {
           const { data, error } = await this.admin.supabase.functions.invoke('send-admin-email', {
             body: {
-              recipients: [{ email: recipient.email, name: recipient.name, manual: recipient.manual === true }],
+              recipients: [
+                { email: recipient.email, name: recipient.name, manual: recipient.manual === true },
+              ],
               subject: this.subject(),
               body: this.body(),
               emailType: this.selectedTemplate(),
@@ -360,7 +899,9 @@ export class AdminEmailFollowup {
           if (error) {
             let message = error.message;
             if ('context' in error && error.context instanceof Response) {
-              const response = await error.context.json().catch(() => null) as { error?: string } | null;
+              const response = (await error.context.json().catch(() => null)) as {
+                error?: string;
+              } | null;
               message = response?.error ?? message;
             }
             throw new Error(message);
@@ -393,21 +934,11 @@ export class AdminEmailFollowup {
       }
 
       this.selectedRecipients.set(failedRecipients);
-      const draftId = this.draftId();
-      if (draftId) {
-        if (failedRecipients.length) {
-          await this.admin.supabase.from('email_followup_drafts').update({
-            recipients: failedRecipients,
-            updated_at: new Date().toISOString(),
-          }).eq('id', draftId);
-        } else {
-          await this.admin.supabase.from('email_followup_drafts').delete().eq('id', draftId);
-          this.draftId.set(null);
-        }
-      }
-      this.status.set(failed
-        ? `${sent} of ${total} delivered. ${failed} failed or unconfirmed; confirmed failures remain selected for retry.`
-        : `All ${sent} emails sent successfully.`);
+      this.status.set(
+        failed
+          ? `${sent} of ${total} delivered. ${failed} failed or unconfirmed; confirmed failures remain selected for retry.`
+          : `All ${sent} emails sent successfully.`,
+      );
     } finally {
       this.sending.set(false);
     }
@@ -450,23 +981,6 @@ export class AdminEmailFollowup {
     return true;
   }
 
-  private async loadDraft(id: string): Promise<void> {
-    const { data, error } = await this.admin.supabase
-      .from('email_followup_drafts')
-      .select('id,subject,body,recipients,images')
-      .eq('id', id)
-      .maybeSingle();
-    if (error || !data) {
-      this.error.set('Could not open this draft.');
-      return;
-    }
-    this.draftId.set(data.id);
-    this.subject.set(data.subject);
-    this.body.set(data.body);
-    this.selectedRecipients.set((data.recipients ?? []) as Recipient[]);
-    this.images.set((data.images ?? []) as EmailImage[]);
-  }
-
   private async loadNewsletterRecipients(ids: string[]): Promise<void> {
     const signupIds = [...new Set(ids)].filter((id) => /^[0-9a-f-]{36}$/i.test(id)).slice(0, 50);
     if (!signupIds.length) return;
@@ -499,7 +1013,9 @@ export class AdminEmailFollowup {
       if (error) throw error;
       this.recipients.set((data ?? []) as Recipient[]);
     } catch {
-      this.error.set('Could not load registered users. Check the admin profile policy and try again.');
+      this.error.set(
+        'Could not load registered users. Check the admin profile policy and try again.',
+      );
     } finally {
       this.loading.set(false);
     }

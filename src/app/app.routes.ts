@@ -245,11 +245,6 @@ export const routes: Routes = [
         title: 'Admin, Email Follow-up | Izuire',
       },
       {
-        path: 'email-drafts',
-        loadComponent: () => import('./pages/admin/admin-email-drafts').then((page) => page.AdminEmailDrafts),
-        title: 'Admin, Email Drafts | Izuire',
-      },
-      {
         path: 'email-history',
         loadComponent: () => import('./pages/admin/admin-email-history').then((page) => page.AdminEmailHistory),
         title: 'Admin, Email History | Izuire',

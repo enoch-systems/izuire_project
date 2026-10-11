@@ -55,6 +55,7 @@ interface ActivitySeries {
 
 const USERS_PER_PAGE = 20;
 const ORDERS_PER_PAGE = 20;
+let dashboardChannelSequence = 0;
 
 /**
  * /admin — the console landing page.
@@ -233,10 +234,11 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
   private activityChart?: Chart<'line', number[], string>;
   private tierChart?: Chart<'doughnut', number[], string>;
   private chartViewReady = false;
+  private realtimeChannel: ReturnType<AdminAuthService['supabase']['channel']> | null = null;
 
   constructor() {
-    this.admin.supabase
-      .channel('admin-registrations')
+    this.realtimeChannel = this.admin.supabase
+      .channel(`admin-registrations-${++dashboardChannelSequence}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
         if (payload.eventType === 'INSERT') this.usersPage.set(0);
         void this.loadUsersPage();
@@ -261,6 +263,7 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.activityChart?.destroy();
     this.tierChart?.destroy();
+    if (this.realtimeChannel) void this.admin.supabase.removeChannel(this.realtimeChannel);
   }
 
   private async load(): Promise<void> {

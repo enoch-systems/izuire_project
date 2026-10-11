@@ -286,7 +286,7 @@ export class AdminShell {
   protected readonly signingOut = signal(false);
 
   protected isEmailWorkspace(): boolean {
-    return ['/admin/email-follow-up', '/admin/email-drafts', '/admin/email-history']
+    return ['/admin/email-follow-up', '/admin/email-history']
       .some((path) => this.router.url.startsWith(path));
   }
 

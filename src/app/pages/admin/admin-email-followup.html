@@ -11,15 +11,18 @@
 </div>
 <nav class="email-workspace-nav" aria-label="Email workspace">
   <a routerLink="/admin/email-follow-up" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Compose</a>
-  <a routerLink="/admin/email-drafts" routerLinkActive="active">Drafts</a>
   <a routerLink="/admin/email-history" routerLinkActive="active">History</a>
 </nav>
 
 <div class="compose-bar">
-  <span class="count">{{ selectedRecipients().length }} recipients selected</span>
-  <div class="actions">
-    <button type="button" class="action" [disabled]="saving() || sending() || uploading()" (click)="saveDraft()">{{ saving() ? 'Saving…' : 'Save as Draft' }}</button>
-    <button type="button" class="action action--primary" [disabled]="saving() || sending() || uploading() || selectedRecipients().length === 0" (click)="sendMail()">{{ sending() ? 'Sending…' : 'Send Mail' }}</button>
+  <div class="manual-tool manual-tool--topbar">
+    <h3>Add another recipient</h3>
+    <div class="manual-fields">
+      <div class="field"><label for="manualRecipientEmail">Recipient email</label><input id="manualRecipientEmail" type="email" autocomplete="email" placeholder="name@example.com" [value]="manualEmail()" [disabled]="checkingEmail()" (input)="onManualEmailChange($any($event.target).value)" (blur)="checkManualEmail()" /></div>
+      <div class="field"><label for="manualRecipientName">Recipient name <span aria-hidden="true">*</span></label><input id="manualRecipientName" type="text" autocomplete="given-name" placeholder="First name" required [value]="manualName()" (input)="manualName.set($any($event.target).value)" /></div>
+    </div>
+    @if (manualEmailMessage()) { <p class="manual-check-status" [class.manual-check-status--valid]="manualEmailState() === 'valid'" [class.manual-check-status--invalid]="manualEmailState() === 'invalid'" role="status">{{ manualEmailMessage() }}</p> }
+    <button type="button" class="action action--primary" [disabled]="checkingEmail() || !manualName().trim() || manualName().trim().length > 160 || manualEmailState() !== 'valid' || checkedManualEmail() !== manualEmail().trim().toLowerCase()" (click)="addManualRecipient()">{{ checkingEmail() ? 'Checking…' : 'Add recipient' }}</button>
   </div>
   @if (sendProgress(); as progress) {
     <div class="send-progress" aria-live="polite">
@@ -43,7 +46,7 @@
 
 <div class="layout">
   <section class="recipients" aria-labelledby="recipientsHeading">
-    <div class="section-head"><h2 id="recipientsHeading">Recipients</h2><button type="button" class="draft-link" [disabled]="loading() || filtered().length === 0" (click)="selectVisibleRecipients()">{{ allVisibleSelected() ? 'Clear visible' : 'Select visible' }}</button></div>
+    <div class="section-head"><h2 id="recipientsHeading">Recipients</h2><button type="button" class="draft-link" [disabled]="loading() || filtered().length === 0" (click)="selectVisibleRecipients()">{{ allVisibleSelected() ? 'Deselect multiple' : 'Select multiple' }}</button></div>
     <p class="count recipient-count">{{ selectedRecipients().length }} selected · {{ recipients().length }} registered users</p>
     <input type="search" aria-label="Search recipients" placeholder="Search name or email" [value]="search()" (input)="search.set($any($event.target).value)" />
     @if (loading()) {
@@ -57,30 +60,27 @@
         @for (recipient of filtered(); track recipient.user_id) {
           <label class="recipient">
             <input type="checkbox" [checked]="isSelected(recipient.user_id)" (change)="toggleRecipient(recipient, $any($event.target).checked)" />
-            <span><strong>{{ recipient.name || 'New customer' }}</strong><small>{{ recipient.email }}</small></span>
+            <span class="recipient-copy">
+              <strong class="recipient-name">{{ recipient.name || 'New customer' }}</strong>
+              <small class="recipient-email">{{ recipient.email }}</small>
+            </span>
           </label>
         }
       </div>
     }
     @if (manualSelectedRecipients().length) {
       <div class="manual-selected" aria-label="Added recipients">
-        <span class="count">Added recipients</span>
+        <span class="count manual-selected-label">Added recipients</span>
         @for (recipient of manualSelectedRecipients(); track recipient.email) {
           <div class="manual-selected-row">
-            <span>{{ recipient.name || recipient.email }}</span>
+            <span class="manual-selected-value">{{ recipient.name || recipient.email }}</span>
             <button type="button" [attr.aria-label]="'Remove ' + recipient.email" (click)="removeManualRecipient(recipient)">×</button>
           </div>
         }
       </div>
     }
-    <div class="manual-tool">
-      <h3>Add another recipient</h3>
-      <div class="manual-fields">
-        <div class="field"><label for="manualRecipientEmail">Recipient email</label><input id="manualRecipientEmail" type="email" autocomplete="email" placeholder="name@example.com" [value]="manualEmail()" [disabled]="checkingEmail()" (input)="onManualEmailChange($any($event.target).value)" (blur)="checkManualEmail()" /></div>
-        <div class="field"><label for="manualRecipientName">Recipient name <span aria-hidden="true">*</span></label><input id="manualRecipientName" type="text" autocomplete="given-name" placeholder="First name" required [value]="manualName()" (input)="manualName.set($any($event.target).value)" /></div>
-      </div>
-      @if (manualEmailMessage()) { <p class="manual-check-status" [class.manual-check-status--valid]="manualEmailState() === 'valid'" [class.manual-check-status--invalid]="manualEmailState() === 'invalid'" role="status">{{ manualEmailMessage() }}</p> }
-      <button type="button" class="action action--primary" [disabled]="checkingEmail() || !manualName().trim() || manualName().trim().length > 160 || manualEmailState() !== 'valid' || checkedManualEmail() !== manualEmail().trim().toLowerCase()" (click)="addManualRecipient()">{{ checkingEmail() ? 'Checking…' : 'Add recipient' }}</button>
+    <div class="manual-send-action">
+      <button type="button" class="action action--primary" [disabled]="sending() || uploading() || selectedRecipients().length === 0" (click)="sendMail()">{{ sending() ? 'Sending…' : 'Send Mail' }}</button>
     </div>
   </section>
 

@@ -41,7 +41,7 @@ export class App {
     // Keep the meta description in sync with the active page, like the
     // per-page <meta name="description"> tags in the original site.
     router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
+      .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
         this.url.set(router.url);
         let route: ActivatedRoute | null = router.routerState.root;
