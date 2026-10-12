@@ -36,7 +36,7 @@
               <a class="search-rec" [routerLink]="['/product', p.id]" (click)="close()">
                 <span class="search-rec-media" [class.is-photo]="p.image">
                   @if (p.image; as img) {
-                    <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                    <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="eager" decoding="async">
                   } @else {
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
                       @switch (p.icon) {
@@ -52,14 +52,11 @@
                       }
                     </svg>
                   }
+                  @if (p.soldOut) {
+                    <span class="product-badge product-badge--soldout search-rec-badge">Sold out</span>
+                  }
                 </span>
                 <span class="search-rec-body">
-                  <!-- The label sits with the words rather than on the thumbnail: a
-                       recommendation this small has no room to lay "Best Selling"
-                       over the shot without covering it. -->
-                  @if (p.badge) {
-                    <em class="search-rec-badge">{{ p.badge }}</em>
-                  }
                   <strong>{{ p.title }}</strong>
                   <small>{{ price(p) }} <em>{{ p.unit }}</em></small>
                 </span>
@@ -114,7 +111,7 @@
               >
                 <span class="search-hit-media" [class.is-photo]="hit.image">
                   @if (hit.image; as img) {
-                    <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                    <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="eager" decoding="async">
                   } @else if (hit.icon) {
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
                       @switch (hit.icon) {
@@ -132,6 +129,7 @@
                   } @else {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
                   }
+                  @if (hit.soldOut) { <span class="product-badge product-badge--soldout search-hit-soldout">Sold out</span> }
                 </span>
 
                 <span class="search-hit-body">

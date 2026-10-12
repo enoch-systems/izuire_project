@@ -35,6 +35,7 @@ interface Hit {
   index: number;
   icon?: Product['icon'];
   image?: Product['image'];
+  soldOut?: boolean;
   price?: string;
   meta?: string;
 }
@@ -109,7 +110,7 @@ export class SearchOverlay {
     if (!q) return [];
 
     const products: Hit[] = this.catalogue.all().filter((p) =>
-      (p.title + ' ' + p.specs + ' ' + p.moq + ' ' + (CAT_LABELS.get(p.cat) ?? p.cat))
+      (p.title + ' ' + (CAT_LABELS.get(p.cat) ?? p.cat))
         .toLowerCase()
         .includes(q),
     )
@@ -119,12 +120,13 @@ export class SearchOverlay {
         group: 'Products',
         title: p.title,
         titleParts: this.segments(p.title, q),
-        desc: `${p.specs} · ${p.moq}`,
-        descParts: this.segments(`${p.specs} · ${p.moq}`, q),
+        desc: `${CAT_LABELS.get(p.cat) ?? p.cat} · ${p.unit}`,
+        descParts: this.segments(`${CAT_LABELS.get(p.cat) ?? p.cat} · ${p.unit}`, q),
         route: ['/product', p.id],
         index: 0,
         icon: p.icon,
         image: p.image,
+        soldOut: p.soldOut,
         price: this.fx.price(p.unitPrice),
         meta: CAT_LABELS.get(p.cat) ?? p.cat,
       }));

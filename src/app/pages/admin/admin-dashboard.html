@@ -1,12 +1,12 @@
 <header class="dashboard-head">
   <div>
-    <span class="kicker">Operations</span>
+    <span class="kicker">Admin overview</span>
     <h1>Welcome back, {{ welcomeName() }}</h1>
-    <p class="lede">A live view of customers, catalogue, and orders.</p>
+    <p class="lede">Your latest registrations, catalogue and order activity.</p>
   </div>
   <div class="dashboard-actions">
-    <a class="action-secondary" routerLink="/admin/email-follow-up">Compose email</a>
-    <a class="action-primary" routerLink="/admin/products">Open catalogue</a>
+    <a class="action-secondary" routerLink="/admin/email-follow-up">Email follow-up</a>
+    <a class="action-primary" routerLink="/admin/products">Manage catalogue</a>
   </div>
 </header>
 
@@ -20,7 +20,7 @@
 
 <div class="grid">
   @if (loading()) {
-    @for (item of [1, 2, 3, 4, 5]; track item) {
+    @for (item of [1, 2, 3, 4]; track item) {
       <div class="card card--loading"><div class="n">—</div><div class="l">Loading…</div></div>
     }
   } @else {
@@ -46,17 +46,95 @@
   </section>
 }
 
+<div class="recent-grid">
+  <section class="registrations registrations--users" aria-labelledby="registrationsHeading">
+    <div class="registrations-head">
+      <div><span class="panel-kicker">LATEST SIGN-UPS</span><h2 id="registrationsHeading">Registered users</h2></div>
+      <a class="view-all" routerLink="/admin/users">View all users <span aria-hidden="true">↗</span></a>
+    </div>
+    <p class="section-note">The five newest accounts</p>
+    @if (usersLoading()) {
+      <p class="users-empty">Loading registrations…</p>
+    } @else if (usersError()) {
+      <p class="status" role="alert">{{ usersError() }}</p>
+    } @else if (users().length === 0) {
+      <p class="users-empty">No registered accounts yet.</p>
+    } @else {
+      <div class="users" aria-live="polite">
+        @for (user of users(); track user.user_id) {
+          <article class="user">
+            <span class="user-avatar" aria-hidden="true">{{ (user.name || user.email).charAt(0).toUpperCase() }}</span>
+            <strong class="user-name">{{ user.name || 'New customer' }}</strong>
+            <time class="user-date" [attr.datetime]="user.created_at">
+              {{ user.created_at | date: 'EEEE, MMM d, y, h:mm a':'+0100' }}
+            </time>
+            <span class="user-email">{{ user.email }}</span>
+            <span class="user-tier">{{ user.member_tier || 'Standard' }}</span>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="registrations registrations--orders" aria-labelledby="ordersHeading">
+    <div class="registrations-head">
+      <div><span class="panel-kicker">LATEST {{ orders().length }}</span><h2 id="ordersHeading">Recent orders</h2></div>
+    </div>
+    <p class="section-note">Most recent customer requests</p>
+    @if (ordersLoading()) {
+      <p class="users-empty">Loading orders…</p>
+    } @else if (ordersError()) {
+      <p class="status" role="alert">{{ ordersError() }}</p>
+    } @else if (orders().length === 0) {
+      <p class="users-empty">No orders yet. New orders will appear here.</p>
+    } @else {
+      <div class="users" aria-live="polite">
+        @for (order of orders(); track order.id) {
+          <article class="user recent-order">
+            <span class="order-status">{{ order.status }}</span>
+            <strong class="user-name">{{ order.title }}</strong>
+            <time class="user-date" [attr.datetime]="order.created_at">
+              {{ order.created_at | date: 'MMM d, y, h:mm a':'+0100' }}
+            </time>
+            <span class="user-email">{{ order.number }} · {{ order.items_summary }}</span>
+            <span class="user-detail">{{ formatOrderAmount(order.subtotal_kobo, order.currency) }} · {{ order.method }}</span>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>
+
 <div class="analytics-grid">
   <section class="analytics-panel activity-panel" aria-labelledby="activityHeading">
     <div class="panel-head">
       <div><span class="panel-kicker">LAST 14 DAYS</span><h2 id="activityHeading">Customer activity</h2></div>
       <span class="panel-note">Registrations and orders</span>
     </div>
-    <div class="chart-frame" [class.chart-frame--empty]="!chartLoading() && !chartError() && !hasActivity()" [attr.aria-busy]="chartLoading()">
-      <canvas #activityCanvas role="img" aria-label="Daily registrations and orders over the last 14 days"></canvas>
-      @if (chartLoading()) { <div class="chart-message"><span class="chart-spinner"></span>Loading activity</div> }
-      @else if (chartError()) { <div class="chart-message chart-message--error">{{ chartError() }}</div> }
-      @else if (!hasActivity()) { <div class="chart-message"><strong>Quiet for now</strong><span>New registrations and orders will appear here.</span></div> }
+    <div class="chart-frame" [attr.aria-busy]="chartLoading()">
+      @if (chartLoading()) {
+        <div class="chart-message">Loading activity</div>
+      } @else if (chartError()) {
+        <div class="chart-message chart-message--error">{{ chartError() }}</div>
+      } @else if (!hasActivity()) {
+        <div class="chart-message"><strong>Quiet for now</strong><span>New registrations and orders will appear here.</span></div>
+      } @else {
+        <div class="activity-chart" role="img" aria-label="Daily registrations and orders over the last 14 days">
+          @for (day of dailyActivity(); track day.label; let index = $index) {
+            <div class="activity-day" [attr.aria-label]="day.label + ': ' + day.registrations + ' registrations, ' + day.orders + ' orders'">
+              <div class="activity-bars">
+                <span class="activity-bar activity-bar--users" [style.height.%]="day.registrationsHeight"></span>
+                <span class="activity-bar activity-bar--orders" [style.height.%]="day.ordersHeight"></span>
+              </div>
+              <span class="day-label">{{ index % 2 === 0 ? day.label : '' }}</span>
+            </div>
+          }
+        </div>
+        <div class="chart-legend" aria-hidden="true">
+          <span><i class="legend-dot legend-dot--users"></i>New users</span>
+          <span><i class="legend-dot legend-dot--orders"></i>Orders</span>
+        </div>
+      }
     </div>
   </section>
 
@@ -65,75 +143,31 @@
       <div><span class="panel-kicker">LAST 14 DAYS</span><h2 id="statusHeading">New sign-ups</h2></div>
       <span class="panel-note">By member tier</span>
     </div>
-    <div class="status-chart-frame" [class.status-chart-frame--empty]="!chartLoading() && !chartError() && !hasTierActivity()" [attr.aria-busy]="chartLoading()">
-      <canvas #tierCanvas role="img" aria-label="New registrations by membership tier in the last 14 days"></canvas>
-      @if (chartLoading()) { <div class="chart-message"><span class="chart-spinner"></span>Loading sign-ups</div> }
-      @else if (chartError()) { <div class="chart-message chart-message--error">{{ chartError() }}</div> }
-      @else if (!hasTierActivity()) { <div class="chart-message"><strong>No recent sign-ups</strong><span>New customers will appear here.</span></div> }
-      @else { <div class="doughnut-center"><strong>{{ tierTotal() }}</strong><span>new users</span></div> }
+    <div class="status-chart-frame" [attr.aria-busy]="chartLoading()">
+      @if (chartLoading()) {
+        <div class="chart-message">Loading sign-ups</div>
+      } @else if (chartError()) {
+        <div class="chart-message chart-message--error">{{ chartError() }}</div>
+      } @else if (!hasTierActivity()) {
+        <div class="chart-message"><strong>No recent sign-ups</strong><span>New customers will appear here.</span></div>
+      } @else {
+        <div class="tier-summary"><strong>{{ tierTotal() }}</strong><span>new users</span></div>
+        <div class="tier-bar" role="img" aria-label="New registrations by member tier">
+          @for (tier of tierBreakdown(); track tier.label) {
+            @if (tier.count > 0) {
+              <span class="tier-segment" [class.tier-segment--verified]="tier.label === 'Verified'" [class.tier-segment--enterprise]="tier.label === 'Enterprise'" [style.flex-grow]="tier.count"></span>
+            }
+          }
+        </div>
+        <div class="tier-legend">
+          @for (tier of tierBreakdown(); track tier.label) {
+            <div class="tier-row">
+              <span class="tier-dot" [class.tier-dot--verified]="tier.label === 'Verified'" [class.tier-dot--enterprise]="tier.label === 'Enterprise'"></span>
+              <span>{{ tier.label }}</span><strong>{{ tier.count }}</strong>
+            </div>
+          }
+        </div>
+      }
     </div>
   </section>
-</div>
-
-<div class="recent-grid">
-<section class="registrations" aria-labelledby="ordersHeading">
-  <div class="registrations-head">
-    <div><span class="panel-kicker">LATEST {{ orders().length }}</span><h2 id="ordersHeading">Recent orders</h2></div>
-  </div>
-  @if (ordersLoading()) {
-    <p class="users-empty">Loading orders…</p>
-  } @else if (ordersError()) {
-    <p class="status" role="alert">{{ ordersError() }}</p>
-  } @else if (orders().length === 0) {
-    <p class="users-empty">No orders yet. New orders will appear here.</p>
-  } @else {
-    <div class="users" aria-live="polite">
-      @for (order of orders(); track order.id) {
-        <article class="user">
-          <strong class="user-name">{{ order.number }} · {{ order.title }}</strong>
-          <time class="user-date" [attr.datetime]="order.created_at">
-            {{ order.created_at | date: 'yyyy-MM-dd HH:mm:ss':'+0000' }} UTC
-          </time>
-          <span class="user-email">{{ order.items_summary }}</span>
-          <span class="user-detail">{{ formatOrderAmount(order.subtotal_kobo, order.currency) }} · {{ order.status }} · {{ order.method }}</span>
-        </article>
-      }
-    </div>
-  }
-</section>
-
-<section class="registrations" aria-labelledby="registrationsHeading">
-  <div class="registrations-head">
-    <div><span class="panel-kicker">{{ stats()[0]?.value ?? '—' }} TOTAL</span><h2 id="registrationsHeading">Registered users</h2></div>
-  </div>
-  @if (usersLoading()) {
-    <p class="users-empty">Loading registrations…</p>
-  } @else if (usersError()) {
-    <p class="status" role="alert">{{ usersError() }}</p>
-  } @else if (users().length === 0) {
-    <p class="users-empty">No registered accounts yet.</p>
-  } @else {
-    <div class="users" aria-live="polite">
-      @for (user of users(); track user.user_id) {
-        <article class="user">
-          <strong class="user-name">{{ user.name || 'New customer' }}</strong>
-          <time class="user-date" [attr.datetime]="user.created_at">
-            Registered {{ user.created_at | date: 'yyyy-MM-dd HH:mm:ss':'+0000' }} UTC
-          </time>
-          <span class="user-email">{{ user.email }}</span>
-          @if (user.phone) { <span class="user-detail">Phone: {{ user.phone }}</span> }
-          @if (user.company) { <span class="user-detail">Company: {{ user.company }}</span> }
-          @if (formatAddress(user.shipping); as address) { <span class="user-detail">Shipping: {{ address }}</span> }
-          @if (formatAddress(user.billing); as address) { <span class="user-detail">Billing: {{ address }}</span> }
-          <span class="user-tier">{{ user.member_tier }}</span>
-        </article>
-      }
-    </div>
-    <nav class="user-pages" aria-label="Registered user pages">
-      <button type="button" (click)="previousUsersPage()" [disabled]="usersPage() === 0">Previous</button>
-      <span>Page {{ usersPage() + 1 }} of {{ usersPageCount() }}</span>
-      <button type="button" (click)="nextUsersPage()" [disabled]="usersPage() >= usersPageCount() - 1">Next</button>
-    </nav>
-  }
-</section>
 </div>

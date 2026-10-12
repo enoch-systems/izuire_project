@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { Product, ProductBadge } from '../pages/marketplace/marketplace-data';
+import { Product } from '../pages/marketplace/marketplace-data';
 import { SupabaseService } from './supabase.service';
 import { fromKobo, toKobo } from './money';
 
@@ -12,9 +12,6 @@ export interface CartLine {
   /** The product photo, snapshot with the rest of the line so the cart shows the
    *  same shot the shopper clicked. Undefined for listings without a photo. */
   image?: Product['image'];
-  /** The card's promotional label, carried across so a line keeps the reason it
-   *  caught the shopper's eye. Absent when the listing had none. */
-  badge?: ProductBadge;
   /** Naira per unit, snapshotted from the product at the moment it was added. */
   unitPrice: number;
   /** e.g. `/ unit`. Carries its own leading slash. */
@@ -123,7 +120,6 @@ export class CartService {
           title: product.title,
           image: product.image,
           icon: product.icon,
-          badge: product.badge,
           unitPrice: product.unitPrice,
           unit: product.unit,
           minQty: product.minQty,
@@ -224,7 +220,6 @@ export class CartService {
             title: String(snapshot.title ?? row['product_id']),
             icon: snapshot.icon ?? 'box',
             image: snapshot.image,
-            badge: snapshot.badge,
             unitPrice: fromKobo(Number(row['unit_price_kobo'] ?? 0)),
             unit: snapshot.unit ?? '/ unit',
             minQty: Number(snapshot.minQty ?? 1) || 1,
@@ -272,7 +267,6 @@ export class CartService {
               title: line.title,
               icon: line.icon,
               image: line.image ?? null,
-              badge: line.badge ?? null,
               unit: line.unit,
               minQty: line.minQty,
             },

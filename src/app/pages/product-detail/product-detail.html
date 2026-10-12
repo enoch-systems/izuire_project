@@ -34,8 +34,6 @@
             }
             @if (p.soldOut) {
               <span class="pd-badge pd-badge--soldout">Sold out</span>
-            } @else if (p.badge) {
-              <span class="pd-badge">{{ p.badge }}</span>
             }
           </div>
 
@@ -54,7 +52,7 @@
                   @if (t.shot.kind === 'video') {
                     <video [src]="t.shot.src" muted playsinline preload="metadata" [attr.aria-label]="p.title + ', ' + t.shot.label"></video>
                   } @else {
-                    <img [src]="t.shot.src" [alt]="p.title + ', ' + t.shot.label" loading="lazy">
+                    <img [src]="t.shot.src" [alt]="p.title + ', ' + t.shot.label" loading="eager" decoding="async">
                   }
                 </button>
               }
@@ -67,28 +65,10 @@
           <span class="pd-eyebrow">{{ p.cat | titlecase }}</span>
           <h1 class="pd-title">{{ p.title }}</h1>
 
-          <div class="pd-rating">
-            <span class="pd-stars" aria-hidden="true">
-              @for (star of [1,2,3,4,5]; track star) {
-                <svg viewBox="0 0 24 24" [class.filled]="star <= Math.round(rating().value)" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.6 1.4 6.9L12 17l-6.2 3.8 1.4-6.9L2 9.3l7-.8z"/></svg>
-              }
-            </span>
-            <span class="pd-rating-val">{{ rating().value.toFixed(1) }}</span>
-            <span class="pd-rating-sep">·</span>
-            <span class="pd-rating-count">{{ rating().count }} reviews</span>
-          </div>
-
-          <p class="pd-specs">{{ p.specs }}</p>
-          @if (p.description) {
-            <p class="pd-description">{{ p.description }}</p>
-          }
-
           <div class="pd-price-row">
             <span class="pd-price">{{ money(p.unitPrice) }}</span>
             <span class="pd-unit">{{ p.unit }}</span>
           </div>
-          <p class="pd-moq">{{ p.moq }}</p>
-
           <div class="pd-divider"></div>
 
           <div class="pd-qty-row">
@@ -113,10 +93,12 @@
             @if (p.soldOut) {
               <p class="pd-soldout-note" role="status">Sold out — check back soon or request a quote.</p>
             }
-            <button type="button" class="btn btn-primary pd-buy" (click)="buyNow()" [disabled]="p.soldOut">
-              Buy now
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </button>
+            @if (!p.soldOut) {
+              <button type="button" class="btn btn-primary pd-buy" (click)="buyNow()">
+                Buy now
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            }
             <button type="button" class="btn btn-outline pd-add" (click)="addToCart()" [disabled]="p.soldOut" [class.is-added]="cart.addedId() === p.id">
               <span>{{ p.soldOut ? 'Sold out' : cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
             </button>
@@ -143,7 +125,7 @@
             <article class="pd-also-card" (click)="openProduct(rel.id)">
               <div class="pd-also-media">
                 @if (rel.image; as img) {
-                  <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" [alt]="rel.title" loading="lazy">
+                  <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" [alt]="rel.title" loading="eager" decoding="async">
                 } @else {
                   <span class="pd-also-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
@@ -178,63 +160,6 @@
       </div>
     </section>
 
-    <!-- Reviews: the listing's own, live from Supabase. -->
-    <section class="pd-reviews section">
-      <div class="container">
-        <div class="pd-reviews-head">
-          <h2>Reviews</h2>
-          <span class="pd-reviews-count">{{ reviews().length }} {{ reviews().length === 1 ? 'review' : 'reviews' }}</span>
-        </div>
-
-        <div class="pd-reviews-layout">
-          <div class="pd-reviews-list">
-            @if (reviews().length) {
-              @for (r of reviews(); track r.id) {
-                <article class="pd-review">
-                  <div class="pd-review-head">
-                    <span class="pd-stars" aria-hidden="true">
-                      @for (star of [1,2,3,4,5]; track star) {
-                        <svg viewBox="0 0 24 24" [class.filled]="star <= r.rating"><path d="M12 2l3 6.5 7 .8-5.2 4.6 1.4 6.9L12 17l-6.2 3.8 1.4-6.9L2 9.3l7-.8z"/></svg>
-                      }
-                    </span>
-                    <strong>{{ r.authorName }}</strong>
-                  </div>
-                  @if (r.title) { <h3>{{ r.title }}</h3> }
-                  @if (r.body) { <p>{{ r.body }}</p> }
-                </article>
-              }
-            } @else {
-              <p class="pd-reviews-empty">No reviews yet. Be the first to review this listing.</p>
-            }
-          </div>
-
-          <aside class="pd-review-form">
-            <h3>Write a review</h3>
-            @if (auth.user()) {
-              <span class="pd-review-stars">
-                <span>Your rating</span>
-                <span class="pd-stars pd-stars--pick" role="radiogroup" aria-label="Your rating">
-                  @for (star of [1,2,3,4,5]; track star) {
-                    <button type="button" role="radio" [attr.aria-checked]="draftRating() === star" [attr.aria-label]="star + ' star' + (star > 1 ? 's' : '')" (click)="setDraftRating(star)">
-                      <svg viewBox="0 0 24 24" [class.filled]="star <= draftRating()" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.6 1.4 6.9L12 17l-6.2 3.8 1.4-6.9L2 9.3l7-.8z"/></svg>
-                    </button>
-                  }
-                </span>
-              </span>
-              <input type="text" placeholder="Headline (optional)" [value]="draftTitle()" (input)="draftTitle.set($any($event.target).value)" aria-label="Review headline">
-              <textarea rows="3" placeholder="What did you think of this listing?" [value]="draftBody()" (input)="draftBody.set($any($event.target).value)" aria-label="Review body"></textarea>
-              @if (reviewError()) { <p role="alert" class="pd-review-error">{{ reviewError() }}</p> }
-              <button type="button" class="btn btn-primary" (click)="submitReview()" [disabled]="reviewBusy()">
-                {{ reviewBusy() ? 'Saving…' : 'Submit review' }}
-              </button>
-            } @else {
-              <p class="pd-reviews-empty">Sign in to leave a review.</p>
-              <button type="button" class="btn btn-outline" (click)="auth.openAuth()">Log in</button>
-            }
-          </aside>
-        </div>
-      </div>
-    </section>
   }
 
 </main>

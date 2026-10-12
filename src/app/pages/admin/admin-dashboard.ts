@@ -1,10 +1,7 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, computed, inject, signal, ViewChild } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Chart, registerables } from 'chart.js';
 import { AdminAuthService } from '../../services/admin-auth.service';
-
-Chart.register(...registerables);
 
 /** A count shown on the dashboard, or a dash when it could not be read. */
 interface Stat {
@@ -17,21 +14,8 @@ interface RegisteredUser {
   user_id: string;
   name: string;
   email: string;
-  phone: string | null;
-  company: string | null;
   member_tier: string;
-  shipping: ProfileAddress | null;
-  billing: ProfileAddress | null;
   created_at: string;
-}
-
-interface ProfileAddress {
-  line1?: string;
-  line2?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  zip?: string;
 }
 
 interface AdminOrder {
@@ -53,9 +37,10 @@ interface ActivitySeries {
   tiers: number[];
 }
 
-const USERS_PER_PAGE = 20;
+const LATEST_USERS_LIMIT = 5;
 const ORDERS_PER_PAGE = 20;
 let dashboardChannelSequence = 0;
+const MEMBER_TIERS = ['Standard', 'Verified', 'Enterprise'] as const;
 
 /**
  * /admin — the console landing page.
@@ -79,21 +64,13 @@ let dashboardChannelSequence = 0;
       .kicker {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
         font-family: var(--font-d);
         font-weight: 600;
         font-size: 0.72rem;
-        letter-spacing: 0.14em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: var(--orange-deep);
+        color: var(--ink-60);
         margin: 0 0 12px;
-      }
-      .kicker::before {
-        content: '';
-        width: 16px;
-        height: 2px;
-        background: var(--orange-deep);
-        display: inline-block;
       }
       h1 {
         font-family: var(--font-d);
@@ -163,18 +140,16 @@ let dashboardChannelSequence = 0;
       .registrations-head { display: flex; align-items: baseline; gap: 10px; }
       .live { color: var(--verify); font-size: 0.72rem; font-weight: 700; }
       .users { border-top: 1px solid var(--line); }
-      .user { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px 16px; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--line); }
+      .user { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto auto; gap: 5px 12px; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--line); }
       .user-name { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
-      .user-email,.user-detail { grid-column: 1; color: var(--ink-60); font-size: 0.84rem; overflow-wrap: anywhere; }
-      .user-date { grid-column: 2; grid-row: 1; color: var(--ink-60); font-size: 0.8rem; text-align: right; font-variant-numeric: tabular-nums; }
-      .user-tier { grid-column: 2; grid-row: 2; color: var(--ink-40); font-size: 0.8rem; text-align: right; }
-      .user-pages { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 14px; font-size: 0.84rem; }
-      .user-pages button { border: 1px solid var(--line); border-radius: 4px; background: var(--white); color: var(--ink); padding: 7px 10px; cursor: pointer; }
-      .user-pages button:disabled { opacity: .45; cursor: default; }
+      .user-email,.user-detail { grid-column: 2; color: var(--ink-60); font-size: 0.78rem; overflow-wrap: anywhere; }
+      .user-date { grid-column: 3; grid-row: 1; color: var(--ink-60); font-size: 0.74rem; text-align: right; font-variant-numeric: tabular-nums; }
+      .user-tier { grid-column: 4; grid-row: 1 / span 2; color: var(--ink-60); font-size: 0.68rem; text-align: center; }
       .users-empty { padding: 18px 0; color: var(--ink-60); font-size: 0.9rem; }
       @media (max-width: 520px) {
-        .user { grid-template-columns: minmax(0, 1fr); }
-        .user-email,.user-detail,.user-date,.user-tier { grid-column: 1; grid-row: auto; text-align: left; }
+        .user { grid-template-columns: 36px minmax(0, 1fr); }
+        .user-email,.user-detail { grid-column: 2; grid-row: auto; }
+        .user-date,.user-tier { grid-column: 2; grid-row: auto; text-align: left; }
       }
       .status {
         margin: 0 0 28px;
@@ -198,7 +173,7 @@ let dashboardChannelSequence = 0;
     `,
   ],
 })
-export class AdminDashboard implements AfterViewInit, OnDestroy {
+export class AdminDashboard implements OnDestroy {
   /** Read by the template, which needs the signed-in admin's email. */
   protected readonly admin = inject(AdminAuthService);
 
@@ -219,29 +194,37 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
   );
   protected readonly hasTierActivity = computed(() => this.activity().tiers.some(Boolean));
   protected readonly tierTotal = computed(() => this.activity().tiers.reduce((sum, count) => sum + count, 0));
+  protected readonly dailyActivity = computed(() => {
+    const series = this.activity();
+    const peak = Math.max(1, ...series.registrations, ...series.orders);
+    return series.labels.map((label, index) => {
+      const registrations = series.registrations[index] ?? 0;
+      const orders = series.orders[index] ?? 0;
+      return {
+        label,
+        registrations,
+        orders,
+        registrationsHeight: registrations ? Math.max(3, Math.round((registrations / peak) * 100)) : 0,
+        ordersHeight: orders ? Math.max(3, Math.round((orders / peak) * 100)) : 0,
+      };
+    });
+  });
+  protected readonly tierBreakdown = computed(() => {
+    const counts = this.activity().tiers;
+    return MEMBER_TIERS.map((label, index) => ({ label, count: counts[index] ?? 0 }));
+  });
   protected readonly welcomeName = computed(() => this.admin.session()?.name.trim().split(/\s+/)[0] || 'Admin');
-  protected readonly usersPage = signal(0);
   protected readonly usersLoading = signal(true);
   protected readonly usersError = signal('');
-  protected readonly usersPageCount = computed(() => {
-    const total = this.stats().find((stat) => stat.label === 'Registered users')?.value ?? 0;
-    return Math.max(1, Math.ceil(total / USERS_PER_PAGE));
-  });
   /** Set when a table could not be read at all — usually not yet migrated. */
   protected readonly schemaMissing = signal(false);
-  @ViewChild('activityCanvas') private activityCanvas?: ElementRef<HTMLCanvasElement>;
-  @ViewChild('tierCanvas') private tierCanvas?: ElementRef<HTMLCanvasElement>;
-  private activityChart?: Chart<'line', number[], string>;
-  private tierChart?: Chart<'doughnut', number[], string>;
-  private chartViewReady = false;
   private realtimeChannel: ReturnType<AdminAuthService['supabase']['channel']> | null = null;
 
   constructor() {
     this.realtimeChannel = this.admin.supabase
       .channel(`admin-registrations-${++dashboardChannelSequence}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
-        if (payload.eventType === 'INSERT') this.usersPage.set(0);
-        void this.loadUsersPage();
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        void this.loadLatestUsers();
         void this.refreshUserCount();
         void this.loadActivity();
       })
@@ -255,14 +238,7 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
     void this.loadActivity();
   }
 
-  ngAfterViewInit(): void {
-    this.chartViewReady = true;
-    this.renderCharts();
-  }
-
   ngOnDestroy(): void {
-    this.activityChart?.destroy();
-    this.tierChart?.destroy();
     if (this.realtimeChannel) void this.admin.supabase.removeChannel(this.realtimeChannel);
   }
 
@@ -273,10 +249,9 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
       this.count('products', false),
       this.count('products', true),
       this.count('orders', false),
-      this.count('reviews', false),
       this.count('profiles', false),
     ]);
-    const [total, featured, orders, reviews, users] = rows;
+    const [total, featured, orders, users] = rows;
     // Every count failing together means the schema is not there, rather than
     // the catalogue happening to be empty.
     if (rows.every((r) => r === null)) this.schemaMissing.set(true);
@@ -285,9 +260,8 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
       { label: 'Products', value: total, hint: 'Rows in the catalogue' },
       { label: 'Featured', value: featured, hint: 'Shown on the home rail' },
       { label: 'Orders', value: orders, hint: 'Across all customers' },
-      { label: 'Reviews', value: reviews, hint: 'Ratings left by buyers' },
     ]);
-    await this.loadUsersPage();
+    await this.loadLatestUsers();
     this.loading.set(false);
   }
 
@@ -296,23 +270,6 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
     this.stats.update((stats) => stats.map((stat) =>
       stat.label === 'Registered users' ? { ...stat, value: count } : stat,
     ));
-  }
-
-  protected previousUsersPage(): void {
-    this.usersPage.update((page) => Math.max(0, page - 1));
-    void this.loadUsersPage();
-  }
-
-  protected nextUsersPage(): void {
-    this.usersPage.update((page) => Math.min(this.usersPageCount() - 1, page + 1));
-    void this.loadUsersPage();
-  }
-
-  protected formatAddress(address: ProfileAddress | null): string {
-    if (!address) return '';
-    return [address.line1, address.line2, address.city, address.state, address.country, address.zip]
-      .filter(Boolean)
-      .join(', ');
   }
 
   protected formatOrderAmount(amountKobo: number, currency: string): string {
@@ -362,88 +319,7 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
       this.chartError.set('Activity data could not be loaded.');
     } finally {
       this.chartLoading.set(false);
-      this.renderActivityChart();
     }
-  }
-
-  private renderCharts(): void {
-    this.renderActivityChart();
-    this.renderTierChart();
-  }
-
-  private renderActivityChart(): void {
-    const canvas = this.activityCanvas?.nativeElement;
-    if (!this.chartViewReady || !canvas) return;
-    const series = this.activity();
-    const colors = this.chartColors();
-    if (!this.activityChart) {
-      this.activityChart = new Chart(canvas, {
-        type: 'line',
-        data: {
-          labels: series.labels,
-          datasets: [
-            { label: 'New users', data: series.registrations, borderColor: '#247A5A', backgroundColor: 'transparent', fill: false, tension: .3, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
-            { label: 'Orders', data: series.orders, borderColor: '#F5821F', backgroundColor: 'transparent', fill: false, tension: .3, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { intersect: false, mode: 'index' },
-          plugins: {
-            legend: { position: 'bottom', labels: { color: colors.text, usePointStyle: true, pointStyle: 'circle', boxWidth: 7, padding: 18, font: { size: 11 } } },
-            tooltip: { backgroundColor: colors.tooltip, titleColor: colors.tooltipText, bodyColor: colors.tooltipText, borderColor: colors.grid, borderWidth: 1, padding: 10, cornerRadius: 6, displayColors: true },
-          },
-          scales: {
-            x: { grid: { display: false }, border: { display: false }, ticks: { color: colors.muted, maxTicksLimit: 7, font: { size: 10 } } },
-            y: { beginAtZero: true, border: { display: false }, grid: { color: colors.grid }, ticks: { color: colors.muted, precision: 0, stepSize: 1, font: { size: 10 }, padding: 8 } },
-          },
-        },
-      });
-      return;
-    }
-    this.activityChart.data.labels = series.labels;
-    this.activityChart.data.datasets[0].data = series.registrations;
-    this.activityChart.data.datasets[1].data = series.orders;
-    this.activityChart.update('none');
-  }
-
-  private renderTierChart(): void {
-    const canvas = this.tierCanvas?.nativeElement;
-    if (!this.chartViewReady || !canvas) return;
-    const colors = this.chartColors();
-    if (!this.tierChart) {
-      this.tierChart = new Chart(canvas, {
-        type: 'doughnut',
-        data: {
-          labels: ['Standard', 'Verified', 'Enterprise'],
-          datasets: [{ data: this.activity().tiers, backgroundColor: ['#7C8799', '#247A5A', '#F5821F'], borderWidth: 0, hoverOffset: 5 }],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: '72%',
-          plugins: {
-            legend: { position: 'bottom', labels: { color: colors.text, usePointStyle: true, pointStyle: 'circle', boxWidth: 7, padding: 13, font: { size: 10 } } },
-            tooltip: { backgroundColor: colors.tooltip, titleColor: colors.tooltipText, bodyColor: colors.tooltipText, borderColor: colors.grid, borderWidth: 1, padding: 10, cornerRadius: 6 },
-          },
-        },
-      });
-      return;
-    }
-    this.tierChart.data.datasets[0].data = this.activity().tiers;
-    this.tierChart.update('none');
-  }
-
-  private chartColors(): { text: string; muted: string; grid: string; tooltip: string; tooltipText: string } {
-    const styles = getComputedStyle(document.documentElement);
-    return {
-      text: styles.getPropertyValue('--ink').trim() || '#111111',
-      muted: styles.getPropertyValue('--ink-60').trim() || 'rgba(17,17,17,.62)',
-      grid: styles.getPropertyValue('--line').trim() || '#E7E2D8',
-      tooltip: styles.getPropertyValue('--ink').trim() || '#111111',
-      tooltipText: styles.getPropertyValue('--white').trim() || '#FFFFFF',
-    };
   }
 
   private async loadOrders(): Promise<void> {
@@ -464,15 +340,15 @@ export class AdminDashboard implements AfterViewInit, OnDestroy {
     }
   }
 
-  private async loadUsersPage(): Promise<void> {
+  private async loadLatestUsers(): Promise<void> {
     this.usersLoading.set(true);
     this.usersError.set('');
     try {
       const { data, error } = await this.admin.supabase
         .from('profiles')
-        .select('user_id,name,email,phone,company,member_tier,shipping,billing,created_at')
+        .select('user_id,name,email,member_tier,created_at')
         .order('created_at', { ascending: false })
-        .range(this.usersPage() * USERS_PER_PAGE, (this.usersPage() + 1) * USERS_PER_PAGE - 1);
+        .limit(LATEST_USERS_LIMIT);
       if (error) throw error;
       this.users.set((data ?? []) as RegisteredUser[]);
     } catch {

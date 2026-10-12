@@ -16,27 +16,11 @@ export interface DbProduct extends Product {
   priceKobo: number;
   /** Extra views the product page's thumbnail strip shows. */
   gallery: GalleryShot[];
-  /** Average review score, 0-5, maintained by a trigger on `reviews`. */
-  ratingValue: number;
-  /** How many reviews that average is over. */
-  ratingCount: number;
   featured: boolean;
   featuredRank: number;
   sortRank: number;
   /** True while sold out: visible in the shop with a pill, cart button disabled. */
   soldOut: boolean;
-}
-
-/** One customer review of a product. */
-export interface Review {
-  id: string;
-  productId: string;
-  userId: string;
-  rating: number;
-  title: string;
-  body: string;
-  createdAt: string;
-  authorName: string;
 }
 
 /** How many featured products the home page shows at most. */
@@ -79,13 +63,6 @@ export class ProductService {
           void this.load();
         })
         .subscribe();
-      this.backend.supabase
-        .channel('reviews-live')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => {
-          const id = this.activeProduct();
-          if (id) void this.loadReviews(id);
-        })
-        .subscribe();
     } catch {
       // Realtime unavailable — load() already covered first paint.
     }
@@ -117,55 +94,6 @@ export class ProductService {
     return fromKobo(this.koboOf(p));
   }
 
-  /** Reviews for the product the product page is currently showing. */
-  readonly currentReviews = computed<Review[]>(() => {
-    const id = this.activeProduct();
-    return id ? (this.reviews()[id] ?? []) : [];
-  });
-
-  private readonly reviews = signal<Record<string, Review[]>>({});
-  private readonly activeProduct = signal<string | null>(null);
-
-  /** Load a product's reviews and mark it as the one realtime refreshes. */
-  async loadReviews(productId: string): Promise<void> {
-    this.activeProduct.set(productId);
-    try {
-      const { data, error } = await this.backend.supabase
-        .from('reviews')
-        .select('id,product_id,user_id,rating,title,body,created_at')
-        .eq('product_id', productId)
-        .order('created_at', { ascending: false });
-      if (error || !data) return;
-      const list = (data as Record<string, unknown>[]).map((r) => this.mapReview(r));
-      this.reviews.update((map) => ({ ...map, [productId]: list }));
-    } catch {
-      // reviews table not migrated yet — the page shows its empty state.
-    }
-  }
-
-  /**
-   * Add or replace this user's review. The database trigger recomputes
-   * products.rating/rating_count, so the stars move everywhere at once.
-   */
-  async addReview(input: { productId: string; rating: number; title: string; body: string }): Promise<void> {
-    const { data: session } = await this.backend.supabase.auth.getSession();
-    const uid = session.session?.user?.id;
-    if (!uid) throw new Error('Sign in to leave a review.');
-    const { error } = await this.backend.supabase.from('reviews').upsert(
-      {
-        product_id: input.productId,
-        user_id: uid,
-        rating: Math.min(5, Math.max(1, Math.round(input.rating))),
-        title: input.title.trim(),
-        body: input.body.trim(),
-      },
-      { onConflict: 'product_id,user_id' },
-    );
-    if (error) throw new Error(error.message);
-    await this.loadReviews(input.productId);
-    await this.load();
-  }
-
   private async load(): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
@@ -191,30 +119,36 @@ export class ProductService {
 
   private mapRow(r: Record<string, unknown>): DbProduct {
     const kobo = Number(r['price_kobo'] ?? r['unit_price'] ?? 0) || 0;
-    const gallery = Array.isArray(r['gallery']) ? (r['gallery'] as GalleryShot[]) : [];
-    const image = (r['image'] as Product['image']) ?? undefined;
+    const gallery = Array.isArray(r['gallery'])
+      ? r['gallery'].map((shot) => this.mapImage(shot)).filter((shot): shot is NonNullable<Product['image']> => !!shot)
+      : [];
+    const image = this.mapImage(r['image']);
+    const videos = Array.isArray(r['videos'])
+      ? r['videos']
+        .map((video) => {
+          if (typeof video === 'string') return { src: video };
+          if (!video || typeof video !== 'object' || typeof (video as { src?: unknown }).src !== 'string') return null;
+          const entry = video as { src: string; duration?: unknown };
+          return { src: entry.src, duration: typeof entry.duration === 'number' ? entry.duration : undefined };
+        })
+        .filter((video): video is { src: string; duration?: number } => video !== null)
+      : [];
     const naira = fromKobo(kobo);
     return {
       id: String(r['id'] ?? ''),
       icon: ((r['icon'] as Product['icon']) ?? 'box') as Product['icon'],
-      badge: (r['badge'] as Product['badge']) ?? undefined,
       cat: String(r['cat'] ?? 'general'),
       name: String(r['name'] ?? ''),
       title: String(r['title'] ?? ''),
       ngn: (r['ngn'] as string) || `₦${grouped.format(naira)}`,
       rmb: (r['rmb'] as string) || '',
       unit: String(r['unit'] ?? '/ unit'),
-      specs: String(r['specs'] ?? ''),
-      description: String(r['description'] ?? ''),
-      moq: String(r['moq'] ?? ''),
       unitPrice: naira,
       minQty: Number(r['min_qty'] ?? 1) || 1,
       image,
-      videos: Array.isArray(r['videos']) ? (r['videos'] as { src: string; duration?: number }[]) : [],
+      videos,
       priceKobo: kobo,
       gallery,
-      ratingValue: Number(r['rating'] ?? 4.5) || 4.5,
-      ratingCount: Number(r['rating_count'] ?? 0) || 0,
       featured: Boolean(r['featured']),
       featuredRank: Number(r['featured_rank'] ?? 0) || 0,
       sortRank: Number(r['sort_rank'] ?? 0) || 0,
@@ -223,16 +157,15 @@ export class ProductService {
     };
   }
 
-  private mapReview(r: Record<string, unknown>): Review {
+  private mapImage(value: unknown): Product['image'] {
+    if (typeof value === 'string' && value) return { src: value, width: 720, height: 900 };
+    if (!value || typeof value !== 'object' || typeof (value as { src?: unknown }).src !== 'string') return undefined;
+    const image = value as { src: string; width?: unknown; height?: unknown };
     return {
-      id: String(r['id'] ?? ''),
-      productId: String(r['product_id'] ?? ''),
-      userId: String(r['user_id'] ?? ''),
-      rating: Number(r['rating'] ?? 0) || 0,
-      title: String(r['title'] ?? ''),
-      body: String(r['body'] ?? ''),
-      createdAt: String(r['created_at'] ?? ''),
-      authorName: 'Verified buyer',
+      src: image.src,
+      width: typeof image.width === 'number' && image.width > 0 ? image.width : 720,
+      height: typeof image.height === 'number' && image.height > 0 ? image.height : 900,
     };
   }
+
 }

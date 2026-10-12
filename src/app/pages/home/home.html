@@ -241,7 +241,7 @@
                         <!-- Where a listing has a real photo it stands in for the icon.
                              Alt is empty because the product title follows immediately
                              below and already names the card. -->
-                        <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                        <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="eager" decoding="async">
                       } @else {
                       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
                         @switch (p.icon) {
@@ -259,14 +259,11 @@
                       }
                       @if (p.soldOut) {
                         <span class="product-badge product-badge--soldout">Sold out</span>
-                      } @else if (p.badge) {
-                        <span class="product-badge">{{ p.badge }}</span>
                       }
                     </div>
                   </a>
                   <div class="product-body">
                     <a class="product-title-link" [routerLink]="['/product', p.id]"><h4 class="product-title">{{ p.title }}</h4></a>
-                    <div class="product-specs">{{ p.specs }}</div>
                     <div class="product-price">
                       <span class="price-val">{{ price(p.unitPrice) }}</span>
                       <span class="unit">{{ p.unit }}</span>

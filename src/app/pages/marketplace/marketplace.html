@@ -86,11 +86,11 @@
             <a class="mk-featured-card" [routerLink]="['/product', p.id]">
               <div class="mk-featured-media">
                 @if (p.image; as img) {
-                  <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                  <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="eager" decoding="async">
                 } @else {
                   <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
                 }
-                @if (p.badge) { <span class="product-badge">{{ p.badge }}</span> }
+                @if (p.soldOut) { <span class="product-badge product-badge--soldout">Sold out</span> }
               </div>
               <div class="mk-featured-body">
                 <h3>{{ p.title }}</h3>
@@ -132,7 +132,7 @@
                   <!-- The listing's own photo where there is one, standing in for the
                        line icon. Alt is empty because the title follows immediately
                        below and already names the card. -->
-                  <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="lazy">
+                  <img [src]="img.src" [attr.width]="img.width" [attr.height]="img.height" alt="" loading="eager" decoding="async">
                 } @else {
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
                   @switch (p.icon) {
@@ -150,13 +150,10 @@
                 }
                 @if (p.soldOut) {
                   <span class="product-badge product-badge--soldout">Sold out</span>
-                } @else if (p.badge) {
-                  <span class="product-badge">{{ p.badge }}</span>
                 }
               </div>
               <div class="product-text">
                 <h4 class="product-title">{{ p.title }}</h4>
-                <div class="product-specs">{{ p.specs }}</div>
 
                 <!-- The price leads, and it leads on its own: the wash that used to
                      sit behind the figure is gone, because a box drawn round every
@@ -164,7 +161,6 @@
                      minimum follows as a pill, because it is a condition on that
                      figure rather than a fact about the product. -->
                 <div class="product-price"><span class="price-val">{{ price(p) }}</span> <span class="unit">{{ p.unit }}</span></div>
-                <div class="product-moq">{{ p.moq }}</div>
               </div>
             </a>
 

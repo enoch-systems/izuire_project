@@ -28,6 +28,18 @@
   <app-logout-confirm />
 }
 <router-outlet />
+@if (offline()) {
+     <div class="network-status network-status--offline" role="alert">
+          <span class="network-status-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0120 0M5 12a10 10 0 0114 0m-11 3.2a5 5 0 018 0M12 19h.01M3 3l18 18" /></svg></span>
+          <span><strong>You’re offline</strong><small>Changes can’t reach Izuire right now. Your page is still here; reconnect to continue.</small></span>
+     </div>
+} @else if (connectionRestored()) {
+     <div class="network-status network-status--restored" role="status" aria-live="polite">
+          <span class="network-status-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg></span>
+          <span><strong>Connection restored</strong><small>You’re back online.</small></span>
+     </div>
+}
+<app-action-feedback />
 @if (!isAdmin()) {
   <app-site-footer />
   <!-- The add confirmation lives at the root so it reads the same from every page,

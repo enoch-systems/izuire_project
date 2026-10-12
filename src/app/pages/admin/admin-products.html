@@ -24,7 +24,7 @@
       <article class="pcard" [class.is-soldout]="isSoldOut(row)" [class.is-hidden]="isHidden(row)">
         <div class="pthumb">
           @if (imageSrc(row); as src) {
-            <img [src]="src" [alt]="row['title']" loading="lazy" />
+            <img [src]="src" [alt]="row['title']" loading="eager" decoding="async" />
           } @else {
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" aria-hidden="true">
               @switch (row['icon']) {
@@ -67,14 +67,19 @@
           }
           @if (isSoldOut(row)) {
             <span class="pbadge pbadge--soldout">Sold out</span>
-          } @else if (row['badge']) {
-            <span class="pbadge">{{ row['badge'] }}</span>
           } @else if (isHidden(row)) {
             <span class="pbadge pbadge--hidden">Hidden</span>
           }
-          @if (row['featured']) {
-            <span class="pfeat" title="On the home rail">★</span>
-          }
+          <button
+            type="button"
+            class="pdelete"
+            [disabled]="deletingId() !== null || saving()"
+            [attr.aria-label]="'Delete ' + row['title']"
+            title="Delete product"
+            (click)="requestDelete(row)"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg>
+          </button>
         </div>
         <div class="pbody">
           <h3>{{ row['title'] }}</h3>
@@ -117,56 +122,47 @@
 }
 
 @if (modal(); as m) {
-  <div class="overlay" role="dialog" aria-modal="true" [attr.aria-label]="m.kind === 'add' ? 'Add product' : 'Edit product'">
+  <div class="overlay" [class.is-open]="modalVisible()" role="dialog" aria-modal="true" [attr.aria-label]="m.kind === 'add' ? 'Add product' : 'Edit product'">
     <div class="overlay-bg" (click)="closeModal()"></div>
     <div class="sheet">
       @if (m.kind === 'add') {
-        <h2>Add product</h2>
-        <p class="sub">Tap a row to fill it in. Photos can come later on the edit screen.</p>
-        <button type="button" class="editrow" (click)="openField('title')">
-          <span class="rowtext">
-            <span class="k">Product name</span>
-            <span class="v" [class.v--empty]="!draft('title')">{{ draft('title') || 'Add a name' }}</span>
-          </span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('price')">
-          <span class="rowtext">
-            <span class="k">Price</span>
-            <span class="v" [class.v--empty]="!draft('price')">{{ draft('price') || 'Set a price' }}</span>
-          </span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('category')">
-          <span class="rowtext"><span class="k">Category</span><span class="v" [class.v--empty]="!draft('category')">{{ draft('category') || 'Choose a category' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('unit')">
-          <span class="rowtext"><span class="k">Unit label</span><span class="v">{{ draft('unit') || 'unit' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('minQty')">
-          <span class="rowtext"><span class="k">Minimum quantity</span><span class="v">{{ draft('minQty') || '1' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('specs')">
-          <span class="rowtext"><span class="k">Specs</span><span class="v" [class.v--empty]="!draft('specs')">{{ draft('specs') || 'Add specs' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('description')">
-          <span class="rowtext"><span class="k">Description</span><span class="v" [class.v--empty]="!draft('description')">{{ draft('description') || 'Add description' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('moq')">
-          <span class="rowtext"><span class="k">MOQ note</span><span class="v" [class.v--empty]="!draft('moq')">{{ draft('moq') || 'Add a note' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('badge')">
-          <span class="rowtext"><span class="k">Badge</span><span class="v">{{ draft('badge') || 'None' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <label class="pick" for="addImages">+ Add photos (up to 6)</label>
-        <input id="addImages" type="file" accept="image/*" multiple hidden (change)="pickImages($event)" />
+        <div class="editor-heading">
+          <div><span class="editor-kicker">NEW LISTING</span><h2>Add product</h2></div>
+          <button type="button" class="editor-close" (click)="closeModal()" aria-label="Close">×</button>
+        </div>
+        <div class="editor-fields">
+          <label class="editor-field editor-field--wide">Product name
+            <input type="text" autocomplete="off" autofocus [value]="draft('title')" (input)="setField('title', $any($event.target).value)" placeholder="e.g. Solar panel 150W" />
+          </label>
+          <label class="editor-field">Price in naira
+            <input type="text" inputmode="decimal" [value]="draft('price')" (input)="setField('price', $any($event.target).value)" placeholder="0.00" />
+          </label>
+          <label class="editor-field">Category
+            <span class="editor-select">
+              <select [value]="draft('category')" (change)="setField('category', $any($event.target).value)">
+                <option value="" disabled>Choose category</option>
+                @for (category of categoryOptions(); track category.id) { <option [value]="category.id">{{ category.label }}</option> }
+              </select>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+            </span>
+          </label>
+          <label class="editor-field">Unit
+            <span class="editor-select">
+              <select [value]="draft('unit')" (change)="setField('unit', $any($event.target).value)">
+                @for (unit of unitOptions(); track unit) { <option [value]="unit">{{ unit }}</option> }
+              </select>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+            </span>
+          </label>
+          <label class="editor-field">Minimum quantity
+            <input type="number" inputmode="numeric" min="1" step="1" [value]="draft('minQty')" (input)="setField('minQty', $any($event.target).value)" />
+          </label>
+        </div>
+        <details class="editor-more">
+          <summary>Photos and listing options</summary>
+          <div class="editor-more-body">
+            <label class="pick" for="productImages">+ Add photos (up to 6)</label>
+            <input id="productImages" type="file" accept="image/*" multiple hidden (change)="pickImages($event)" />
         @if (formImages.length) {
           <div class="thumbs">
             @for (img of formImages; track img.src; let i = $index) {
@@ -180,8 +176,8 @@
             }
           </div>
         }
-        <label class="pick" for="addVideos">+ Add videos (up to 4)</label>
-        <input id="addVideos" type="file" accept="video/*" multiple hidden (change)="pickVideos($event)" />
+          <label class="pick" for="productVideos">+ Add videos (up to 4)</label>
+          <input id="productVideos" type="file" accept="video/*" multiple hidden (change)="pickVideos($event)" />
         @if (formVideos.length) {
           <div class="thumbs">
             @for (video of formVideos; track video.src; let i = $index) {
@@ -193,11 +189,13 @@
             }
           </div>
         }
-        <div class="checks">
-          <label><input type="checkbox" [checked]="flags.featured" (change)="setFlag('featured', $any($event.target).checked)" /><span>Featured<small>Shows on the home page.</small></span></label>
-          <label><input type="checkbox" [checked]="flags.soldOut" (change)="setFlag('soldOut', $any($event.target).checked)" /><span>Sold out<small>Listing stays visible but cannot be ordered.</small></span></label>
-          <label><input type="checkbox" [checked]="flags.hidden" (change)="setFlag('hidden', $any($event.target).checked)" /><span>Hidden<small>Keep the listing off the storefront.</small></span></label>
-        </div>
+            <div class="checks">
+              <label><input type="checkbox" [checked]="flags.featured" (change)="setFlag('featured', $any($event.target).checked)" /><span>Featured<small>Show on the home page.</small></span></label>
+              <label><input type="checkbox" [checked]="flags.soldOut" (change)="setFlag('soldOut', $any($event.target).checked)" /><span>Sold out<small>Keep visible; disable Buy and Add to cart.</small></span></label>
+              <label><input type="checkbox" [checked]="flags.hidden" (change)="setFlag('hidden', $any($event.target).checked)" /><span>Hide from storefront<small>Keeps the product in your catalog; does not delete it.</small></span></label>
+            </div>
+          </div>
+        </details>
         <div class="actions">
           <button type="button" class="btn-primary" [disabled]="saving()" (click)="submitModal()">
             {{ saving() ? 'Adding…' : 'Add product' }}
@@ -205,61 +203,42 @@
           <button type="button" [disabled]="saving()" (click)="closeModal()">Cancel</button>
         </div>
       } @else {
-        <h2>Edit product</h2>
-        <p class="sub">Tap any row to change it, then Save when you are done.</p>
-        <button type="button" class="editrow" (click)="openField('title')">
-          <span class="rowtext">
-            <span class="k">Product name</span>
-            <span class="v" [class.v--empty]="!draft('title')">{{ draft('title') || 'Add a name' }}</span>
-          </span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('price')">
-          <span class="rowtext">
-            <span class="k">Price</span>
-            <span class="v" [class.v--empty]="!draft('price')">{{ draft('price') || 'Set a price' }}</span>
-          </span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('category')">
-          <span class="rowtext"><span class="k">Category</span><span class="v" [class.v--empty]="!draft('category')">{{ draft('category') || 'Choose a category' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('unit')">
-          <span class="rowtext"><span class="k">Unit label</span><span class="v">{{ draft('unit') || 'unit' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('minQty')">
-          <span class="rowtext"><span class="k">Minimum quantity</span><span class="v">{{ draft('minQty') || '1' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('badge')">
-          <span class="rowtext">
-            <span class="k">Badge</span>
-            <span class="v" [class.v--empty]="!draft('badge')">{{ draft('badge') || 'None' }}</span>
-          </span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('specs')">
-          <span class="rowtext">
-            <span class="k">Specs</span>
-            <span class="v" [class.v--empty]="!draft('specs')">{{ draft('specs') || 'Add specs' }}</span>
-          </span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('description')">
-          <span class="rowtext"><span class="k">Description</span><span class="v" [class.v--empty]="!draft('description')">{{ draft('description') || 'Add description' }}</span></span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <button type="button" class="editrow" (click)="openField('moq')">
-          <span class="rowtext">
-            <span class="k">MOQ note</span>
-            <span class="v" [class.v--empty]="!draft('moq')">{{ draft('moq') || 'Add a note' }}</span>
-          </span>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-        <label class="pick" for="editImages">+ Photos (up to 6, first is the cover)</label>
-        <input id="editImages" type="file" accept="image/*" multiple hidden (change)="pickImages($event)" />
+        <div class="editor-heading">
+          <div><span class="editor-kicker">CATALOGUE</span><h2>Edit product</h2></div>
+          <button type="button" class="editor-close" (click)="closeModal()" aria-label="Close">×</button>
+        </div>
+        <div class="editor-fields">
+          <label class="editor-field editor-field--wide">Product name
+            <input type="text" autocomplete="off" [value]="draft('title')" (input)="setField('title', $any($event.target).value)" placeholder="Product name" />
+          </label>
+          <label class="editor-field">Price in naira
+            <input type="text" inputmode="decimal" [value]="draft('price')" (input)="setField('price', $any($event.target).value)" placeholder="0.00" />
+          </label>
+          <label class="editor-field">Category
+            <span class="editor-select">
+              <select [value]="draft('category')" (change)="setField('category', $any($event.target).value)">
+                @for (category of categoryOptions(); track category.id) { <option [value]="category.id">{{ category.label }}</option> }
+              </select>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+            </span>
+          </label>
+          <label class="editor-field">Unit
+            <span class="editor-select">
+              <select [value]="draft('unit')" (change)="setField('unit', $any($event.target).value)">
+                @for (unit of unitOptions(); track unit) { <option [value]="unit">{{ unit }}</option> }
+              </select>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg>
+            </span>
+          </label>
+          <label class="editor-field">Minimum quantity
+            <input type="number" inputmode="numeric" min="1" step="1" [value]="draft('minQty')" (input)="setField('minQty', $any($event.target).value)" />
+          </label>
+        </div>
+        <details class="editor-more">
+          <summary>Photos and listing options</summary>
+          <div class="editor-more-body">
+            <label class="pick" for="productImages">+ Photos (up to 6, first is the cover)</label>
+            <input id="productImages" type="file" accept="image/*" multiple hidden (change)="pickImages($event)" />
         @if (formImages.length) {
           <div class="thumbs">
             @for (img of formImages; track img.src; let i = $index) {
@@ -273,8 +252,8 @@
             }
           </div>
         }
-        <label class="pick" for="editVideos">+ Videos (up to 4)</label>
-        <input id="editVideos" type="file" accept="video/*" multiple hidden (change)="pickVideos($event)" />
+          <label class="pick" for="productVideos">+ Videos (up to 4)</label>
+          <input id="productVideos" type="file" accept="video/*" multiple hidden (change)="pickVideos($event)" />
         @if (formVideos.length) {
           <div class="thumbs">
             @for (video of formVideos; track video.src; let i = $index) {
@@ -286,14 +265,14 @@
             }
           </div>
         }
-        <div class="checks">
+          <div class="checks">
           <label>
             <input
               type="checkbox"
               [checked]="flags.featured"
               (change)="setFlag('featured', $any($event.target).checked)"
             />
-            <span>Featured<small>Shows on the home page.</small></span>
+            <span>Featured<small>Show on the home page.</small></span>
           </label>
           <label>
             <input
@@ -301,7 +280,7 @@
               [checked]="flags.soldOut"
               (change)="setFlag('soldOut', $any($event.target).checked)"
             />
-            <span>Mark as sold<small>Stays in the shop with a Sold out pill, and the cart button locks.</small></span>
+            <span>Sold out<small>Keep visible; disable Buy and Add to cart.</small></span>
           </label>
           <label>
             <input
@@ -309,9 +288,11 @@
               [checked]="flags.hidden"
               (change)="setFlag('hidden', $any($event.target).checked)"
             />
-            <span>Hide product<small>Taken off the shop until you bring it back.</small></span>
-          </label>
-        </div>
+            <span>Hide from storefront<small>Keeps the product in your catalog; does not delete it.</small></span>
+            </label>
+            </div>
+          </div>
+        </details>
         <div class="actions">
           <button type="button" class="btn-primary" [disabled]="saving()" (click)="submitModal()">
             {{ saving() ? 'Saving…' : 'Save' }}
@@ -323,67 +304,38 @@
   </div>
 }
 
-@if (fieldEdit()) {
-  <div class="overlay overlay--top">
-    <div class="overlay-bg" (click)="cancelField()"></div>
-    <div class="sheet sheet--narrow">
-      <h2>{{ fieldTitle() }}</h2>
-      <p class="sub">{{ fieldHint() }}</p>
-
-      @if (fieldEdit() === 'badge') {
-        <div class="badgepick" role="group" aria-label="Badge">
-          @for (b of badgeOptions; track b) {
-            <button
-              type="button"
-              [class.is-on]="fieldValue() === b"
-              [attr.aria-pressed]="fieldValue() === b"
-              (click)="onFieldInput(b)"
-            >
-              <span>{{ b === '' ? 'None' : b }}</span>
-              @if (fieldValue() === b) {
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
-              }
-            </button>
-          }
-        </div>
-      } @else if (fieldEdit() === 'specs' || fieldEdit() === 'description') {
-        <textarea
-          id="fieldEditInput"
-          rows="4"
-          [value]="fieldValue()"
-          (input)="onFieldInput($any($event.target).value)"
-        ></textarea>
-      } @else if (fieldEdit() === 'price') {
-        <input
-          id="fieldEditInput"
-          type="text"
-          inputmode="decimal"
-          [value]="fieldValue()"
-          (input)="onFieldInput($any($event.target).value)"
-        />
-      } @else if (fieldEdit() === 'minQty') {
-        <input
-          id="fieldEditInput"
-          type="number"
-          min="1"
-          step="1"
-          inputmode="numeric"
-          [value]="fieldValue()"
-          (input)="onFieldInput($any($event.target).value)"
-        />
+@if (saving() || saveComplete()) {
+  <div class="save-feedback" role="status" aria-live="polite">
+    <div class="save-feedback-panel">
+      @if (saveComplete()) {
+        <span class="save-feedback-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg>
+        </span>
+        <h2>{{ modal()?.kind === 'add' ? 'Product added' : 'Changes saved' }}</h2>
+        <p>{{ modal()?.kind === 'add' ? 'Successfully listed in the marketplace.' : 'Your product has been updated.' }}</p>
       } @else {
-        <input
-          id="fieldEditInput"
-          type="text"
-          [value]="fieldValue()"
-          (input)="onFieldInput($any($event.target).value)"
-        />
+        <span class="save-feedback-spinner" aria-hidden="true"></span>
+        <h2>{{ modal()?.kind === 'add' ? 'Adding product' : 'Saving product' }}</h2>
+        <p>Please wait while we update the catalog.</p>
       }
-
-      <div class="actions">
-        <button type="button" class="btn-primary" (click)="saveField()">Done</button>
-        <button type="button" (click)="cancelField()">Cancel</button>
-      </div>
     </div>
+  </div>
+}
+
+@if (deleteTarget(); as product) {
+  <div class="product-delete-overlay" role="alertdialog" aria-modal="true" aria-labelledby="deleteProductTitle" aria-describedby="deleteProductDescription">
+    <div class="product-delete-backdrop" (click)="cancelDelete()"></div>
+    <section class="product-delete-dialog">
+      <span class="product-delete-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg>
+      </span>
+      <p class="product-delete-kicker">REMOVE FROM CATALOGUE</p>
+      <h2 id="deleteProductTitle">Delete this product?</h2>
+      <p id="deleteProductDescription"><strong>{{ product['title'] }}</strong> will be permanently removed from your catalogue.</p>
+      <div class="product-delete-actions">
+        <button type="button" class="product-delete-cancel" (click)="cancelDelete()">Keep product</button>
+        <button type="button" class="product-delete-confirm" (click)="confirmDelete()">Delete product</button>
+      </div>
+    </section>
   </div>
 }

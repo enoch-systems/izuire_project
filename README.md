@@ -60,7 +60,7 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## Supabase backend
 
-The app uses Supabase for Auth, products, orders, reviews and user settings. The
+The app uses Supabase for Auth, products, orders and user settings. The
 Angular environment files are compiled into the app; `.env` is used by local
 CLI/seed scripts and is not read by Angular. Only the public anon key belongs in
 the frontend. Keep `SUPABASE_SERVICE_ROLE_KEY` in the git-ignored `.env` only.
@@ -104,7 +104,6 @@ rows. Account avatars stay in the private Supabase `avatars` bucket.
 | --- | --- |
 | Home, Marketplace, Search | `public.products` only (realtime; no bundled product fallback) |
 | Product page media | Cloudinary URLs in `products.image`, `products.gallery`, and `products.videos` |
-| Product rating + reviews | `public.reviews` (realtime), rating kept by a trigger |
 | Payments / transaction history | `public.orders` for the signed-in `auth.uid()` (realtime) |
 | Checkout (`/checkout`) | calls `public.place_order`; Postgres validates current catalog prices and atomically writes pending `orders` + `order_lines` |
 | Registration and profile | `auth.users` + `public.profiles`; a database trigger creates each profile |
@@ -116,8 +115,10 @@ browser submits product IDs and quantities, never authoritative prices. Amounts
 remain integer kobo, with display divided by 100 only for the reading.
 
 Realtime requires the tables to be in the `supabase_realtime` publication; the
-`20251003000007_izuire_realtime` migration adds `products`, `orders` and
-`reviews` so the rails and histories move without a reload.
+`20251003000007_izuire_realtime` migration adds `products` and `orders` so the
+catalogue and order history move without a reload. The later
+`20261012000000_izuire_remove_reviews` migration removes the retired reviews
+table and its product rating columns.
 
 `20261007000000_izuire_fresh_catalog.sql` adds product videos, creates profiles
 for new Auth users, and removes the historical starter listings so a clean

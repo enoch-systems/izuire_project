@@ -7,8 +7,8 @@ import { AuthService } from '../../services/auth.service';
 import { ThemeToggle } from '../theme-toggle/theme-toggle';
 import { LOGO_SRC } from '../../logo';
 
-/** Desktop dropdowns. Only one may be open at a time. */
-type DropdownName = 'services' | 'company' | 'account';
+/** The account dropdown can be open, or all dropdowns can be closed. */
+type DropdownName = 'account';
 
 /**
  * Site header + mobile navigation.
@@ -49,8 +49,8 @@ export class SiteHeader implements OnDestroy {
   protected readonly scrolled = signal(false);
   /** Name of the open desktop dropdown, or null when they are all closed. */
   protected readonly openDropdown = signal<DropdownName | null>(null);
-  /** Which mobile drawer sections are expanded. */
-  protected readonly openGroup = signal<{ services: boolean; company: boolean }>({ services: false, company: false });
+  protected readonly featureNotice = signal<string | null>(null);
+  private noticeTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     // Lock body scroll while the mobile drawer is open.
@@ -70,6 +70,7 @@ export class SiteHeader implements OnDestroy {
   ngOnDestroy(): void {
     document.body.style.overflow = '';
     clearTimeout(this.landTimer);
+    clearTimeout(this.noticeTimer);
   }
 
   protected menuOpen() {
@@ -144,9 +145,12 @@ export class SiteHeader implements OnDestroy {
     this.openDropdown.set(null);
   }
 
-  /** Toggles a mobile drawer section open or shut. */
-  protected toggleGroup(group: 'services' | 'company'): void {
-    this.openGroup.update((current) => ({ ...current, [group]: !current[group] }));
+  protected showFeatureNotice(section: string): void {
+    this.openDropdown.set(null);
+    if (this.ui.menuOpen()) this.ui.closeMenu();
+    this.featureNotice.set(`${section} feature will be available soon.`);
+    clearTimeout(this.noticeTimer);
+    this.noticeTimer = setTimeout(() => this.featureNotice.set(null), 3000);
   }
 
   protected onWindowScroll(): void {

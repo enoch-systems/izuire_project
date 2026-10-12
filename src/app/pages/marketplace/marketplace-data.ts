@@ -1,10 +1,3 @@
-/**
- * The words a card's badge may use. One shallow union rather than free text, so
- * the page cannot drift into a hundred near-synonyms and each label can be
- * restyled in one place. Swap a word here and every card wearing it follows.
- */
-export type ProductBadge = 'Popular' | 'Hot Deal' | 'New' | 'Best Selling' | 'Sold out';
-
 export interface Product {
   /** Stable key. Used as the cart line key, so it must not change. */
   id: string;
@@ -23,18 +16,6 @@ export interface Product {
    */
   image?: { src: string; width: number; height: number };
   videos?: { src: string; duration?: number }[];
-  /**
-   * The promotional label the card carries, if any. One word and no more, and at
-   * most one per product, so a grid of them reads as a shop's own labels rather
-   * than a wall of stickers — the colour stays put and only the words change.
-   *
-   * This replaces the old boolean `verified`, which put the same word on half the
-   * catalogue: repeated that often it said nothing about any one listing, and
-   * what it did say was the wrong thing — that a supplier is checked is a promise
-   * the whole catalogue makes (see the product page's own note), not a remark on
-   * one card. Left out entirely on the listings with nothing to shout about.
-   */
-  badge?: ProductBadge;
   /**
    * True while the listing is sold out. The card stays visible with a pill and
    * a disabled cart button (unlike `active=false`, which removes it entirely).
@@ -59,9 +40,6 @@ export interface Product {
    */
   rmb: string;
   unit: string;
-  specs: string;
-  description: string;
-  moq: string;
   /**
    * Naira price per unit, for the cart's arithmetic. The same figure `ngn` shows,
    * kept as a number so totals can be worked out without parsing a display
@@ -69,7 +47,7 @@ export interface Product {
    */
   unitPrice: number;
   /**
-   * Minimum order quantity, lifted out of `moq` so the cart can clamp to it.
+  * Minimum order quantity, so the cart can clamp to it.
    * Bales are sold whole, so their minimum is 1 rather than 0.
    */
   minQty: number;

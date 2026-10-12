@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Meta } from '@angular/platform-browser';
 import { filter } from 'rxjs';
@@ -12,14 +12,15 @@ import { CartToast } from './components/cart-toast/cart-toast';
 import { SignatureLoader } from './components/signature-loader/signature-loader';
 import { AuthLoader } from './components/auth-loader/auth-loader';
 import { LogoutConfirm } from './components/logout-confirm/logout-confirm';
+import { ActionFeedback } from './components/action-feedback/action-feedback';
 import { MediaMuteService } from './services/media-mute.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SiteHeader, SiteFooter, RateTicker, SearchOverlay, LegalModal, AuthModal, CartToast, SignatureLoader, AuthLoader, LogoutConfirm],
+  imports: [RouterOutlet, SiteHeader, SiteFooter, RateTicker, SearchOverlay, LegalModal, AuthModal, CartToast, SignatureLoader, AuthLoader, LogoutConfirm, ActionFeedback],
   templateUrl: './app.html',
 })
-export class App {
+export class App implements OnDestroy {
   /** The URL as it stands, so the chrome can stand down inside the admin. */
   private readonly url = signal('/');
 
@@ -28,6 +29,9 @@ export class App {
    *  back there. Without this the console renders inside the shop's nav, which
    *  is what made it read as a stray customer page. */
   protected readonly isAdmin = computed(() => this.url().startsWith('/admin'));
+  protected readonly offline = signal(typeof navigator !== 'undefined' && !navigator.onLine);
+  protected readonly connectionRestored = signal(false);
+  private connectionTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     const router = inject(Router);
@@ -49,5 +53,25 @@ export class App {
         const desc = route.snapshot.data['desc'];
         if (desc) meta.updateTag({ name: 'description', content: desc });
       });
+  }
+
+  @HostListener('window:offline')
+  protected onOffline(): void {
+    clearTimeout(this.connectionTimer);
+    this.connectionRestored.set(false);
+    this.offline.set(true);
+  }
+
+  @HostListener('window:online')
+  protected onOnline(): void {
+    if (!this.offline()) return;
+    this.offline.set(false);
+    this.connectionRestored.set(true);
+    clearTimeout(this.connectionTimer);
+    this.connectionTimer = setTimeout(() => this.connectionRestored.set(false), 3600);
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.connectionTimer);
   }
 }

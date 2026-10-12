@@ -1,5 +1,6 @@
-import { Component, effect, inject, signal, untracked } from '@angular/core';
+import { Component, effect, inject, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActionFeedbackService } from '../../../components/action-feedback/action-feedback';
 import { AccountGate } from '../../../components/account-gate/account-gate';
 import { AccountNav } from '../../../components/account-nav/account-nav';
 import { Breadcrumb } from '../../../components/breadcrumb/breadcrumb';
@@ -29,6 +30,7 @@ function emptyAddress(): AddressInfo {
 })
 export class AccountProfile {
   protected readonly auth = inject(AuthService);
+  private readonly feedback = inject(ActionFeedbackService);
 
   /** Personal details. */
   protected name = '';
@@ -39,10 +41,6 @@ export class AccountProfile {
   /** The two addresses, each saved on its own — they are edited separately too. */
   protected shipping: AddressInfo = emptyAddress();
   protected billing: AddressInfo = emptyAddress();
-
-  /** The line under the header after a save, or empty when nothing was saved. */
-  protected readonly flash = signal('');
-  private flashTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     effect(() => {
@@ -79,9 +77,7 @@ export class AccountProfile {
   }
 
   private saved(message: string): void {
-    this.flash.set(message);
-    clearTimeout(this.flashTimer);
-    this.flashTimer = setTimeout(() => this.flash.set(''), 2800);
+    this.feedback.success('Saved to your account', message);
   }
 
   /** Copy the signed-in user over the drafts. */

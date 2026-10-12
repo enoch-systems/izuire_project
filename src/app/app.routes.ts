@@ -254,7 +254,12 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/admin-newsletter').then((page) => page.AdminNewsletter),
         title: 'Admin, Newsletter Sign-ups | Izuire',
       },
+      {
+        path: '**',
+        loadComponent: () => import('./pages/not-found').then((page) => page.NotFound),
+        title: 'Admin Page Not Found | Izuire',
+      },
     ],
   },
-  { path: '**', redirectTo: '' },
+  { path: '**', loadComponent: () => import('./pages/not-found').then((page) => page.NotFound), title: 'Page Not Found | Izuire' },
 ];

@@ -16,27 +16,11 @@
            so without it this row would read as current on the whole site. -->
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
       <a routerLink="/marketplace" routerLinkActive="active">Marketplace</a>
-      <div class="nav-dropdown" [class.open]="isDropdownOpen('services')">
-        <button class="nav-dropdown-trigger" type="button" (click)="toggleDropdown('services')" aria-haspopup="true" [attr.aria-expanded]="isDropdownOpen('services')">Services
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="nav-dropdown-panel">
-          <a routerLink="/sourcing" routerLinkActive="active" (click)="closeDropdown()">Sourcing</a>
-          <a routerLink="/shipping" routerLinkActive="active" (click)="closeDropdown()">Shipping</a>
-          <a routerLink="/business-solutions" routerLinkActive="active" (click)="closeDropdown()">Business Solutions</a>
-        </div>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-trigger" type="button" (click)="showFeatureNotice('Services')">Services</button>
       </div>
-      <div class="nav-dropdown" [class.open]="isDropdownOpen('company')">
-        <button class="nav-dropdown-trigger" type="button" (click)="toggleDropdown('company')" aria-haspopup="true" [attr.aria-expanded]="isDropdownOpen('company')">Company
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="nav-dropdown-panel">
-          <a routerLink="/about" routerLinkActive="active" (click)="closeDropdown()">About</a>
-          <a routerLink="/insights" routerLinkActive="active" (click)="closeDropdown()">Insights</a>
-          <a routerLink="/faq" routerLinkActive="active" (click)="closeDropdown()">FAQ</a>
-          <a routerLink="/legal" routerLinkActive="active" (click)="closeDropdown()">Legal</a>
-          <a routerLink="/contact" routerLinkActive="active" (click)="closeDropdown()">Contact</a>
-        </div>
+      <div class="nav-dropdown">
+        <button class="nav-dropdown-trigger" type="button" (click)="showFeatureNotice('Company')">Company</button>
       </div>
     </nav>
     <div class="header-actions">
@@ -250,31 +234,24 @@
     <a (click)="closeMenu()" routerLink="/marketplace" routerLinkActive="active"><span>Marketplace</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></a>
 
     <!-- Services -->
-    <div class="mobile-nav-group" [class.open]="openGroup().services">
-      <button type="button" class="mobile-nav-group-head" (click)="toggleGroup('services')" aria-expanded="openGroup().services">
+    <div class="mobile-nav-group">
+      <button type="button" class="mobile-nav-group-head" (click)="showFeatureNotice('Services')">
         <span>Services</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="mobile-nav-group-body">
-        <a (click)="closeMenu()" routerLink="/sourcing" routerLinkActive="active"><span>Sourcing</span></a>
-        <a (click)="closeMenu()" routerLink="/shipping" routerLinkActive="active"><span>Shipping</span></a>
-        <a (click)="closeMenu()" routerLink="/business-solutions" routerLinkActive="active"><span>Business Solutions</span></a>
-      </div>
     </div>
 
     <!-- Company -->
-    <div class="mobile-nav-group" [class.open]="openGroup().company">
-      <button type="button" class="mobile-nav-group-head" (click)="toggleGroup('company')" aria-expanded="openGroup().company">
+    <div class="mobile-nav-group">
+      <button type="button" class="mobile-nav-group-head" (click)="showFeatureNotice('Company')">
         <span>Company</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <div class="mobile-nav-group-body">
-        <a (click)="closeMenu()" routerLink="/about" routerLinkActive="active"><span>About</span></a>
-        <a (click)="closeMenu()" routerLink="/insights" routerLinkActive="active"><span>Insights</span></a>
-        <a (click)="closeMenu()" routerLink="/faq" routerLinkActive="active"><span>FAQ</span></a>
-        <a (click)="closeMenu()" routerLink="/legal" routerLinkActive="active"><span>Legal</span></a>
-        <a (click)="closeMenu()" routerLink="/contact" routerLinkActive="active"><span>Contact</span></a>
-      </div>
     </div>
   </nav>
 </div>
+
+@if (featureNotice(); as notice) {
+  <div class="feature-soon-toast" role="status" aria-live="polite">
+    <span class="feature-soon-mark" aria-hidden="true">i</span>
+    <span>{{ notice }}</span>
+  </div>
+}
