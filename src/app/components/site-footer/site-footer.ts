@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LOGO_SRC } from '../../logo';
 import { UiService } from '../../services/ui.service';
@@ -25,7 +25,7 @@ import { SupabaseService } from '../../services/supabase.service';
     @media(max-width:620px){.footer-newsletter{grid-template-columns:1fr;gap:15px}}
   `],
 })
-export class SiteFooter {
+export class SiteFooter implements OnDestroy {
   private readonly ui = inject(UiService);
   private readonly backend = inject(SupabaseService);
 
@@ -35,6 +35,8 @@ export class SiteFooter {
   protected readonly newsletterBusy = signal(false);
   protected readonly newsletterMessage = signal('');
   protected readonly newsletterError = signal(false);
+  protected readonly featureNotice = signal<string | null>(null);
+  private noticeTimer: ReturnType<typeof setTimeout> | undefined;
   /** The wordmark, from the one shared copy in logo.ts. */
   protected readonly logo = LOGO_SRC;
 
@@ -45,6 +47,16 @@ export class SiteFooter {
    */
   protected openLegal(id: LegalDocId): void {
     this.ui.openLegal(id);
+  }
+
+  protected showFeatureNotice(feature: string): void {
+    this.featureNotice.set(`${feature} feature will be available soon.`);
+    clearTimeout(this.noticeTimer);
+    this.noticeTimer = setTimeout(() => this.featureNotice.set(null), 3000);
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.noticeTimer);
   }
 
   /**

@@ -521,9 +521,15 @@
     <h2 class="cta-final__title">Ready to start sourcing?</h2>
     <p class="cta-final__copy">Tell us what you need and we'll come back with pricing, MOQ and lead time, usually within 24 hours.</p>
     <div class="cta-row cta-final__row">
-      <a routerLink="/quote" class="btn btn-primary">Start sourcing</a>
+      <button type="button" class="btn btn-primary" (click)="showQuoteNotice()">Start sourcing</button>
     </div>
   </div>
 </section>
+@if (quoteNotice(); as notice) {
+  <div class="feature-soon-toast" role="status" aria-live="polite">
+    <span class="feature-soon-mark" aria-hidden="true">i</span>
+    <span>{{ notice }}</span>
+  </div>
+}
 
 </main>
