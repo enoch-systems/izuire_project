@@ -16,13 +16,13 @@
           <a routerLink="/marketplace">Human hair</a>
         </div>
         <div class="cta-row hero-slide">
-          <a routerLink="/quote" class="btn btn-primary">Start sourcing</a>
+          <a routerLink="/marketplace" class="btn btn-primary">Explore marketplace</a>
           <!-- The sign-in call is here for the visitor who is not signed in, and
                only for them. Signed in it used to swap for a "Welcome back, name"
                button linking to the profile, which meant the hero's one clear
                action was joined by a second one greeting someone the header had
                already greeted. The button now simply is not there, leaving
-               "Start Sourcing" alone rather than replacing it. The header's own
+               "Explore marketplace" alone rather than replacing it. The header's own
                welcome chip is still where a signed-in shopper finds their name. -->
           @if (!auth.user()) {
             <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started<span class="hero-join-sep">or</span>log in</button>
@@ -372,7 +372,7 @@
       <div class="step"><div class="step-num">3<span class="step-ping" aria-hidden="true"></span></div><h4>You Approve</h4><p>Confirm pricing and terms before anything moves into production.</p></div>
       <div class="step"><div class="step-num">4<span class="step-ping" aria-hidden="true"></span></div><h4>We Inspect &amp; Ship</h4><p>Quality checked, consolidated, and shipped to your door.</p></div>
     </div>
-    <div class="steps-cta"><a routerLink="/sourcing" class="btn btn-outline btn-sm">See the Full Sourcing Process</a></div>
+    <div class="steps-cta"><button type="button" class="btn btn-outline btn-sm" (click)="showFeatureNotice('Sourcing process')">See the Full Sourcing Process</button></div>
   </div>
 </section>
 
@@ -521,11 +521,11 @@
     <h2 class="cta-final__title">Ready to start sourcing?</h2>
     <p class="cta-final__copy">Tell us what you need and we'll come back with pricing, MOQ and lead time, usually within 24 hours.</p>
     <div class="cta-row cta-final__row">
-      <button type="button" class="btn btn-primary" (click)="showQuoteNotice()">Start sourcing</button>
+      <button type="button" class="btn btn-primary" (click)="showFeatureNotice('Request a quote')">Start sourcing</button>
     </div>
   </div>
 </section>
-@if (quoteNotice(); as notice) {
+@if (featureNotice(); as notice) {
   <div class="feature-soon-toast" role="status" aria-live="polite">
     <span class="feature-soon-mark" aria-hidden="true">i</span>
     <span>{{ notice }}</span>

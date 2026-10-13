@@ -183,7 +183,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   /** The stories in the slider, so the slide markup is generated from one place. */
   protected readonly testimonials = TESTIMONIALS;
   protected readonly current = signal(0);
-  protected readonly quoteNotice = signal<string | null>(null);
+  protected readonly featureNotice = signal<string | null>(null);
 
   /** Hero slides, in order. Add another entry here for an 8th slide. */
   protected readonly heroStats: HeroStat[] = [
@@ -406,7 +406,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   private snapTimer: ReturnType<typeof setTimeout> | undefined;
   private heroPhotoTimer: ReturnType<typeof setInterval> | undefined;
   private heroPhotoSnapTimer: ReturnType<typeof setTimeout> | undefined;
-  private quoteNoticeTimer: ReturnType<typeof setTimeout> | undefined;
+  private featureNoticeTimer: ReturnType<typeof setTimeout> | undefined;
   private mediaObserver: IntersectionObserver | undefined;
   private revealObserver: IntersectionObserver | undefined;
   private stepObserver: IntersectionObserver | undefined;
@@ -425,10 +425,10 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     this.current.set(((idx % this.dots.length) + this.dots.length) % this.dots.length);
   }
 
-  protected showQuoteNotice(): void {
-    this.quoteNotice.set('Request a quote feature will be available soon.');
-    clearTimeout(this.quoteNoticeTimer);
-    this.quoteNoticeTimer = setTimeout(() => this.quoteNotice.set(null), 3000);
+  protected showFeatureNotice(feature: string): void {
+    this.featureNotice.set(`${feature} feature will be available soon.`);
+    clearTimeout(this.featureNoticeTimer);
+    this.featureNoticeTimer = setTimeout(() => this.featureNotice.set(null), 3000);
   }
 
   /** Move cards and backdrop one step left, then snap both back off the clone. */
@@ -472,7 +472,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     clearTimeout(this.snapTimer);
     clearInterval(this.heroPhotoTimer);
     clearTimeout(this.heroPhotoSnapTimer);
-    clearTimeout(this.quoteNoticeTimer);
+    clearTimeout(this.featureNoticeTimer);
     this.mediaObserver?.disconnect();
     this.revealObserver?.disconnect();
     this.stepObserver?.disconnect();
