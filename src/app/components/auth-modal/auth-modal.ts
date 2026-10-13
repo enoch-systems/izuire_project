@@ -1,6 +1,7 @@
 import { Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { LOGO_SRC } from '../../logo';
 import { AuthService } from '../../services/auth.service';
 import { UiService } from '../../services/ui.service';
 
@@ -45,6 +46,7 @@ export class AuthModal {
   protected readonly busy = signal(false);
   /** Set just after a successful password reset, to tell the user what to do next. */
   protected readonly resetSent = signal(false);
+  protected readonly logoSrc = LOGO_SRC;
 
   private readonly firstField = viewChild<ElementRef<HTMLInputElement>>('firstField');
 
@@ -130,6 +132,18 @@ export class AuthModal {
       this.password.set('');
     } catch (e) {
       this.error.set(e instanceof Error ? e.message : 'Could not send a reset link.');
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  protected async onGoogleLogin(): Promise<void> {
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      await this.auth.loginWithGoogle();
+    } catch (e) {
+      this.error.set(e instanceof Error ? e.message : 'Could not start Google sign-in.');
     } finally {
       this.busy.set(false);
     }

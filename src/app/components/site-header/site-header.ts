@@ -128,10 +128,6 @@ export class SiteHeader implements OnDestroy {
    * finished would make the logo feel broken, and routing first means the
    * animation is already running by the time the new page paints under it.
    */
-  protected onLogoClick(): void {
-    this.ui.requestSignature();
-  }
-
   protected isDropdownOpen(name: DropdownName): boolean {
     return this.openDropdown() === name;
   }

@@ -52,10 +52,6 @@ export class SiteFooter {
    * the link is left alone, so the click still goes home and the animation plays
    * over the top of the navigation rather than holding it back.
    */
-  protected onLogoClick(): void {
-    this.ui.requestSignature();
-  }
-
   protected async subscribe(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     const email = this.newsletterEmail().trim().toLowerCase();

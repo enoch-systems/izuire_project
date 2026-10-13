@@ -1,6 +1,7 @@
 import { Component, OnDestroy, computed, effect, inject, signal, untracked } from '@angular/core';
 import { AuthLoadingStage, AuthService } from '../../services/auth.service';
 import { UiService } from '../../services/ui.service';
+import { LOGO_SRC } from '../../logo';
 
 /** What the overlay says and how long the bar should take, per stage. */
 interface LoaderFace {
@@ -40,6 +41,7 @@ const FACES: Partial<Record<AuthLoadingStage, LoaderFace>> = {
   templateUrl: './auth-loader.html',
 })
 export class AuthLoader implements OnDestroy {
+  protected readonly logo = LOGO_SRC;
   protected readonly auth = inject(AuthService);
   private readonly ui = inject(UiService);
 

@@ -62,7 +62,7 @@ export class Faq {
       label: 'Shipping & Delivery',
       lead: 'Transit times, destinations we serve, and how air vs. sea compares for typical orders.',
       items: [
-        { id: 'shipping-time', q: 'How long does shipping take?', a: 'Air freight typically takes days to just over a week door-to-door; sea freight typically takes several weeks depending on the destination and consolidation schedule. Exact timelines are confirmed when we prepare your shipping quote, see our Shipping &amp; Logistics page for more detail.' },
+        { id: 'shipping-time', q: 'How long does shipping take?', a: 'Air freight typically takes days to just over a week, with delivery to your door. Sea freight typically takes several weeks depending on the destination and consolidation schedule. Exact timelines are confirmed when we prepare your shipping quote. See our Shipping and logistics page for more detail.' },
         { id: 'outside-nigeria', q: 'Can you ship outside Nigeria?', a: 'Yes. While most of our current buyers are in Nigeria, our sourcing and shipping process is built to serve importers across Africa. Tell us your destination when requesting a quote and we\'ll confirm logistics.' },
       ],
     },
@@ -70,7 +70,7 @@ export class Faq {
       key: 'quality',
       n: '04',
       label: 'Quality & Beyond',
-      lead: 'Quality checks before orders ship, plus white-labeling, custom branding, and what you can customize.',
+      lead: 'Quality checks before orders ship, plus white labeling, custom branding, and what you can customize.',
       items: [
         { id: 'inspect', q: 'Do you inspect products before shipping?', a: 'Yes. Every order goes through a quality check before it leaves China, and we send photo or video proof so you can confirm before it ships.' },
         { id: 'customize', q: 'Can you customize or brand products?', a: 'Yes, white labeling and custom packaging / branding are available on eligible products and order volumes. Let us know your requirements when you request a quote.' },

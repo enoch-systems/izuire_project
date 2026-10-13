@@ -81,7 +81,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
   {
     "title": "Sea Freight",
     "cat": "Shipping",
-    "desc": "Cost-effective for bulk, higher CBM orders",
+    "desc": "Cost effective for bulk, higher CBM orders",
     "route": "/shipping",
     "fragment": undefined
   },

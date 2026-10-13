@@ -15,30 +15,30 @@ export class Shipping {
     {
       n: '01',
       chapter: 'Step 01, Consolidate',
-      title: 'Packing & consolidation at our Guangzhou warehouse',
+      title: 'Packing and consolidation at our Guangzhou warehouse',
       body: mkWords('Your order is inspected, packed, and consolidated with the right commercial invoice, packing list and shipping documentation at our Guangzhou warehouse. We consolidate multiple suppliers into one shipment where it saves you money.'),
-      perk: 'Combining orders from 2+ suppliers into one container typically saves 25–40% on per-unit freight.',
+      perk: 'Combining orders from two or more suppliers into one container typically saves 25 to 40 percent on freight per unit.',
     },
     {
       n: '02',
       chapter: 'Step 02, Book',
       title: 'Freight booking on the right route for your timeline',
-      body: mkWords('We book air or sea freight based on your timeline, budget and shipment volume. No "one size fits all", we compare routes, lines, and current capacity to get the best option for that specific week.'),
+      body: mkWords('We book air or sea freight based on your timeline, budget and shipment volume. We do not use a one size fits all approach, we compare routes, lines, and current capacity to get the best option for that specific week.'),
       perk: 'Freight rates change weekly. We quote the live rate, not a stale catalogue price from 6 months ago.',
     },
     {
       n: '03',
       chapter: 'Step 03, Clear',
-      title: 'Import documentation & customs clearance on arrival',
+      title: 'Import documentation and customs clearance on arrival',
       body: mkWords('SONCAP, form M, PAAR, duty assessments, and customs coordination on arrival. We work with licensed clearing agents we\'ve used for years so the paperwork matches the cargo and nothing gets stuck at the port over an avoidable issue.'),
       perk: 'Documentation mismatches are the #1 cause of clearance delays. We catch them before the ship sails, not when it docks.',
     },
     {
       n: '04',
       chapter: 'Step 04, Deliver',
-      title: 'Last-mile delivery to your destination city',
+      title: 'Delivery to your destination city',
       body: mkWords('Once cleared, your cargo is trucked to Lagos, Onitsha, Abuja, or wherever you are in Nigeria or beyond. You get tracking updates at each leg, so you know when to expect delivery instead of guessing.'),
-      perk: 'Door-to-door delivery to Onitsha and the Southeast uses established overland routes we run every week.',
+      perk: 'Delivery to your door in Onitsha and the Southeast uses established overland routes we run every week.',
     },
   ];
 
@@ -60,7 +60,7 @@ export class Shipping {
       tagline: 'Slower, best value at volume',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 21l1.5-3h17L22 21M4 18l4-10h8l4 10M8.5 8l1.5-4h4l1.5 4M5 18c2 1 4.5 2 7 2s5-1 7-2"/></svg>',
       rows: [
-        ['Cost', 'More cost-effective at volume, priced per CBM or per container'],
+        ['Cost', 'Better value at volume, priced per CBM or per container'],
         ['Best for', 'Bulk orders and larger CBM shipments (1 CBM+ or full containers)'],
         ['Typical use', 'Thrift bales, building materials, bulk merchandise, furniture'],
       ],
@@ -71,7 +71,7 @@ export class Shipping {
     {
       n: '01',
       name: 'Lagos',
-      body: 'Nigeria\'s primary port of entry, our most common destination for both air and sea shipments, with on-demand clearing and delivery from the ports.',
+      body: 'Nigeria\'s primary port of entry, our most common destination for both air and sea shipments, with clearing and delivery arranged as needed from the ports.',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>',
     },
     {

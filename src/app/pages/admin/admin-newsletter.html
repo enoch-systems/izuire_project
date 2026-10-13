@@ -7,7 +7,7 @@
 <p class="lede">People who opted in to Izuire sourcing notes.</p>
 
 <div class="toolbar">
-  <input type="search" aria-label="Filter newsletter sign-ups by email" placeholder="Filter by email" [value]="filter()" (input)="onFilter($any($event.target).value)" />
+  <input type="search" aria-label="Filter newsletter sign ups by email" placeholder="Filter by email" [value]="filter()" (input)="onFilter($any($event.target).value)" />
   <div class="toolbar-actions">
     <span class="count">{{ total() }} subscribers</span>
     <button type="button" class="compose" [disabled]="selectedIds().length === 0" (click)="emailSelected()">Email selected ({{ selectedIds().length }})</button>
@@ -15,7 +15,7 @@
 </div>
 
 @if (loading()) {
-  <p class="empty">Loading sign-ups…</p>
+  <p class="empty">Loading sign ups…</p>
 } @else if (error()) {
   <p class="empty" role="alert">{{ error() }}</p>
 } @else if (signups().length === 0) {

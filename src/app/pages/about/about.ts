@@ -26,7 +26,7 @@ export class About {
       tag: 'CAC registered',
       year: 'Back home',
       title: 'Registered in Nigeria, accountable at home',
-      body: 'Izuire Co. Ltd. is registered with Nigeria\'s Corporate Affairs Commission (CAC), with scope covering importation, exportation, and general trading of consumer goods and merchandise. Our Onitsha roots mean we stay close to the realities of the African businesses we serve, pricing, clearing, last-mile, payment flows, not just the factory side of the trade.',
+      body: 'Izuire Co. Ltd. is registered with Nigeria\'s Corporate Affairs Commission (CAC), with scope covering importation, exportation, and general trading of consumer goods and merchandise. Our Onitsha roots mean we stay close to the realities of the African businesses we serve, including pricing, clearing, final delivery, and payment flows, not just the factory side of the trade.',
     },
     {
       tag: 'Onitsha HQ',
@@ -38,7 +38,7 @@ export class About {
       tag: 'Growing network',
       year: 'Today',
       title: 'Serving Africa, one order at a time',
-      body: 'While our roots are Nigeria-first, our sourcing and logistics network is built to serve importers across the wider African market. Lagos, Abuja, Accra, Douala, Nairobi, wherever your business is, if you need reliable sourcing out of China, we can build the route.',
+      body: 'While our roots are in Nigeria, our sourcing and logistics network serves importers across the wider African market. Lagos, Abuja, Accra, Douala, Nairobi, wherever your business is, if you need reliable sourcing out of China, we can build the route.',
     },
   ];
 
@@ -46,13 +46,13 @@ export class About {
     {
       n: '01',
       name: 'Our Mission',
-      body: 'To give African buyers direct, trustworthy access to Chinese manufacturers, with sourcing, quality control and logistics handled end-to-end, so that sourcing isn\'t the bottleneck in growing a business.',
+      body: 'To give African buyers direct, trustworthy access to Chinese manufacturers, with sourcing, quality control, and logistics handled from start to finish, so sourcing is never a bottleneck in growing a business.',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
     },
     {
       n: '02',
       name: 'Our Vision',
-      body: 'To be the most trusted bridge for China-to-Africa trade, known for transparency where the industry has historically had none. Pricing you can audit, timelines you can rely on, and a person you can reach when something needs answering.',
+      body: 'To be the most trusted bridge for trade between China and Africa, known for transparency where the industry has historically had none. Pricing you can audit, timelines you can rely on, and a person you can reach when something needs answering.',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>',
     },
     {

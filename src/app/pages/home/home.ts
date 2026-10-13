@@ -27,6 +27,11 @@ interface HeroStat {
   bg: 'bg-a' | 'bg-b' | 'bg-c' | 'bg-d' | 'bg-e' | 'bg-f' | 'bg-g';
 }
 
+interface HeroPhoto {
+  src: string;
+  alt: string;
+}
+
 /** One of the reasons listed under "Why Izuire". */
 interface WhyReason {
   title: string;
@@ -181,14 +186,36 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
   /** Hero slides, in order. Add another entry here for an 8th slide. */
   protected readonly heroStats: HeroStat[] = [
-    { icon: 'calendar', num: '6+', lbl: 'Years Sourcing', tone: 'bs-a', bg: 'bg-a' },
-    { icon: 'grid', num: '8', lbl: 'Categories Covered', tone: 'bs-b', bg: 'bg-b' },
-    { icon: 'clock', num: '24hr', lbl: 'Quote Turnaround', tone: 'bs-c', bg: 'bg-c' },
-    { icon: 'plane', num: '2', lbl: 'Freight Modes: Air & Sea', tone: 'bs-d', bg: 'bg-d' },
-    { icon: 'shield', num: '100%', lbl: 'Orders Inspected', tone: 'bs-e', bg: 'bg-e' },
-    { icon: 'pin', num: 'Guangzhou', lbl: 'On-Ground Sourcing Team', tone: 'bs-f', bg: 'bg-f' },
-    { icon: 'camera', num: 'Photo + Video', lbl: 'Proof Before Shipping', tone: 'bs-g', bg: 'bg-g' },
+    { icon: 'calendar', num: '6+', lbl: 'Years sourcing', tone: 'bs-a', bg: 'bg-a' },
+    { icon: 'grid', num: '8', lbl: 'Categories covered', tone: 'bs-b', bg: 'bg-b' },
+    { icon: 'clock', num: '24hr', lbl: 'Quote turnaround', tone: 'bs-c', bg: 'bg-c' },
+    { icon: 'plane', num: '2', lbl: 'Freight modes: air and sea', tone: 'bs-d', bg: 'bg-d' },
+    { icon: 'shield', num: '100%', lbl: 'Orders inspected', tone: 'bs-e', bg: 'bg-e' },
+    { icon: 'pin', num: 'Guangzhou', lbl: 'On ground sourcing team', tone: 'bs-f', bg: 'bg-f' },
+    { icon: 'camera', num: 'Photo + Video', lbl: 'Proof before shipping', tone: 'bs-g', bg: 'bg-g' },
   ];
+
+  protected readonly heroPhotos: HeroPhoto[] = [
+    {
+      src: 'https://res.cloudinary.com/dwry4zb9z/image/upload/v1791860411/kye54ucrnbfxwt9zpp20.png',
+      alt: 'Commercial mixer sourcing overview with included stainless steel accessories',
+    },
+    {
+      src: 'https://res.cloudinary.com/dwry4zb9z/image/upload/v1791860410/c0ajkf1nymynfgevrfdk.jpg',
+      alt: 'Stainless steel commercial stand mixer',
+    },
+    {
+      src: 'https://res.cloudinary.com/dwry4zb9z/image/upload/v1791860411/xcdh1zcigfzhcj4ygy2d.jpg',
+      alt: 'Close-up of mixer attachments for product inspection',
+    },
+    {
+      src: 'https://res.cloudinary.com/dwry4zb9z/image/upload/v1791860411/bhk8drjjzd8xamh3eugz.png',
+      alt: 'Commercial stand mixer with accessories, ready for sourcing',
+    },
+  ];
+  protected readonly loopHeroPhotos = computed(() => [...this.heroPhotos, this.heroPhotos[0]]);
+  protected readonly heroPhotoSlide = signal(0);
+  protected readonly snappingHeroPhoto = signal(false);
 
   /** The slides plus a clone of slide 1, giving a seamless right-to-left loop. */
   protected readonly loopStats = computed(() => [...this.heroStats, this.heroStats[0]]);
@@ -376,6 +403,8 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   private timer: ReturnType<typeof setInterval> | undefined;
   private statTimer: ReturnType<typeof setInterval> | undefined;
   private snapTimer: ReturnType<typeof setTimeout> | undefined;
+  private heroPhotoTimer: ReturnType<typeof setInterval> | undefined;
+  private heroPhotoSnapTimer: ReturnType<typeof setTimeout> | undefined;
   private mediaObserver: IntersectionObserver | undefined;
   private revealObserver: IntersectionObserver | undefined;
   private stepObserver: IntersectionObserver | undefined;
@@ -408,15 +437,33 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  private nextHeroPhoto(): void {
+    const cloneIndex = this.loopHeroPhotos().length - 1;
+    const next = this.heroPhotoSlide() + 1;
+    this.heroPhotoSlide.set(next);
+    if (next === cloneIndex) {
+      this.heroPhotoSnapTimer = setTimeout(() => {
+        this.snappingHeroPhoto.set(true);
+        this.heroPhotoSlide.set(0);
+        this.heroPhotoSnapTimer = setTimeout(() => this.snappingHeroPhoto.set(false), 80);
+      }, 900);
+    }
+  }
+
   ngOnInit(): void {
     this.timer = setInterval(() => this.goTo(this.current() + 1), 6000);
     this.statTimer = setInterval(() => this.nextStat(), 3000);
+    if (typeof window === 'undefined' || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.heroPhotoTimer = setInterval(() => this.nextHeroPhoto(), 4200);
+    }
   }
 
   ngOnDestroy(): void {
     clearInterval(this.timer);
     clearInterval(this.statTimer);
     clearTimeout(this.snapTimer);
+    clearInterval(this.heroPhotoTimer);
+    clearTimeout(this.heroPhotoSnapTimer);
     this.mediaObserver?.disconnect();
     this.revealObserver?.disconnect();
     this.stepObserver?.disconnect();

@@ -91,8 +91,8 @@
       <select id="emailTemplate" [value]="selectedTemplate()" (change)="applyTemplate($any($event.target).value)">
         <option value="welcome">Welcome email</option>
         <option value="newsletter">Newsletter email</option>
-        <option value="check-in">Sourcing check-in</option>
-        <option value="quote">Quote follow-up</option>
+        <option value="check-in">Sourcing check in</option>
+        <option value="quote">Quote follow up</option>
       </select>
     </div>
     <div class="field"><label for="followupSubject">Subject</label><input id="followupSubject" type="text" [value]="subject()" (input)="subject.set($any($event.target).value)" /></div>

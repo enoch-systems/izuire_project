@@ -768,7 +768,7 @@ export class AdminEmailFollowup {
       this.checkedManualEmail.set(email);
       this.manualEmailState.set('valid');
       this.manualEmailMessage.set(
-        'Valid address format and mail-enabled domain. The specific inbox is not confirmed.',
+        'Valid address format and a domain set up to receive email. The specific inbox is not confirmed.',
       );
     } catch (error) {
       if (this.manualEmail().trim().toLowerCase() !== email) return;

@@ -1,4 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { buildGoogleAuthRedirectUrl } from './auth-redirect';
 import { SupabaseService } from './supabase.service';
 
 /** Which screen the auth modal is on. */
@@ -245,6 +246,41 @@ export class AuthService {
     }
     this.loadingStage.set('idle');
     throw new Error(failure);
+  }
+
+  /** Sign in with Google through Supabase Auth. */
+  async loginWithGoogle(): Promise<void> {
+    this.loadingStage.set('signing-in');
+    this.authError.set(null);
+    this.runSigningInCopy();
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://127.0.0.1:4200';
+    const redirectTo = buildGoogleAuthRedirectUrl(origin);
+    this.authOpen.set(false);
+
+    try {
+      const { error } = await this.backend.supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          queryParams: { prompt: 'select_account' },
+        },
+      });
+      if (error) {
+        this.loadingStage.set('idle');
+        throw new Error(
+          error.message.includes('provider') || error.message.includes('OAuth')
+            ? 'Google sign-in is not configured for this app yet. Add Google as an OAuth provider in Supabase and allow the app URL.'
+            : error.message,
+        );
+      }
+    } catch (error) {
+      this.loadingStage.set('idle');
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : 'Could not start Google sign-in. Check the Supabase provider settings and redirect URLs.',
+      );
+    }
   }
 
   /** Register a Supabase Auth account and persist its profile. */

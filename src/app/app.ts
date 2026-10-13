@@ -50,8 +50,10 @@ export class App implements OnDestroy {
         this.url.set(router.url);
         let route: ActivatedRoute | null = router.routerState.root;
         while (route.firstChild) route = route.firstChild;
-        const desc = route.snapshot.data['desc'];
-        if (desc) meta.updateTag({ name: 'description', content: desc });
+        const desc = route.snapshot.data['desc'] ?? 'Izuire connects African buyers with trusted suppliers in China through sourcing, procurement and shopping.';
+        const privateRoute = route.snapshot.data['robots'] === 'noindex, nofollow' || /^\/(admin|account|cart|checkout)(\/|$)/.test(router.url);
+        meta.updateTag({ name: 'description', content: desc });
+        meta.updateTag({ name: 'robots', content: privateRoute ? 'noindex, nofollow' : 'index, follow' });
       });
   }
 

@@ -5,7 +5,7 @@
     <p class="lede">Your latest registrations, catalogue and order activity.</p>
   </div>
   <div class="dashboard-actions">
-    <a class="action-secondary" routerLink="/admin/email-follow-up">Email follow-up</a>
+    <a class="action-secondary" routerLink="/admin/email-follow-up">Email follow up</a>
     <a class="action-primary" routerLink="/admin/products">Manage catalogue</a>
   </div>
 </header>
@@ -21,12 +21,12 @@
 <div class="grid">
   @if (loading()) {
     @for (item of [1, 2, 3, 4]; track item) {
-      <div class="card card--loading"><div class="n">—</div><div class="l">Loading…</div></div>
+      <div class="card card--loading"><div class="n">...</div><div class="l">Loading…</div></div>
     }
   } @else {
     @for (stat of stats(); track stat.label) {
       <div class="card" [class.card--empty]="stat.value === 0">
-        <div class="n">{{ stat.value === null ? '—' : stat.value }}</div>
+        <div class="n">{{ stat.value === null ? 'N/A' : stat.value }}</div>
         <div class="l">{{ stat.label }}</div>
         <div class="h">{{ stat.hint }}</div>
       </div>
@@ -49,7 +49,7 @@
 <div class="recent-grid">
   <section class="registrations registrations--users" aria-labelledby="registrationsHeading">
     <div class="registrations-head">
-      <div><span class="panel-kicker">LATEST SIGN-UPS</span><h2 id="registrationsHeading">Registered users</h2></div>
+      <div><span class="panel-kicker">LATEST SIGN UPS</span><h2 id="registrationsHeading">Registered users</h2></div>
       <a class="view-all" routerLink="/admin/users">View all users <span aria-hidden="true">↗</span></a>
     </div>
     <p class="section-note">The five newest accounts</p>
@@ -145,11 +145,11 @@
     </div>
     <div class="status-chart-frame" [attr.aria-busy]="chartLoading()">
       @if (chartLoading()) {
-        <div class="chart-message">Loading sign-ups</div>
+        <div class="chart-message">Loading sign ups</div>
       } @else if (chartError()) {
         <div class="chart-message chart-message--error">{{ chartError() }}</div>
       } @else if (!hasTierActivity()) {
-        <div class="chart-message"><strong>No recent sign-ups</strong><span>New customers will appear here.</span></div>
+        <div class="chart-message"><strong>No recent sign ups</strong><span>New customers will appear here.</span></div>
       } @else {
         <div class="tier-summary"><strong>{{ tierTotal() }}</strong><span>new users</span></div>
         <div class="tier-bar" role="img" aria-label="New registrations by member tier">

@@ -1,4 +1,5 @@
 import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
+import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 import { CATEGORIES, Product } from './marketplace-data';
@@ -84,8 +85,8 @@ export class Marketplace {
   protected readonly priceBands = [
     { id: 'all', label: 'Any price', min: 0, max: Infinity },
     { id: 'under-10k', label: 'Under ₦10k', min: 0, max: 10000 },
-    { id: '10k-50k', label: '₦10k–₦50k', min: 10000, max: 50000 },
-    { id: '50k-200k', label: '₦50k–₦200k', min: 50000, max: 200000 },
+    { id: '10k-50k', label: '₦10k to ₦50k', min: 10000, max: 50000 },
+    { id: '50k-200k', label: '₦50k to ₦200k', min: 50000, max: 200000 },
     { id: 'over-200k', label: 'Over ₦200k', min: 200000, max: Infinity },
   ];
   /**
@@ -111,6 +112,8 @@ export class Marketplace {
   private readonly qtyDrafts = signal<Record<string, number>>({});
   protected readonly cart = inject(CartService);
   private readonly flyToCart = inject(FlyToCartService);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
 
   /**
    * Whether the refine sheet is up.
@@ -132,6 +135,23 @@ export class Marketplace {
   );
 
   constructor() {
+    effect(() => {
+      const selected = this.filter();
+      const category = this.categories().find((item) => item.id === selected)?.label;
+      if (!category || selected === 'all') {
+        this.title.setTitle('Marketplace | Shop Products Sourced from China | Izuire');
+        this.meta.updateTag({
+          name: 'description',
+          content: 'Browse wholesale products sourced from China, compare prices and minimums, and request a quote from Izuire.',
+        });
+        return;
+      }
+      this.title.setTitle(`${category} | Explore Products and Shop Online | Izuire`);
+      this.meta.updateTag({
+        name: 'description',
+        content: `Explore ${category.toLowerCase()} sourced from China. Browse live Izuire listings, pricing and minimum order quantities.`,
+      });
+    });
     // A sheet over a scrollable page means the page underneath keeps moving
     // under a thumb that is meant to be choosing something. Held here as an
     // effect rather than a pair of calls at each open and close, so the two can

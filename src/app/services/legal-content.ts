@@ -102,7 +102,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       { kind: 'h3', text: 'Refunds' },
       {
         kind: 'p',
-        text: 'Refund eligibility depends on the stage of the order, funds committed to production or already-purchased stock may not be fully refundable. Specific terms are communicated before you confirm an order.',
+        text: 'Refund eligibility depends on the stage of the order. Funds committed to production or stock already bought may not be fully refundable. Specific terms are communicated before you confirm an order.',
       },
     ],
   },
@@ -118,7 +118,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       { kind: 'h3', text: 'Risk in transit' },
       {
         kind: 'p',
-        text: 'Once goods are handed to a freight carrier, standard freight insurance terms apply. Optional additional coverage can be discussed for high-value shipments.',
+        text: 'Once goods are handed to a freight carrier, standard freight insurance terms apply. Optional additional coverage can be discussed for high value shipments.',
       },
     ],
   },
@@ -135,7 +135,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
       {
         kind: 'p',
         lead: "Customer's responsibility:",
-        text: 'providing accurate product specifications, timely payment per agreed terms, and timely response during quality sign-off windows.',
+        text: 'providing accurate product specifications, timely payment per agreed terms, and timely response during quality approval windows.',
       },
       {
         kind: 'p',

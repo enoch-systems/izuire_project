@@ -5,8 +5,8 @@
   <div class="container">
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow hero-slide">China &rarr; Africa Sourcing</span>
-        <h1 class="hero-slide">Your Trusted Bridge<br>from China to <em>Africa</em>.</h1>
+        <span class="eyebrow hero-slide">China to Africa sourcing</span>
+        <h1 class="hero-slide">Your trusted bridge<br>from China to <em>Africa</em>.</h1>
         <p class="hero-sub hero-slide">IZUIRE sources, inspects and ships products for African importers, from Guangzhou's factories and markets straight to your door in Nigeria and beyond.</p>
         <div class="hero-tags hero-slide">
           <span>Popular:</span>
@@ -16,7 +16,7 @@
           <a routerLink="/marketplace">Human hair</a>
         </div>
         <div class="cta-row hero-slide">
-          <a routerLink="/quote" class="btn btn-primary">Start Sourcing</a>
+          <a routerLink="/quote" class="btn btn-primary">Start sourcing</a>
           <!-- The sign-in call is here for the visitor who is not signed in, and
                only for them. Signed in it used to swap for a "Welcome back, name"
                button linking to the profile, which meant the hero's one clear
@@ -25,26 +25,20 @@
                "Start Sourcing" alone rather than replacing it. The header's own
                welcome chip is still where a signed-in shopper finds their name. -->
           @if (!auth.user()) {
-            <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started<span class="hero-join-sep">or</span>Log in</button>
+            <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started<span class="hero-join-sep">or</span>log in</button>
           }
         </div>
       </div>
-      <div class="hero-visual hero-slide" aria-hidden="true">
-        <div class="badge-bg">
-          <div class="badge-bg-track" [style.transform]="'translateX(-' + statSlide() * 100 + '%)'" [style.transition]="snapping() ? 'none' : null">
-            @for (s of loopStats(); track $index) {
-              <div [class]="'badge-bg-panel ' + s.bg">
-                <svg viewBox="0 0 480 520">
-                  <polygon class="m1" points="70,60 210,60 90,460 -50,460"/>
-                  <polygon class="m2" points="250,60 400,60 480,150 480,300 250,460 130,460"/>
-                  <polygon class="m3" points="150,80 250,80 250,150 175,150"/>
-                  <polygon class="m4" points="150,150 175,150 100,430 60,430"/>
-                  <polygon class="m5" points="175,150 250,150 100,430 40,430"/>
-                  <polygon class="m6" points="100,430 250,430 210,500 60,500"/>
-                </svg>
+      <div class="hero-visual hero-slide" role="region" aria-label="Products sourced for African buyers">
+        <div class="hero-photo-viewport" aria-live="off">
+          <div class="hero-photo-track" [style.transform]="'translateX(-' + heroPhotoSlide() * 100 + '%)'" [style.transition]="snappingHeroPhoto() ? 'none' : null">
+            @for (photo of loopHeroPhotos(); track $index) {
+              <div class="hero-photo-slide">
+                <img [src]="photo.src" [alt]="$last ? '' : photo.alt" [attr.fetchpriority]="$first ? 'high' : null" [attr.loading]="$first ? 'eager' : 'lazy'" />
               </div>
             }
           </div>
+          <div class="hero-photo-shade" aria-hidden="true"></div>
         </div>
         <div class="badge-slider hero-slide">
           <div class="badge-viewport">
@@ -107,8 +101,8 @@
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/sourcing.mp4" type="video/mp4">
         </video>
         <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></div>
-        <h4>Sourcing &amp; Procurement</h4>
-        <p>Product &amp; manufacturer sourcing, supplier verification, negotiation, MOQ help, QC and inspection.</p>
+        <h4>Sourcing and procurement</h4>
+        <p>Product and manufacturer sourcing, supplier verification, negotiation, MOQ help, QC and inspection.</p>
       </a>
       <a class="service-card service-card--media service-card--marketplace" routerLink="/marketplace">
         <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"/><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"/><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"/></svg></div>
@@ -120,13 +114,44 @@
           <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
         </video>
         <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></div>
-        <h4>Shipping &amp; Logistics</h4>
+        <h4>Shipping and logistics</h4>
         <p>Air and sea freight, CBM planning, customs coordination and delivery across Africa.</p>
       </a>
       <a class="service-card service-card--media service-card--business-solutions" routerLink="/business-solutions">
         <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg></div>
         <h4>Business Solutions</h4>
         <p>Tailored support for new importers, retailers, wholesalers and corporate buyers.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section on-paper sourcing-partners" id="partners">
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">Sourcing partners</span><h2>Global marketplaces, one sourcing team</h2></div>
+      <p>We compare products and suppliers across leading marketplaces to find the right fit for your order.</p>
+    </div>
+    <div class="partner-grid">
+      <a class="partner-item" href="https://www.jd.com/" aria-label="Visit JD.com" target="_blank" rel="noopener">
+        <img src="https://www.google.com/s2/favicons?domain=jd.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
+        <span>JD.com</span>
+      </a>
+      <a class="partner-item" href="https://www.1688.com/" aria-label="Visit 1688" target="_blank" rel="noopener">
+        <img src="https://www.google.com/s2/favicons?domain=1688.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
+        <span>1688</span>
+      </a>
+      <a class="partner-item" href="https://www.taobao.com/" aria-label="Visit Taobao" target="_blank" rel="noopener">
+        <img src="https://www.google.com/s2/favicons?domain=taobao.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
+        <span>Taobao</span>
+      </a>
+      <a class="partner-item" href="https://www.dhgate.com/" aria-label="Visit DHgate" target="_blank" rel="noopener">
+        <img src="https://www.google.com/s2/favicons?domain=dhgate.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
+        <span>DHgate</span>
+      </a>
+      <a class="partner-item" href="https://www.pinduoduo.com/" aria-label="Visit Pinduoduo" target="_blank" rel="noopener">
+        <img src="https://www.google.com/s2/favicons?domain=pinduoduo.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
+        <span>Pinduoduo</span>
       </a>
     </div>
   </div>
@@ -345,7 +370,7 @@
       <div class="step"><div class="step-num">1<span class="step-ping" aria-hidden="true"></span></div><h4>Tell Us What You Need</h4><p>A category, a product photo, or a link, plus your target quantity.</p></div>
       <div class="step"><div class="step-num">2<span class="step-ping" aria-hidden="true"></span></div><h4>We Source &amp; Quote</h4><p>Our Guangzhou team pulls quotes from vetted factories and markets.</p></div>
       <div class="step"><div class="step-num">3<span class="step-ping" aria-hidden="true"></span></div><h4>You Approve</h4><p>Confirm pricing and terms before anything moves into production.</p></div>
-      <div class="step"><div class="step-num">4<span class="step-ping" aria-hidden="true"></span></div><h4>We Inspect &amp; Ship</h4><p>Quality-checked, consolidated, and shipped to your door.</p></div>
+      <div class="step"><div class="step-num">4<span class="step-ping" aria-hidden="true"></span></div><h4>We Inspect &amp; Ship</h4><p>Quality checked, consolidated, and shipped to your door.</p></div>
     </div>
     <div class="steps-cta"><a routerLink="/sourcing" class="btn btn-outline btn-sm">See the Full Sourcing Process</a></div>
   </div>
@@ -414,9 +439,9 @@
       }
     </div>
     <div class="trust-badges">
-      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>CAC-Registered, Izuire Co. Ltd.</div>
-      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>China-based team, on the ground in Guangzhou</div>
-      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Quality-checked before shipping</div>
+      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>Registered with CAC, Izuire Co. Ltd.</div>
+      <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>Team based in China, on the ground in Guangzhou</div>
+        <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Quality assurance before shipping</div>
     </div>
   </div>
 </section>
@@ -426,7 +451,7 @@
   <div class="container">
     <div class="section-head">
       <div><span class="eyebrow">Under the IZUIRE umbrella</span><h2>Our sub-brands</h2></div>
-      <p>Specialist storefronts for two of our fastest-moving categories.</p>
+      <p>Specialist storefronts for two of our fastest growing categories.</p>
     </div>
     <!-- No cards: two unboxed columns split by a hairline. Each column is type only -
          the category still that used to sit behind the words is gone, so there is no
@@ -496,7 +521,7 @@
     <h2 class="cta-final__title">Ready to start sourcing?</h2>
     <p class="cta-final__copy">Tell us what you need and we'll come back with pricing, MOQ and lead time, usually within 24 hours.</p>
     <div class="cta-row cta-final__row">
-      <a routerLink="/quote" class="btn btn-primary">Start Sourcing</a>
+      <a routerLink="/quote" class="btn btn-primary">Start sourcing</a>
     </div>
   </div>
 </section>

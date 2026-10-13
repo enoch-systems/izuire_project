@@ -21,7 +21,7 @@ const options = (values: string[]): SelectOption[] => values.map((value) => ({ v
 const CATEGORIES = options([
   'Electronics & phone accessories',
   'Fashion & clothing',
-  'Okrika (second-hand) bales',
+  'Okrika (used) bales',
   'Hair & wigs',
   'Beauty & cosmetics',
   'Home & kitchenware',
@@ -34,11 +34,11 @@ const CATEGORIES = options([
 
 /** Most buyers know the size of an order, not the exact count, so bands it is. */
 const QUANTITIES = options([
-  '1 – 49 units',
-  '50 – 199 units',
-  '200 – 499 units',
-  '500 – 999 units',
-  '1,000 – 4,999 units',
+  '1 to 49 units',
+  '50 to 199 units',
+  '200 to 499 units',
+  '500 to 999 units',
+  '1,000 to 4,999 units',
   '5,000+ units',
 ]);
 

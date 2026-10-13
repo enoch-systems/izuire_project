@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
+import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Product } from '../marketplace/marketplace-data';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
@@ -50,6 +51,8 @@ export class ProductDetail {
   /** The live catalogue — the same rows home and the marketplace read. */
   private readonly catalogue = inject(ProductService);
   private readonly fx = inject(DisplayCurrencyService);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
   /** The price, in the site's picked display currency. */
   protected readonly money = (value: number): string => this.fx.price(value);
 
@@ -94,6 +97,22 @@ export class ProductDetail {
        swaps the product on those in-page navigations; the initial emission
        still drives the prerendered first paint. */
     this.route.paramMap.subscribe((params) => this.load(params.get('id') ?? ''));
+    effect(() => {
+      const product = this.product();
+      if (!product) {
+        if (this.catalogue.live()) {
+          this.title.setTitle('Product Not Found | Izuire Marketplace');
+          this.meta.updateTag({ name: 'description', content: 'This product is no longer available in the Izuire marketplace.' });
+        }
+        return;
+      }
+      const name = (product.title || product.name).trim();
+      this.title.setTitle(`${name} | Features, Details and Online Ordering | Izuire`);
+      this.meta.updateTag({
+        name: 'description',
+        content: `View pricing, photos, minimum order quantity and ordering details for ${name} at Izuire.`,
+      });
+    });
     // Once the live catalogue has answered, an id it does not contain is not a
     // page: bounce to the marketplace rather than render an empty shell.
     effect(() => {

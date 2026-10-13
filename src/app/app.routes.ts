@@ -37,7 +37,7 @@ export const routes: Routes = [
   {
     path: '',
     component: Home,
-    title: 'IZUIRE, Your Trusted Bridge from China to Africa',
+    title: 'Izuire | Sourcing and Shopping from China to Africa',
     data: {
       desc: 'IZUIRE sources, inspects and ships products from China to African buyers. Electronics, thrift, hair, building materials, solar and more, sourced, vetted, delivered.',
     },
@@ -45,7 +45,7 @@ export const routes: Routes = [
   {
     path: 'legal',
     component: Legal,
-    title: 'Terms, Privacy & Policies, Izuire',
+    title: 'Legal Policies | Izuire',
     data: {
       desc: "Izuire's terms and conditions, privacy policy, refund and payment policy, shipping policy, and supplier/customer responsibilities.",
       crumb: trail({ label: 'Legal' }),
@@ -54,7 +54,7 @@ export const routes: Routes = [
   {
     path: 'contact',
     component: Contact,
-    title: 'Contact Izuire, WhatsApp, Phone, Email & Office',
+    title: 'Contact Izuire | Customer Support and Enquiries',
     data: {
       desc: 'Get in touch with Izuire Co. Ltd. via WhatsApp, phone, email, or our registered offices in Guangzhou and Onitsha.',
       crumb: trail({ label: 'Contact' }),
@@ -63,7 +63,7 @@ export const routes: Routes = [
   {
     path: 'insights',
     component: Insights,
-    title: 'Izuire Insights, China Import Guides & Market Education',
+    title: 'Importing Guides and Trade Insights | Izuire',
     data: {
       desc: 'Guides on importing from China, Guangzhou market research, product sourcing tips and business advice for African importers.',
       crumb: trail({ label: 'Izuire Insights' }),
@@ -72,7 +72,7 @@ export const routes: Routes = [
   {
     path: 'faq',
     component: Faq,
-    title: 'FAQ, Izuire Sourcing Questions Answered',
+    title: 'FAQs | Sourcing, Orders and Shipping | Izuire',
     data: {
       desc: 'Answers to common questions about MOQ, payment, shipping timelines, product inspection and sourcing with Izuire.',
       crumb: trail({ label: 'FAQ' }),
@@ -82,16 +82,16 @@ export const routes: Routes = [
   {
     path: 'about',
     component: About,
-    title: 'About Izuire, Our Story, Mission & Team',
+    title: 'About Izuire | Our Story and Commitment',
     data: {
-      desc: 'Learn about Izuire Co. Ltd., the China-to-Africa sourcing company bridging Guangzhou manufacturers and African buyers.',
+      desc: 'Learn about Izuire Co. Ltd., a sourcing company connecting manufacturers in Guangzhou with buyers across Africa.',
       crumb: trail({ label: 'About' }),
     },
   },
   {
     path: 'quote',
     component: Quote,
-    title: 'Request a Quote, Izuire Sourcing',
+    title: 'Request a Sourcing Quote | Izuire',
     data: {
       desc: 'Request a sourcing quote from Izuire, product, quantity, specifications, target price, destination and shipping method.',
       crumb: trail({ label: 'Request a Quote' }),
@@ -100,7 +100,7 @@ export const routes: Routes = [
   {
     path: 'business-solutions',
     component: BusinessSolutions,
-    title: 'Business Solutions, Izuire',
+    title: 'Business Sourcing Solutions | Izuire',
     data: {
       desc: 'Sourcing solutions tailored for new importers, existing businesses, retailers, wholesalers, corporate buyers and bulk procurement.',
       crumb: trail({ label: 'Business Solutions' }),
@@ -109,25 +109,25 @@ export const routes: Routes = [
   {
     path: 'shipping',
     component: Shipping,
-    title: 'Shipping & Logistics, China to Nigeria | Izuire',
+    title: 'Shipping and Logistics from China to Africa | Izuire',
     data: {
       desc: 'Air and sea freight from China to Nigeria, CBM explained, and destination coverage across Africa.',
-      crumb: trail({ label: 'Shipping & Logistics' }),
+      crumb: trail({ label: 'Shipping and logistics' }),
     },
   },
   {
     path: 'sourcing',
     component: Sourcing,
-    title: 'Sourcing & Procurement, Izuire',
+    title: 'Product Sourcing and Procurement | Izuire',
     data: {
       desc: 'Product sourcing, manufacturer sourcing, supplier verification, price negotiation, MOQ assistance, quality control, inspection, white labeling, packaging and shipping coordination.',
-      crumb: trail({ label: 'Sourcing & Procurement' }),
+      crumb: trail({ label: 'Sourcing and procurement' }),
     },
   },
   {
     path: 'marketplace',
     component: Marketplace,
-    title: 'Marketplace, Available Stock | Izuire',
+    title: 'Marketplace | Shop Products Sourced from China | Izuire',
     data: {
       desc: 'Browse trending products sourced from China, electronics, Okrika thrift bales, building materials, hair, solar equipment and more. Request a quote on any item.',
       crumb: trail({ label: 'Marketplace' }),
@@ -136,16 +136,17 @@ export const routes: Routes = [
   {
     path: 'cart',
     component: Cart,
-    title: 'Your Cart, Izuire',
+    title: 'Shopping Cart | Review Your Selected Products | Izuire',
     data: {
       desc: 'Review the products you have added, adjust quantities to your minimums, and send the basket through for a quote.',
+      robots: 'noindex, nofollow',
       crumb: trail({ label: 'Cart' }),
     },
   },
   {
     path: 'product/:id',
     component: ProductDetail,
-    title: 'Product, Izuire',
+    title: 'Product Details | Izuire',
     data: {
       desc: 'Product details, photos, pricing and minimums for this Izuire listing.',
       // The product names the last stop from the catalogue; the route only knows
@@ -160,45 +161,50 @@ export const routes: Routes = [
   {
     path: 'account/profile',
     component: AccountProfile,
-    title: 'Profile, Your Account | Izuire',
+    title: 'Your Profile | Izuire Account',
     data: {
       desc: 'Your Izuire profile: name, contact details, shipping address and billing address.',
+      robots: 'noindex, nofollow',
       crumb: trail({ label: 'Account', link: '/account' }, { label: 'Profile' }),
     },
   },
   {
     path: 'account/payments',
     component: Payments,
-    title: 'Payments, Pending & Successful Orders | Izuire',
+    title: 'Payment History | Izuire Account',
     data: {
       desc: 'Your Izuire payment history: pending transactions, successful payments, references and tracking.',
+      robots: 'noindex, nofollow',
       crumb: trail({ label: 'Account', link: '/account' }, { label: 'Payments' }),
     },
   },
   {
     path: 'account/settings',
     component: AccountSettings,
-    title: 'Settings, Your Account | Izuire',
+    title: 'Account Settings | Izuire',
     data: {
       desc: 'Appearance, notifications and marketplace currency preferences for your Izuire account.',
+      robots: 'noindex, nofollow',
       crumb: trail({ label: 'Account', link: '/account' }, { label: 'Settings' }),
     },
   },
   {
     path: 'account/password',
     component: AccountPassword,
-    title: 'Change Password, Your Account | Izuire',
+    title: 'Change Password | Izuire Account',
     data: {
       desc: 'Change the password on your Izuire account.',
+      robots: 'noindex, nofollow',
       crumb: trail({ label: 'Account', link: '/account' }, { label: 'Change password' }),
     },
   },
   {
     path: 'checkout',
     component: Checkout,
-    title: 'Checkout, Izuire',
+    title: 'Secure Checkout | Complete Your Order | Izuire',
     data: {
       desc: 'Confirm your basket, choose a payment method and place your Izuire order.',
+      robots: 'noindex, nofollow',
       crumb: trail({ label: 'Checkout' }),
     },
   },
@@ -214,8 +220,8 @@ export const routes: Routes = [
   {
     path: 'admin/login',
     component: AdminLogin,
-    title: 'Admin Sign In | Izuire',
-    data: { desc: 'Staff sign in to the Izuire admin console.' },
+    title: 'Staff Sign In | Izuire Admin',
+    data: { desc: 'Staff sign in to the Izuire admin console.', robots: 'noindex, nofollow' },
   },
   {
     path: 'admin',
@@ -226,40 +232,46 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./pages/admin/admin-dashboard').then((page) => page.AdminDashboard),
-        title: 'Admin Dashboard | Izuire',
+        title: 'Dashboard | Izuire Admin',
+        data: { desc: 'Manage Izuire store operations and review current activity.', robots: 'noindex, nofollow' },
       },
       {
         path: 'products',
         component: AdminProducts,
-        title: 'Admin, Catalogue Manager | Izuire',
-        data: { desc: 'Admin catalogue manager: prices, featured products and visibility.' },
+        title: 'Catalogue Manager | Izuire Admin',
+        data: { desc: 'Manage catalogue listings, prices, featured products and visibility.', robots: 'noindex, nofollow' },
       },
       {
         path: 'users',
         loadComponent: () => import('./pages/admin/admin-users').then((page) => page.AdminUsers),
-        title: 'Admin, Users | Izuire',
+        title: 'User Management | Izuire Admin',
+        data: { desc: 'Manage customer accounts in the Izuire admin console.', robots: 'noindex, nofollow' },
       },
       {
         path: 'email-follow-up',
         loadComponent: () => import('./pages/admin/admin-email-followup').then((page) => page.AdminEmailFollowup),
-        title: 'Admin, Email Follow-up | Izuire',
+        title: 'Email Follow-up | Izuire Admin',
+        data: { desc: 'Review and manage customer email follow-ups.', robots: 'noindex, nofollow' },
       },
       {
         path: 'email-history',
         loadComponent: () => import('./pages/admin/admin-email-history').then((page) => page.AdminEmailHistory),
-        title: 'Admin, Email History | Izuire',
+        title: 'Email History | Izuire Admin',
+        data: { desc: 'Review email delivery history for the Izuire store.', robots: 'noindex, nofollow' },
       },
       {
         path: 'newsletter-signups',
         loadComponent: () => import('./pages/admin/admin-newsletter').then((page) => page.AdminNewsletter),
-        title: 'Admin, Newsletter Sign-ups | Izuire',
+        title: 'Newsletter Sign-ups | Izuire Admin',
+        data: { desc: 'Review newsletter subscriptions for the Izuire store.', robots: 'noindex, nofollow' },
       },
       {
         path: '**',
         loadComponent: () => import('./pages/not-found').then((page) => page.NotFound),
-        title: 'Admin Page Not Found | Izuire',
+        title: 'Admin Page Not Found | Izuire Admin',
+        data: { desc: 'The requested Izuire admin page could not be found.', robots: 'noindex, nofollow' },
       },
     ],
   },
-  { path: '**', loadComponent: () => import('./pages/not-found').then((page) => page.NotFound), title: 'Page Not Found | Izuire' },
+  { path: '**', loadComponent: () => import('./pages/not-found').then((page) => page.NotFound), title: 'Page Not Found | Izuire', data: { desc: 'The requested Izuire page could not be found.', robots: 'noindex, nofollow' } },
 ];

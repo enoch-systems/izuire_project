@@ -91,7 +91,7 @@
 
           <div class="pd-actions">
             @if (p.soldOut) {
-              <p class="pd-soldout-note" role="status">Sold out — check back soon or request a quote.</p>
+              <p class="pd-soldout-note" role="status">Sold out. Check back soon or request a quote.</p>
             }
             @if (!p.soldOut) {
               <button type="button" class="btn btn-primary pd-buy" (click)="buyNow()">
@@ -105,7 +105,7 @@
           </div>
 
           <ul class="pd-perks">
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v7M21 7v7M12 11v7"/></svg>Sourced, inspected &amp; quality-checked in China</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v7M21 7v7M12 11v7"/></svg>Sourced, inspected, and quality checked in China</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Every batch verified before it ships</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="11" rx="2"/><path d="M15 18H9M7 4h10v3H7z"/></svg>Freight &amp; duties quoted in your checkout</li>
           </ul>

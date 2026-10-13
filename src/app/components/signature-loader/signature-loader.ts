@@ -1,5 +1,6 @@
 import { Component, OnDestroy, effect, inject, signal, untracked } from '@angular/core';
 import { UiService } from '../../services/ui.service';
+import { LOGO_SRC } from '../../logo';
 
 /**
  * The signing animation: the Izuire mark written out in orange, nib first, the
@@ -37,6 +38,7 @@ import { UiService } from '../../services/ui.service';
   templateUrl: './signature-loader.html',
 })
 export class SignatureLoader implements OnDestroy {
+  protected readonly logo = LOGO_SRC;
   /** Carries the logo click over to the signature animation. */
   private readonly ui = inject(UiService);
 
@@ -108,8 +110,8 @@ export class SignatureLoader implements OnDestroy {
     // arriving over the top of it. With nothing arriving over it the sheet has
     // to hold on the finished signature first, or the flourish is cut off
     // mid-stroke and the whole thing reads as a flash rather than a signature.
-    this.hideTimer = setTimeout(() => this.playing.set(false), immediate ? 2250 : 2850);
-    this.settleTimer = setTimeout(() => this.signed.set(true), immediate ? 1750 : 2350);
+    this.hideTimer = setTimeout(() => this.playing.set(false), 620);
+    this.settleTimer = setTimeout(() => this.signed.set(true), 360);
   }
 
   ngOnDestroy(): void {

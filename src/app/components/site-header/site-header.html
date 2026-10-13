@@ -1,6 +1,6 @@
 <header id="site-header" [class.is-scrolled]="scrolled()">
   <div class="header-inner container">
-    <a routerLink="/" class="logo-link" aria-label="IZUIRE home" (click)="onLogoClick()" routerLinkActive="logo-active" [routerLinkActiveOptions]="{ exact: true }">
+    <a routerLink="/" class="logo-link" aria-label="IZUIRE home" routerLinkActive="logo-active" [routerLinkActiveOptions]="{ exact: true }">
       <img src="{{ logo }}" alt="IZUIRE logo">
     </a>
     <nav class="main-nav" aria-label="Primary">
@@ -137,7 +137,7 @@
 
 <div class="mobile-nav" id="mobileNav" [class.open]="menuOpen()">
   <div class="mobile-nav-top">
-    <a routerLink="/" (click)="closeMenu(); onLogoClick()" aria-label="IZUIRE home">
+    <a routerLink="/" (click)="closeMenu()" aria-label="IZUIRE home">
       <img src="{{ logo }}" alt="IZUIRE logo">
     </a>
     <button class="mobile-close" id="mobileClose" aria-label="Close menu" (click)="closeMenu()">
