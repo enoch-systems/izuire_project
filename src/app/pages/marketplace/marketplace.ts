@@ -8,13 +8,8 @@ import { DisplayCurrencyService } from '../../services/display-currency.service'
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 
-/**
- * How many listings a page of the catalogue holds. Eight, rather than the five
- * this used to be: a phone screen holds two rows of two comfortably and a
- * desktop four-across holds two, so eight lands the grid near the fold on both
- * and halves the number of taps a shopper needs to reach the twelfth listing.
- */
-const PAGE_SIZE = 8;
+/** Listings shown before the marketplace pager advances. */
+const PAGE_SIZE = 40;
 
 /**
  * Marketplace page: searchable stock, price/category filters, currency display,
@@ -29,31 +24,7 @@ const PAGE_SIZE = 8;
   imports: [RouterLink, Breadcrumb],
   templateUrl: './marketplace.html',
   styles: [`
-    .mk-featured .section-head { align-items: flex-end; gap: 12px; }
-    .mk-featured-more { font-size: .85rem; font-weight: 600; color: var(--orange); text-decoration: none; }
-    .mk-featured-rail {
-      display: grid; grid-auto-flow: column; grid-auto-columns: 78%;
-      gap: 14px; overflow-x: auto; padding-bottom: 6px;
-      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-    }
-    .mk-featured-card {
-      scroll-snap-align: start; display: flex; flex-direction: column;
-      border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
-      background: var(--white); color: inherit; text-decoration: none;
-    }
-    .mk-featured-media { position: relative; aspect-ratio: 4 / 3; background: var(--paper); }
-    .mk-featured-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .mk-featured-media svg { width: 40%; height: 40%; margin: 30% auto; display: block; stroke: var(--ink-40); }
-    .mk-featured-body { padding: 12px 14px; display: grid; gap: 6px; }
-    .mk-featured-body h3 { font-size: .95rem; margin: 0; }
-    .mk-featured-price { display: flex; align-items: baseline; gap: 6px; }
-    .mk-featured-price .unit { font-size: .76rem; color: var(--ink-60); }
-    @media (min-width: 720px) {
-      .mk-featured-rail { grid-auto-flow: row; grid-template-columns: repeat(3, 1fr); grid-auto-columns: auto; overflow: visible; }
-    }
-    @media (min-width: 1024px) {
-      .mk-featured-rail { grid-template-columns: repeat(5, 1fr); }
-    }
+    .mk-preview-tag { padding: 4px 8px; border-radius: 4px; background: #fff1df; color: #a84a12; font-size: .68rem; font-weight: 700; white-space: nowrap; }
   `],
 })
 export class Marketplace {
@@ -63,12 +34,11 @@ export class Marketplace {
   private readonly fx = inject(DisplayCurrencyService);
   /** The database-backed catalogue. */
   private readonly catalogue = inject(ProductService);
+  protected readonly previewMode = this.catalogue.previewMode;
   /** The whole catalogue from Supabase. */
   protected readonly products = this.catalogue.all;
   protected readonly catalogueLoading = this.catalogue.loading;
   protected readonly catalogueError = this.catalogue.error;
-  /** The featured rail at the top of the page, fed by the same rows as home. */
-  protected readonly featured = this.catalogue.featured;
   protected readonly categories = computed(() => {
     const labels = new Map(CATEGORIES.map((category) => [category.id, category.label]));
     const ids = [...new Set(this.products().map((product) => product.cat))].sort();
@@ -96,7 +66,7 @@ export class Marketplace {
    * reads without opening a native picker over the page.
    */
   protected readonly sortOrders = [
-    { id: 'featured', label: 'Featured' },
+    { id: 'recommended', label: 'Recommended' },
     { id: 'price-low', label: 'Price: low to high' },
     { id: 'price-high', label: 'Price: high to low' },
   ];
@@ -106,7 +76,7 @@ export class Marketplace {
   protected readonly currency = this.fx.currency;
   protected readonly filter = signal('all');
   protected readonly priceFilter = signal('all');
-  protected readonly sortOrder = signal('featured');
+  protected readonly sortOrder = signal('recommended');
   protected readonly query = signal('');
   protected readonly page = signal(0);
   private readonly qtyDrafts = signal<Record<string, number>>({});
@@ -179,7 +149,11 @@ export class Marketplace {
     return this.shown().slice(start, start + PAGE_SIZE);
   });
   protected readonly pageCount = computed(() => Math.ceil(this.shown().length / PAGE_SIZE));
-  protected readonly pageNumbers = computed(() => Array.from({ length: this.pageCount() }, (_, index) => index));
+  protected readonly pageNumbers = computed(() => {
+    const count = this.pageCount();
+    const first = Math.min(Math.max(this.page() - 2, 0), Math.max(count - 5, 0));
+    return Array.from({ length: Math.min(count, 5) }, (_, index) => first + index);
+  });
   protected readonly noResults = computed(() => this.shown().length === 0);
 
   /** True outside NGN, so the page can explain the indicative conversion. */
@@ -293,7 +267,7 @@ export class Marketplace {
   protected resetTune(): void {
     this.filter.set('all');
     this.priceFilter.set('all');
-    this.sortOrder.set('featured');
+    this.sortOrder.set('recommended');
     this.page.set(0);
   }
 

@@ -1,7 +1,8 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, isDevMode, signal } from '@angular/core';
 import { Product } from '../pages/marketplace/marketplace-data';
 import { SupabaseService } from './supabase.service';
 import { fromKobo, toKobo } from './money';
+import { PREVIEW_PRODUCTS } from './mock-catalogue';
 
 /** One gallery view stored against a product row. */
 export interface GalleryShot {
@@ -37,11 +38,12 @@ const grouped = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 export class ProductService {
   private readonly backend = inject(SupabaseService);
   private readonly rows = signal<DbProduct[] | null>(null);
+  readonly previewMode = isDevMode() && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('previewCatalog') === '1';
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
   /** True once Supabase has answered with rows — i.e. the catalogue is live. */
-  readonly live = computed(() => this.rows() !== null);
+  readonly live = computed(() => this.rows() !== null && !this.previewMode);
 
   /** The whole catalogue, or an empty list until Supabase returns rows. */
   readonly all = computed<Product[]>(() => this.rows() ?? []);
@@ -55,6 +57,11 @@ export class ProductService {
   });
 
   constructor() {
+    if (this.previewMode) {
+      this.rows.set(PREVIEW_PRODUCTS);
+      this.loading.set(false);
+      return;
+    }
     void this.load();
     try {
       this.backend.supabase
