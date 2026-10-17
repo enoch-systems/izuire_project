@@ -60,19 +60,6 @@
       </button>
     </div>
 
-    <!-- The categories, on their own rail under the search. They are the way
-         most people actually get through a catalogue, so they are given the
-         whole width rather than a share of a toolbar, and they scroll sideways
-         instead of wrapping onto a second line. -->
-    <div class="mk-bar-cats">
-      <div class="container">
-        <div class="filter-bar" id="filterBar" role="group" aria-label="Filter by category">
-          @for (c of categories(); track c.id) {
-            <button type="button" class="filter-chip" [class.active]="filter() === c.id" [attr.aria-pressed]="filter() === c.id" (click)="setFilter(c.id)">{{ c.label }}<span class="filter-count">{{ count(c.id) }}</span></button>
-          }
-        </div>
-      </div>
-    </div>
   </div>
 
   <section class="section mk-body">

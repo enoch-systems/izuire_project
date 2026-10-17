@@ -8417,10 +8417,12 @@ body:has(app-site-header) .mk-head{padding:26px 0 18px;background:var(--white);}
 body:has(app-site-header) .mk-head h1{font-size:1.8rem;}
 body:has(app-site-header) .mk-head-count{border-radius:4px;background:var(--paper);}
 body:has(app-site-header) .mk-bar{top:var(--mk-sticky-top, 0px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--white);box-shadow:0 3px 12px rgba(20,24,28,.05);}
-body:has(app-site-header) .mk-bar .mk-search{border-radius:5px;box-shadow:none;}
-body:has(app-site-header) .mk-tune{border-radius:5px;}
-body:has(app-site-header) .mk-bar-cats .filter-chip{border-radius:4px;}
-body:has(app-site-header) .mk-bar-cats .filter-chip.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+body:has(app-site-header) .mk-bar-main.container{max-width:920px;justify-content:center;}
+body:has(app-site-header) .mk-bar .mk-search{border:1px solid var(--line);border-radius:8px;background:var(--white);box-shadow:0 2px 8px rgba(20,24,28,.04);}
+body:has(app-site-header) .mk-bar .mk-search:focus-within{border-color:var(--orange);box-shadow:0 0 0 3px rgba(245,130,31,.12);}
+body:has(app-site-header) .mk-bar .mk-search input{min-width:0;font-size:16px !important;}
+body:has(app-site-header) .mk-bar .mk-tune{border-radius:8px;background:var(--white);}
+body:has(app-site-header) .marketplace-page .mk-meta{scroll-margin-top:calc(var(--mk-top) + 78px);}
 body:has(app-site-header) .mk-featured{background:var(--surface-section);}
 body:has(app-site-header) .mk-featured-card{border-radius:6px;}
 body:has(app-site-header) .mk-foot{border-radius:6px;background:var(--surface-section);}
@@ -8453,6 +8455,12 @@ body:has(app-site-header) .auth-tabs{border-radius:6px;}
   body:has(app-site-header) .hero-copy{padding-bottom:24px;}
   body:has(app-site-header) .header-inner{min-height:60px;}
   body:has(app-site-header) .product-grid{gap:10px;}
+}
+
+@media(max-width:620px){
+  body:has(app-site-header) .mk-bar-main.container{width:100%;max-width:100%;gap:8px;}
+  body:has(app-site-header) .mk-bar .mk-search{min-width:0;min-height:46px;border-radius:8px;}
+  body:has(app-site-header) .mk-bar .mk-tune{min-width:44px;min-height:44px;border-radius:8px;}
 }
 
 /* Mobile preview catalogue: three readable, image-led columns without page overflow. */

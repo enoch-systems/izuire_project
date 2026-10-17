@@ -8,8 +8,9 @@ import { DisplayCurrencyService } from '../../services/display-currency.service'
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 
-/** Listings shown before the marketplace pager advances. */
-const PAGE_SIZE = 40;
+const MOBILE_BREAKPOINT = '(max-width: 620px)';
+const DESKTOP_PAGE_SIZE = 40;
+const MOBILE_PAGE_SIZE = 42;
 
 /**
  * Marketplace page: searchable stock, price/category filters, currency display,
@@ -39,6 +40,9 @@ export class Marketplace {
   protected readonly products = this.catalogue.all;
   protected readonly catalogueLoading = this.catalogue.loading;
   protected readonly catalogueError = this.catalogue.error;
+  private readonly mobileLayout = signal(
+    typeof window !== 'undefined' && window.matchMedia(MOBILE_BREAKPOINT).matches,
+  );
   protected readonly categories = computed(() => {
     const labels = new Map(CATEGORIES.map((category) => [category.id, category.label]));
     const ids = [...new Set(this.products().map((product) => product.cat))].sort();
@@ -51,7 +55,7 @@ export class Marketplace {
     ];
   });
   protected readonly currencies = this.fx.currencies;
-  protected readonly pageSize = PAGE_SIZE;
+  protected readonly pageSize = computed(() => this.mobileLayout() ? MOBILE_PAGE_SIZE : DESKTOP_PAGE_SIZE);
   protected readonly priceBands = [
     { id: 'all', label: 'Any price', min: 0, max: Infinity },
     { id: 'under-10k', label: 'Under ₦10k', min: 0, max: 10000 },
@@ -132,6 +136,15 @@ export class Marketplace {
     });
   }
 
+  @HostListener('window:resize')
+  protected onWindowResize(): void {
+    if (typeof window === 'undefined') return;
+    const mobile = window.matchMedia(MOBILE_BREAKPOINT).matches;
+    if (mobile === this.mobileLayout()) return;
+    this.mobileLayout.set(mobile);
+    this.page.set(0);
+  }
+
   /**
    * The listings on screen. Filtering drops cards from the list rather than
    * hiding them with a style binding, so what is filtered out is genuinely not in
@@ -145,10 +158,10 @@ export class Marketplace {
     return matching;
   });
   protected readonly visible = computed(() => {
-    const start = this.page() * PAGE_SIZE;
-    return this.shown().slice(start, start + PAGE_SIZE);
+    const start = this.page() * this.pageSize();
+    return this.shown().slice(start, start + this.pageSize());
   });
-  protected readonly pageCount = computed(() => Math.ceil(this.shown().length / PAGE_SIZE));
+  protected readonly pageCount = computed(() => Math.ceil(this.shown().length / this.pageSize()));
   protected readonly pageNumbers = computed(() => {
     const count = this.pageCount();
     const first = Math.min(Math.max(this.page() - 2, 0), Math.max(count - 5, 0));
@@ -283,10 +296,12 @@ export class Marketplace {
 
   protected goToPage(index: number): void {
     this.page.set(index);
+    this.scrollToListingStart();
   }
 
   protected stepPage(delta: number): void {
     this.page.update((current) => Math.min(Math.max(current + delta, 0), this.pageCount() - 1));
+    this.scrollToListingStart();
   }
 
   protected qtyFor(id: string): number {
@@ -311,5 +326,9 @@ export class Marketplace {
 
   private setQty(id: string, qty: number): void {
     this.qtyDrafts.update((drafts) => ({ ...drafts, [id]: qty }));
+  }
+
+  private scrollToListingStart(): void {
+    requestAnimationFrame(() => document.querySelector<HTMLElement>('.mk-meta')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
   }
 }
