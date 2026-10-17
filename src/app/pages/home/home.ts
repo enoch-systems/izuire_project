@@ -263,6 +263,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
   /** The catalogue backend: Supabase rows when live, the bundled list otherwise. */
   private readonly catalogue = inject(ProductService);
+  protected readonly previewMode = this.catalogue.previewMode;
 
   /** The showcase pages through the whole live catalogue. */
   protected readonly catalogueRows = this.catalogue.all;

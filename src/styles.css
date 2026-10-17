@@ -8407,6 +8407,7 @@ body:has(app-site-header) .mk-foot{border-radius:6px;background:var(--surface-se
 
 body:has(app-site-header) .pd-media,
 body:has(app-site-header) .pd-also-card{border-radius:6px;}
+body:has(app-site-header) .pd-preview-note{margin:18px 0;padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--orange);border-radius:5px;background:var(--paper);color:var(--ink-60);font-size:.9rem;}
 body:has(app-site-header) .pd-price{color:var(--orange-deep);}
 body:has(app-site-header) .pd-buy{background:var(--orange);color:#fff;}
 body:has(app-site-header) .pd-buy:hover{background:var(--orange-deep);}

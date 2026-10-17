@@ -50,6 +50,7 @@ export class ProductDetail {
   protected readonly cart = inject(CartService);
   /** The live catalogue — the same rows home and the marketplace read. */
   private readonly catalogue = inject(ProductService);
+  protected readonly previewMode = this.catalogue.previewMode;
   private readonly fx = inject(DisplayCurrencyService);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);

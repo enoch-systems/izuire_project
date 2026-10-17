@@ -293,6 +293,7 @@
                       <span class="price-val">{{ price(p.unitPrice) }}</span>
                       <span class="unit">{{ p.unit }}</span>
                     </div>
+                      @if (!previewMode) {
                       <div class="product-qty">
                       <button type="button" class="product-qty-step" (click)="stepQty(p.id, -1)" [disabled]="qtyFor(p.id) <= 1" [attr.aria-label]="'One fewer unit of ' + p.title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
@@ -312,6 +313,7 @@
                       </span>
                       <span>{{ p.soldOut ? 'Sold out' : cart.addedId() === p.id ? 'Added' : 'Add to cart' }}</span>
                     </button>
+                      }
                   </div>
                 </article>
               }
