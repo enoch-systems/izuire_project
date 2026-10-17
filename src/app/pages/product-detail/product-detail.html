@@ -122,9 +122,19 @@
       <div class="container">
         <div class="pd-also-head">
           <h2>You may also like</h2>
-          <a routerLink="/marketplace" class="pd-also-more">View all</a>
+          <div class="pd-also-actions">
+            <a routerLink="/marketplace" class="pd-also-more">View all</a>
+            <div class="pd-also-controls" aria-label="You may also like navigation">
+              <button type="button" class="pd-also-scroll" (click)="scrollAlsoLike(alsoLikeGrid, -1)" aria-label="Show previous related products">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <button type="button" class="pd-also-scroll" (click)="scrollAlsoLike(alsoLikeGrid, 1)" aria-label="Show more related products">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="pd-also-grid">
+        <div class="pd-also-grid" #alsoLikeGrid>
           @for (rel of alsoLike(); track rel.id) {
             <article class="pd-also-card" (click)="openProduct(rel.id)">
               <div class="pd-also-media">

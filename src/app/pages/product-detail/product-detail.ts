@@ -88,7 +88,7 @@ export class ProductDetail {
   /** Neighbours for "You may also like", from the live catalogue. */
   protected readonly alsoLike = computed(() => {
     const p = this.product();
-    return p ? this.catalogue.related(p.id, 4) : [];
+    return p ? this.catalogue.related(p.id, 9) : [];
   });
 
   constructor() {
@@ -166,6 +166,10 @@ export class ProductDetail {
 
   protected openProduct(id: string): void {
     void this.router.navigate(['/product', id]);
+  }
+
+  protected scrollAlsoLike(track: HTMLElement, direction: -1 | 1): void {
+    track.scrollBy({ left: direction * track.clientWidth, behavior: 'smooth' });
   }
 
   protected addRelated(product: Product): void {
