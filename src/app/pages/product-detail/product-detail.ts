@@ -88,7 +88,7 @@ export class ProductDetail {
   /** Neighbours for "You may also like", from the live catalogue. */
   protected readonly alsoLike = computed(() => {
     const p = this.product();
-    return p ? this.catalogue.related(p.id, 9) : [];
+    return p ? this.catalogue.related(p.id, 16) : [];
   });
 
   constructor() {
