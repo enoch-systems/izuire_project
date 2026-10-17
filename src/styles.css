@@ -8455,10 +8455,10 @@ body:has(app-site-header) .auth-tabs{border-radius:6px;}
   body:has(app-site-header) .product-grid{gap:10px;}
 }
 
-/* Mobile preview catalogue: four readable, image-led columns without page overflow. */
+/* Mobile preview catalogue: three readable, image-led columns without page overflow. */
 @media(max-width:620px){
   .marketplace-page.preview-mode .product-grid--market{
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(3,minmax(0,1fr));
     gap:8px;
     width:100%;
   }
