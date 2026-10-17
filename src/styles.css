@@ -8517,7 +8517,7 @@ html:has(app-site-header){overflow-x:clip;}
 body:has(app-site-header) .marketplace-page .product-grid--market .product-card{
   overflow:hidden;
   border:1px solid var(--line);
-  border-radius:9px;
+  border-radius:8px;
   background:var(--white);
   box-shadow:0 2px 8px rgba(20,24,28,.045);
   transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease);
