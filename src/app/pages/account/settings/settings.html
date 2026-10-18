@@ -1,4 +1,4 @@
-<main id="top" class="account-page">
+<main id="top" class="account-page account-page--settings">
   <app-account-gate label="your settings">
 
     <section class="page-hero account-hero">
@@ -20,64 +20,25 @@
       <div class="container">
         <div class="settings-grid">
 
-          <section class="account-card">
+          <section class="account-card settings-card--appearance">
             <header class="account-card-head">
               <div>
                 <span class="account-card-kicker">Interface</span>
                 <h2>Appearance</h2>
-                <p>The same switch the header carries, written out in full.</p>
+                <p>Choose the appearance used across the storefront and your account.</p>
               </div>
             </header>
             <div class="settings-choice">
               <button type="button" class="settings-theme" [class.active]="theme.theme() === 'light'" (click)="setTheme('light')" [attr.aria-pressed]="theme.theme() === 'light'">
                 <span class="settings-theme-preview settings-theme-preview--light" aria-hidden="true"><i></i><i></i><i></i></span>
                 <strong>Light</strong>
-                <small>The way the site was built</small>
+                <small>Bright, low-contrast surfaces</small>
               </button>
               <button type="button" class="settings-theme" [class.active]="theme.theme() === 'dark'" (click)="setTheme('dark')" [attr.aria-pressed]="theme.theme() === 'dark'">
                 <span class="settings-theme-preview settings-theme-preview--dark" aria-hidden="true"><i></i><i></i><i></i></span>
                 <strong>Dark</strong>
-                <small>Easier at night</small>
+                <small>Reduced light for dim settings</small>
               </button>
-            </div>
-          </section>
-
-          <section class="account-card">
-            <header class="account-card-head">
-              <div>
-                <span class="account-card-kicker">Alerts</span>
-                <h2>Notifications</h2>
-                <p>What we send you about quotes, payments and shipments.</p>
-              </div>
-            </header>
-            <div class="settings-rows">
-              <div class="settings-row">
-                <div>
-                  <strong>Email updates</strong>
-                  <small>Quote replies, receipts and tracking numbers.</small>
-                </div>
-                <button type="button" class="settings-switch" [class.on]="emailUpdates()" role="switch" [attr.aria-checked]="emailUpdates()" (click)="toggle('email')" aria-label="Email updates">
-                  <span></span>
-                </button>
-              </div>
-              <div class="settings-row">
-                <div>
-                  <strong>WhatsApp updates</strong>
-                  <small>The fastest way we reach buyers while an order moves.</small>
-                </div>
-                <button type="button" class="settings-switch" [class.on]="whatsappUpdates()" role="switch" [attr.aria-checked]="whatsappUpdates()" (click)="toggle('whatsapp')" aria-label="WhatsApp updates">
-                  <span></span>
-                </button>
-              </div>
-              <div class="settings-row">
-                <div>
-                  <strong>Price drop alerts</strong>
-                  <small>When a line you watch gets cheaper at the market.</small>
-                </div>
-                <button type="button" class="settings-switch" [class.on]="priceAlerts()" role="switch" [attr.aria-checked]="priceAlerts()" (click)="toggle('alerts')" aria-label="Price drop alerts">
-                  <span></span>
-                </button>
-              </div>
             </div>
           </section>
 
@@ -86,7 +47,7 @@
               <div>
                 <span class="account-card-kicker">Storefront</span>
                 <h2>Display currency</h2>
-                <p>The money every price on the site is shown in. Pick it once and it holds everywhere.</p>
+                <p>Choose how product and order prices appear across the storefront.</p>
               </div>
             </header>
             <label class="fx-pick">
@@ -111,7 +72,7 @@
               <div>
                 <span class="account-card-kicker">Session</span>
                 <h2>Account</h2>
-                <p>Jump to the rest, or end the session on this device.</p>
+                <p>Manage your personal details, transactions, credentials, or sign out.</p>
               </div>
             </header>
             <div class="settings-links">
@@ -128,16 +89,14 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
               </a>
               <button type="button" class="settings-signout" (click)="signOut()">
-                <span><strong>Log out</strong><small>Ask first, then end this session</small></span>
+                <span><strong>Log out</strong><small>End this session securely</small></span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
               </button>
             </div>
           </section>
         </div>
 
-        <p class="account-note">
-          Appearance and display currency are remembered between visits. The notification switches are demo preferences, they reset when the page reloads.
-        </p>
+        <p class="account-note">Appearance and display currency preferences are saved on this device.</p>
       </div>
     </section>
   </app-account-gate>

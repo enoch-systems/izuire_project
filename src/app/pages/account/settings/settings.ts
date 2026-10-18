@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AccountGate } from '../../../components/account-gate/account-gate';
 import { AccountNav } from '../../../components/account-nav/account-nav';
@@ -10,12 +10,8 @@ import { Theme, ThemeService } from '../../../services/theme.service';
 /**
  * Settings: the switches that are about the experience rather than the person.
  *
- * Appearance and the display currency are the real ones — the first drives the
- * same ThemeService the header toggle does, the second is the shared pick the
- * payments page and the marketplace select also write to, and both are
- * remembered between visits. The notification preference is session-level mock
- * state: it flips, it reads back, and it resets on reload, which is the honest
- * behaviour for a site with no backend.
+ * Appearance and display currency are shared, persistent preferences. Account
+ * access links lead to the profile, payments and password flows.
  */
 @Component({
   selector: 'app-account-settings',
@@ -26,22 +22,12 @@ export class AccountSettings {
   protected readonly auth = inject(AuthService);
   protected readonly theme = inject(ThemeService);
 
-  /** Mock preferences, kept only for this session. */
-  protected readonly emailUpdates = signal(true);
-  protected readonly whatsappUpdates = signal(true);
-  protected readonly priceAlerts = signal(false);
   /** The shared display-currency pick — same service the payments page and the
    *  marketplace select use, so all three can never disagree. */
   protected readonly fx = inject(DisplayCurrencyService);
 
   protected setTheme(theme: Theme): void {
     this.theme.set(theme);
-  }
-
-  protected toggle(setting: 'email' | 'whatsapp' | 'alerts'): void {
-    if (setting === 'email') this.emailUpdates.update((on) => !on);
-    if (setting === 'whatsapp') this.whatsappUpdates.update((on) => !on);
-    if (setting === 'alerts') this.priceAlerts.update((on) => !on);
   }
 
   protected signOut(): void {

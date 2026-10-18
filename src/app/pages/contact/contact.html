@@ -5,7 +5,7 @@
     <app-breadcrumb />
     <span class="eyebrow">Get in touch</span>
     <h1>Contact Izuire</h1>
-    <p>Questions about an order, a product, or how sourcing works, reach us however's easiest for you. You'll get a real person, usually within minutes on WhatsApp.</p>
+    <p>For questions about an order, a product, or our sourcing process, contact our team through the channel that works best for you.</p>
     <div class="hero-step-counter">
       <span>Ways to reach us · Pick the one that works</span>
     </div>
@@ -17,7 +17,7 @@
     <div class="cluster-head">
       <span class="eyebrow">How to reach us</span>
       <h2>Four paths in, pick the fastest for your question</h2>
-      <p>WhatsApp gets the fastest reply, but every channel below is monitored by the same team. If one doesn't fit, try the next.</p>
+      <p>Choose a channel based on the kind of support you need. For order or quote questions, include the relevant product and any timing requirements.</p>
     </div>
 
     <div class="contact-flow">
@@ -25,15 +25,15 @@
         <div class="flow-step-num">01</div>
         <div class="flow-step-body">
           <h4>Chat on WhatsApp</h4>
-          <p>Fastest. Most questions get answered within minutes during business hours. Use this for sourcing questions, order updates, and quote requests.</p>
+          <p>Use WhatsApp for sourcing questions, order updates, and quote requests. Response times may vary by business hours and message volume.</p>
           <div class="flow-actions">
-            <a class="flow-link" href="https://wa.me/2340000000000" target="_blank" rel="noopener">
+            <a class="flow-link" href="https://wa.me/2348167912191" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
               Open WhatsApp Chat
             </a>
-            <a class="flow-link" href="tel:+2340000000000">
+            <a class="flow-link" href="tel:+2348167912191">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.4 2.1L8 9.9a16 16 0 006 6l1.4-1.4a2 2 0 012.1-.4c.9.3 1.8.5 2.7.6a2 2 0 011.8 2.2z"/></svg>
-              +234 000 000 0000
+              +234 816 791 2191
             </a>
           </div>
         </div>
@@ -43,7 +43,7 @@
         <div class="flow-step-num">02</div>
         <div class="flow-step-body">
           <h4>Send us an email</h4>
-          <p>Longer inquiries, documents, purchase orders, or things that need a paper trail. We reply within one business day.</p>
+          <p>Email works well for longer inquiries, documents, and purchase orders that need a written record.</p>
           <div class="flow-actions">
             <a class="flow-link" href="mailto:hello&#64;izuire.com">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 6l8 7 8-7"/></svg>
@@ -116,7 +116,7 @@
           </div>
           <div class="field">
             <label for="cPhone">WhatsApp / Phone</label>
-            <input type="tel" id="cPhone" name="cPhone" [(ngModel)]="cPhone" placeholder="e.g. 0803 000 0000">
+            <input type="tel" id="cPhone" name="cPhone" [(ngModel)]="cPhone" placeholder="Include your country code">
           </div>
           <div class="field" id="field-message" [class.has-error]="submitted() && messageInvalid()">
             <label for="cMessage">Message <span class="req">*</span></label>
@@ -127,7 +127,7 @@
             <button type="submit" class="btn btn-primary" id="contactSubmit">Send via WhatsApp</button>
             <a href="#" class="btn btn-outline" id="contactEmailBtn" (click)="sendEmail($event)">Send via Email</a>
           </div>
-          <p class="form-note">We typically respond within 24 hours. WhatsApp replies are often within minutes during business hours.</p>
+          <p class="form-note">Include the product, quantity, and timeline so our team can respond with relevant next steps.</p>
         </form>
       </div>
     </div>

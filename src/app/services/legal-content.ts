@@ -39,7 +39,7 @@ export interface LegalDoc {
 
 /** Carried in the header of every view that shows this copy. */
 export const LEGAL_DISCLAIMER =
-  'The sections below are a starting structure only and are not final legal terms, have them reviewed by a qualified lawyer licensed in your jurisdiction before publishing them live on the site.';
+  'This information is a general summary. Your accepted quotation and order documents set the terms for your specific transaction. Please contact Izuire before confirming an order if anything is unclear.';
 
 export const LEGAL_DOCS: LegalDoc[] = [
   {

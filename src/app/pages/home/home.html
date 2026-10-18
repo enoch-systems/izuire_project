@@ -8,25 +8,11 @@
         <span class="eyebrow hero-slide">China to Africa sourcing</span>
         <h1 class="hero-slide">Your trusted bridge<br>from China to <em>Africa</em>.</h1>
         <p class="hero-sub hero-slide">IZUIRE sources, inspects and ships products for African importers, from Guangzhou's factories and markets straight to your door in Nigeria and beyond.</p>
-        <div class="hero-tags hero-slide">
-          <span>Popular:</span>
-          <a routerLink="/marketplace">Phone accessories</a>
-          <a routerLink="/marketplace">Okrika bales</a>
-          <a routerLink="/marketplace">Solar panels</a>
-          <a routerLink="/marketplace">Human hair</a>
-        </div>
         <div class="cta-row hero-slide">
-          <a routerLink="/marketplace" class="btn btn-primary">Explore marketplace</a>
-          <!-- The sign-in call is here for the visitor who is not signed in, and
-               only for them. Signed in it used to swap for a "Welcome back, name"
-               button linking to the profile, which meant the hero's one clear
-               action was joined by a second one greeting someone the header had
-               already greeted. The button now simply is not there, leaving
-               "Explore marketplace" alone rather than replacing it. The header's own
-               welcome chip is still where a signed-in shopper finds their name. -->
           @if (!auth.user()) {
-            <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started<span class="hero-join-sep">or</span>log in</button>
+            <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started</button>
           }
+          <a routerLink="/marketplace" class="btn btn-primary">Explore marketplace</a>
         </div>
       </div>
       <div class="hero-visual hero-slide" role="region" aria-label="Products sourced for African buyers">
@@ -85,43 +71,56 @@
       <div><span class="eyebrow">What we do</span><h2>Everything you need to import from China</h2></div>
       <p>Four core services, one point of contact.</p>
     </div>
-    <!-- Four cards, so this row runs 4-up (see .service-grid--media), matching the
-         category grid further down the page. -->
-    <div class="service-grid service-grid--media">
-      <!-- All four cards carry media of their own. Sourcing and Shipping loop a
-           Cloudinary clip through the shared #catMedia ref, which home.ts plays
-           only while that card is on screen; Marketplace and Business Solutions
-           take a Cloudinary still. styles.css supplies the images, the tile
-           height and the scrim that keeps the icon, heading and copy readable,
-           and swaps each clip for a still frame under prefers-reduced-motion.
-           Icons are Lucide (lucide.dev, ISC licence), inlined at the site's
-           1.8 stroke width. -->
-      <a class="service-card service-card--media service-card--sourcing" routerLink="/sourcing">
-        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/sourcing.jpg">
-          <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/sourcing.mp4" type="video/mp4">
-        </video>
-        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></div>
-        <h4>Sourcing and procurement</h4>
-        <p>Product and manufacturer sourcing, supplier verification, negotiation, MOQ help, QC and inspection.</p>
-      </a>
-      <a class="service-card service-card--media service-card--marketplace" routerLink="/marketplace">
-        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"/><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"/><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"/></svg></div>
-        <h4>Marketplace</h4>
-        <p>Browse trending stock across eight categories, with live pricing and MOQ.</p>
-      </a>
-      <a class="service-card service-card--media service-card--shipping" routerLink="/shipping">
-        <video #catMedia class="cat-media" [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/ship.jpg">
-          <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
-        </video>
-        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></div>
-        <h4>Shipping and logistics</h4>
-        <p>Air and sea freight, CBM planning, customs coordination and delivery across Africa.</p>
-      </a>
-      <a class="service-card service-card--media service-card--business-solutions" routerLink="/business-solutions">
-        <div class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg></div>
-        <h4>Business Solutions</h4>
-        <p>Tailored support for new importers, retailers, wholesalers and corporate buyers.</p>
-      </a>
+    <!-- Services form a connected sourcing-to-delivery path, with media separate from copy. -->
+    <div class="service-tree">
+      <div class="service-node service-node--left">
+        <div class="service-node-media service-node-media--sourcing">
+          <video #catMedia class="cat-media service-node-video" autoplay [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/sourcing.jpg">
+            <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/sourcing.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="service-node-copy">
+          <span class="service-node-step">01 / Find the source</span>
+          <span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg></span>
+          <h3>Sourcing and procurement</h3>
+          <p>Product and manufacturer sourcing, supplier verification, negotiation, MOQ help, QC and inspection.</p>
+        </div>
+      </div>
+      <div class="service-node service-node--right">
+        <div class="service-node-media">
+          <img src="https://res.cloudinary.com/djdbcoyot/image/upload/c_limit,w_720,q_auto:good/ders-images/thrift.jpg" alt="" loading="lazy">
+        </div>
+        <div class="service-node-copy">
+          <span class="service-node-step">02 / Choose your goods</span>
+          <span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"/><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"/><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"/></svg></span>
+          <h3>Marketplace</h3>
+          <p>Browse trending stock across eight categories, with live pricing and MOQ.</p>
+        </div>
+      </div>
+      <div class="service-node service-node--left">
+        <div class="service-node-media service-node-media--shipping">
+          <video #catMedia class="cat-media service-node-video" autoplay [muted]="true" loop playsinline preload="metadata" aria-hidden="true" poster="https://res.cloudinary.com/djdbcoyot/video/upload/so_1,w_480/ders-videos/ship.jpg">
+            <source src="https://res.cloudinary.com/djdbcoyot/video/upload/c_limit,w_480,q_auto:low/ders-videos/ship.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="service-node-copy">
+          <span class="service-node-step">03 / Move it safely</span>
+          <span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></span>
+          <h3>Shipping and logistics</h3>
+          <p>Air and sea freight, CBM planning, customs coordination and delivery across Africa.</p>
+        </div>
+      </div>
+      <div class="service-node service-node--right">
+        <div class="service-node-media">
+          <img src="https://res.cloudinary.com/djdbcoyot/image/upload/c_limit,w_720,q_auto:good/ders-images/doc.jpg" alt="" loading="lazy">
+        </div>
+        <div class="service-node-copy">
+          <span class="service-node-step">04 / Grow your business</span>
+          <span class="service-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg></span>
+          <h3>Business solutions</h3>
+          <p>Tailored support for new importers, retailers, wholesalers and corporate buyers.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -133,26 +132,22 @@
       <p>We compare products and suppliers across leading marketplaces to find the right fit for your order.</p>
     </div>
     <div class="partner-grid">
-      <a class="partner-item" href="https://www.jd.com/" aria-label="Visit JD.com" target="_blank" rel="noopener">
+      <div class="partner-item">
         <img src="https://www.google.com/s2/favicons?domain=jd.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
         <span>JD.com</span>
-      </a>
-      <a class="partner-item" href="https://www.1688.com/" aria-label="Visit 1688" target="_blank" rel="noopener">
+      </div>
+      <div class="partner-item">
         <img src="https://www.google.com/s2/favicons?domain=1688.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
         <span>1688</span>
-      </a>
-      <a class="partner-item" href="https://www.taobao.com/" aria-label="Visit Taobao" target="_blank" rel="noopener">
+      </div>
+      <div class="partner-item">
         <img src="https://www.google.com/s2/favicons?domain=taobao.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
         <span>Taobao</span>
-      </a>
-      <a class="partner-item" href="https://www.dhgate.com/" aria-label="Visit DHgate" target="_blank" rel="noopener">
+      </div>
+      <div class="partner-item">
         <img src="https://www.google.com/s2/favicons?domain=dhgate.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
         <span>DHgate</span>
-      </a>
-      <a class="partner-item" href="https://www.pinduoduo.com/" aria-label="Visit Pinduoduo" target="_blank" rel="noopener">
-        <img src="https://www.google.com/s2/favicons?domain=pinduoduo.com&amp;sz=128" alt="" width="56" height="56" loading="lazy">
-        <span>Pinduoduo</span>
-      </a>
+      </div>
     </div>
   </div>
 </section>

@@ -35,7 +35,7 @@
     </div>
 
     <div class="legal-dialog__body" #body>
-      <p class="legal-note"><strong>Draft placeholder content.</strong> {{ disclaimer }}</p>
+      <p class="legal-note">{{ disclaimer }}</p>
       @for (block of doc().blocks; track $index) {
         @switch (block.kind) {
           @case ('h3') {

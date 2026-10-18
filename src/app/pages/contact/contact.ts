@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Breadcrumb } from '../../components/breadcrumb/breadcrumb';
 
-const WHATSAPP_NUMBER = '2340000000000';
+const WHATSAPP_NUMBER = '2348167912191';
 const CONTACT_EMAIL = 'hello@izuire.com';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
