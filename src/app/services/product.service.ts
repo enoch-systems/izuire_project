@@ -25,7 +25,7 @@ export interface DbProduct extends Product {
 }
 
 /** How many featured products the home page shows at most. */
-export const FEATURED_LIMIT = 5;
+export const FEATURED_LIMIT = 6;
 
 /** Grouping that renders the naira sign rather than an "NGN" code. */
 const grouped = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
@@ -48,7 +48,7 @@ export class ProductService {
   /** The whole catalogue, or an empty list until Supabase returns rows. */
   readonly all = computed<Product[]>(() => this.rows() ?? []);
 
-  /** The four-to-five on show under "Featured products" and atop the marketplace. */
+  /** Up to six products shown under "Featured products" and atop the marketplace. */
   readonly featured = computed<Product[]>(() => {
     const rows = this.rows();
     if (!rows) return [];

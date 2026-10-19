@@ -12,11 +12,12 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Product } from '../marketplace/marketplace-data';
-import { ProductService } from '../../services/product.service';
+import { FEATURED_LIMIT, ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 import { AuthService } from '../../services/auth.service';
 import { DisplayCurrencyService } from '../../services/display-currency.service';
+import { UiService } from '../../services/ui.service';
 
 /** One slide of the hero stat carousel (a card plus its backdrop design). */
 interface HeroStat {
@@ -122,7 +123,7 @@ const TESTIMONIALS: Testimonial[] = [
 ];
 
 /** Products per pager page. Four keeps the grid's own four-column rhythm. */
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 6;
 
 /* The showcase's pager pages are derived from the live catalogue in the
    component, so a price/featured edit from /admin lands without a redeploy. */
@@ -184,6 +185,8 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   protected readonly testimonials = TESTIMONIALS;
   protected readonly current = signal(0);
   protected readonly featureNotice = signal<string | null>(null);
+  protected readonly searchPrompt = signal('');
+  private readonly ui = inject(UiService);
 
   /** Hero slides, in order. Add another entry here for an 8th slide. */
   protected readonly heroStats: HeroStat[] = [
@@ -261,12 +264,12 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
     ),
   );
 
-  /** The catalogue backend: Supabase rows when live, the bundled list otherwise. */
+  /** The ranked featured products, capped by ProductService at six. */
   private readonly catalogue = inject(ProductService);
   protected readonly previewMode = this.catalogue.previewMode;
 
-  /** The showcase pages through the whole live catalogue. */
-  protected readonly catalogueRows = this.catalogue.all;
+  /** The six highest-ranked products marked as featured in the catalog. */
+  protected readonly catalogueRows = this.catalogue.featured;
   protected readonly catalogueLive = this.catalogue.live;
   protected readonly catalogueLoading = this.catalogue.loading;
   protected readonly catalogueError = this.catalogue.error;
@@ -349,6 +352,16 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   /** Open the login screen from the hero's secondary call. */
   protected openAuth(): void {
     this.auth.openAuth();
+  }
+
+  protected submitDiscovery(event: SubmitEvent): void {
+    event.preventDefault();
+    this.ui.openSearch(this.searchPrompt().trim());
+  }
+
+  protected searchFor(term: string): void {
+    this.searchPrompt.set(term);
+    this.ui.openSearch(term);
   }
 
   /**
@@ -509,7 +522,7 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
 
     const cards = Array.from(
       this.host.nativeElement.querySelectorAll<HTMLElement>(
-        '.cat-card, .product-card, .subbrand, .cta-final',
+        '.cat-card, .product-card, .cta-final',
       ),
     );
 

@@ -1,0 +1,39 @@
+<aside class="commerce-guide" [class.is-open]="open()">
+  @if (open()) {
+    <section class="commerce-guide-panel" id="commerceGuidePanel" aria-labelledby="commerceGuideTitle">
+      <div class="commerce-guide-head">
+        <span class="commerce-guide-orbit" aria-hidden="true"><i></i></span>
+        <div>
+          <span class="commerce-guide-kicker">IZUIRE SOURCING GUIDE</span>
+          <h2 id="commerceGuideTitle">Where should we start?</h2>
+        </div>
+        <button type="button" class="commerce-guide-close" (click)="close()" aria-label="Close sourcing guide">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <p class="commerce-guide-note">Choose a next step. Product discovery is live; our sourcing team can help with anything beyond the listings.</p>
+      <button type="button" class="commerce-guide-action" (click)="search()">
+        <span class="commerce-guide-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
+        <span><strong>Explore products</strong><small>Search live marketplace listings</small></span>
+        <span class="commerce-guide-arrow" aria-hidden="true">↗</span>
+      </button>
+      <a class="commerce-guide-action" routerLink="/quote" (click)="close()">
+        <span class="commerce-guide-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 7l8 6 8-6"/></svg></span>
+        <span><strong>Request sourcing</strong><small>Tell us what you need and your quantity</small></span>
+        <span class="commerce-guide-arrow" aria-hidden="true">↗</span>
+      </a>
+      <a class="commerce-guide-human" href="https://wa.me/2348167912191?text=Hello%20Izuire%2C%20I%20need%20help%20with%20sourcing." target="_blank" rel="noopener noreferrer" (click)="close()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.5a8.5 8.5 0 0 1-12.7 7.4L3 20l1.2-4.5a8.5 8.5 0 1 1 16.3-4ZM8.6 8.2c.2-.5.4-.5.7-.5h.5c.2 0 .4 0 .5.4l.7 1.7c.1.2.1.4 0 .5l-.5.7c-.2.2-.2.3 0 .6a6.8 6.8 0 0 0 1.3 1.5c.7.6 1.3.8 1.6.9.3.1.4.1.6-.1l.8-.9c.2-.2.4-.2.6-.1l1.6.8c.2.1.4.2.4.4 0 .2-.1 1-.6 1.5-.5.5-1.1.6-1.5.6s-1.2-.1-2.2-.6a10 10 0 0 1-4.4-3.9c-.4-.7-1-1.8-1-2.7 0-.9.4-1.4.7-1.8Z"/></svg>
+        <span><strong>Talk to our team</strong><small>Continue on WhatsApp with a real person</small></span>
+      </a>
+    </section>
+  }
+  <button type="button" class="commerce-guide-trigger" (click)="toggle()" [attr.aria-expanded]="open()" aria-controls="commerceGuidePanel" [attr.aria-label]="open() ? 'Close sourcing guide' : 'Open sourcing guide'">
+    @if (open()) {
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    } @else {
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1"/><circle cx="12" cy="12" r="4"/></svg>
+      <span>Need a hand?</span>
+    }
+  </button>
+</aside>

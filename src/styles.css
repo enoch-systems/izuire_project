@@ -2068,71 +2068,6 @@
     to{ opacity:1; translate:0 0; }
   }
 
-  /* ============ SUB-BRANDS ============ */
-  /* No boxes, no panels, no rounded fills: two columns of type split by a hairline.
-     The brand name is the loudest thing on the page here, and it is the only thing
-     there is: the category still that used to sit behind the words - blurred, held
-     back, and opened up on hover - is gone, so nothing paints behind the copy. */
-  .subbrand-rail{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    border-top:1px solid var(--line);
-  }
-  .subbrand{
-    position:relative; overflow:hidden;
-    display:block;
-    padding:40px 44px 42px;
-  }
-  .subbrand + .subbrand{ border-left:1px solid var(--line); }
-  /* Three sizes again, this time led by the brand. */
-  .sb-kicker{
-    display:inline-flex; align-items:center; gap:9px;
-    font-family:var(--font-d); font-weight:600;
-    font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--orange-deep);
-  }
-  .sb-kicker::before{
-    content:""; width:16px; height:2px; background:currentColor;
-  }
-  .subbrand h3{
-    font-size:clamp(1.9rem, 3.4vw, 2.7rem);
-    line-height:1.02; letter-spacing:-.02em;
-    margin:14px 0 12px;
-  }
-  .subbrand p{ font-size:.95rem; color:var(--ink-60); max-width:36ch; margin-bottom:26px; }
-  /* The link is a line of type, not a button: an orange rule draws under it and the
-     arrow steps out. */
-  .sb-link{
-    position:relative;
-    display:inline-flex; align-items:center;
-    font-family:var(--font-d); font-weight:600; font-size:.92rem;
-    color:var(--ink);
-  }
-  .sb-link::before{
-    content:"";
-    position:absolute; left:0; right:0; bottom:-7px; height:2px;
-    background:var(--orange);
-    transform:scaleX(0); transform-origin:left center;
-    transition:transform .45s var(--ease);
-  }
-  .subbrand:hover .sb-link::before,
-  .subbrand:focus-visible .sb-link::before{ transform:scaleX(1); }
-  .sb-arrow{
-    display:inline-block; margin-left:9px;
-    opacity:.45; transform:translateX(-3px);
-    transition:transform .3s var(--ease), opacity .3s var(--ease);
-  }
-  .subbrand:hover .sb-arrow,
-  .subbrand:focus-visible .sb-arrow{ transform:translateX(3px); opacity:1; }
-  /* Still reveals on scroll: the name wipes on, the copy and the link rise behind it.
-     `riseIn` is shared with the testimonials. */
-  .subbrand.in h3{ animation:sbName .8s var(--ease) .12s both; }
-  @keyframes sbName{
-    from{ clip-path:inset(0 100% 0 0); letter-spacing:.14em; opacity:0; }
-    to{ clip-path:inset(0 0 0 0); letter-spacing:normal; opacity:1; }
-  }
-  .subbrand.in p{ animation:riseIn .6s var(--ease) .3s both; }
-  .subbrand.in .sb-link{ animation:riseIn .6s var(--ease) .42s both; }
   @keyframes riseIn{
     from{ opacity:0; translate:0 12px; }
     to{ opacity:1; translate:0 0; }
@@ -2918,9 +2853,6 @@
     .steps{grid-template-columns:repeat(2,1fr); row-gap:36px;}
     .steps::before{display:none;}
     .trust-stats{grid-template-columns:repeat(2,1fr); row-gap:28px;}
-    /* Stacked, so the hairline between the two columns turns horizontal. */
-    .subbrand-rail{grid-template-columns:1fr;}
-    .subbrand + .subbrand{ border-left:none; border-top:1px solid var(--line); }
     /* The footer's own tablet track sits with the rest of the footer rules, above,
        where the grid it reshapes is defined. Repeating it here would only fight
        that block at the same width. */
@@ -4266,10 +4198,6 @@
     .testi-nav.next{ right:0; }
     .testi-dots{ margin-top:26px; }
 
-    /* Sub-brands */
-    .subbrand{ padding:30px 24px 32px; }
-    .subbrand h3{ font-size:1.7rem; }
-
     /* Forms / RFQ */
     .rfq-group{ padding:16px; border-radius:12px; }
     .rfq-send__btn{ min-height:52px; font-size:.98rem; }
@@ -4354,8 +4282,6 @@
     .service-icon{ width:44px; height:44px; }
     .service-card h4{ font-size:.96rem; }
     .trust-stat .num{ font-size:1.4rem; }
-    .subbrand{ padding:24px 20px 26px; }
-    .subbrand p{ font-size:.88rem; }
     .rfq-group{ padding:14px; }
     .testi-slide p{ font-size:.98rem; }
     .footer-bottom{ font-size:.74rem; }
@@ -5017,7 +4943,9 @@
    first — so a browser without container-query support keeps a sensible size
    rather than dropping the whole declaration. */
 
-  .product-grid--featured .product-body{ container-type:inline-size; padding:18px 18px 20px; gap:0; }
+  .product-grid--featured{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:960px;margin:24px auto 0;}
+  .product-grid--featured .product-media{height:190px;aspect-ratio:auto;}
+  .product-grid--featured .product-body{ container-type:inline-size; padding:14px 14px 16px; gap:0; }
   .product-grid--featured .product-title-link{ color:inherit; text-decoration:none; display:block; }
   .product-grid--featured .product-title-link:hover .product-title{ color:var(--orange-deep); }
   .product-grid--featured .product-title{ transition:color .18s var(--ease); }
@@ -5167,7 +5095,7 @@
 
   .product-grid--featured .product-body .product-add{
     width:100%; margin-top:auto;
-    padding:12px 14px; border-radius:8px;
+    min-height:42px; padding:10px 12px; border-radius:8px;
     font-size:.86rem;
     font-size:clamp(.76rem, 1.7cqw + .45rem, .86rem);
   }
@@ -5216,25 +5144,19 @@
   }
 
   @media (max-width: 620px){
-    /* One card per row, thumb beside the text. Two columns would leave ~170px
-       for a title, a price range and a button — too little to read. */
-    .product-grid--featured{ grid-template-columns:1fr; gap:12px; margin-top:24px; }
-    .product-grid--featured .product-card{ flex-direction:row; align-items:stretch; }
-    /* A listing shot is the whole point of the card, so the thumb is given real
-       width rather than the sliver a bare icon can get away with. It is sized
-       against the card so the split holds at any screen: 36% of a 390px phone
-       still leaves ~200px of text, and on a 620px screen it tops out at 170px
-       with ~385px for the copy. The floor keeps it readable on a 320px screen. */
-    .product-grid--featured .product-media{
-      width:118px;
-      width:clamp(118px, 36%, 170px);
-      flex:none; aspect-ratio:auto;
-    }
-    .product-grid--featured .product-body{ flex:1; min-width:0; padding:14px; }
-    .product-grid--featured .product-title{ margin-bottom:2px; }
-    .product-grid--featured .product-specs{ margin-bottom:10px; }
-    .product-grid--featured .product-price{ margin-bottom:8px; padding:9px 11px; }
-    .product-grid--featured .product-qty{ margin-bottom:12px; }
+    .product-grid--featured{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px;}
+    .product-grid--featured .product-card{flex-direction:column;min-width:0;}
+    .product-grid--featured .product-media{width:100%;height:122px;flex:none;aspect-ratio:auto;}
+    .product-grid--featured .product-body{flex:1;min-width:0;padding:9px;}
+    .product-grid--featured .product-title{margin-bottom:3px;font-size:.8rem;}
+    .product-grid--featured .product-specs{margin-bottom:7px;font-size:.64rem;}
+    .product-grid--featured .product-price{margin-bottom:7px;padding:7px 8px;font-size:.88rem;}
+    .product-grid--featured .product-price .unit{font-size:.6rem;}
+    .product-grid--featured .product-qty{width:100%;margin-bottom:8px;}
+    .product-grid--featured .product-qty-step{width:27px;}
+    .product-grid--featured .product-qty-input{width:36px;padding:7px 0;}
+    .product-grid--featured .product-qty-unit{padding:0 5px 0 4px;font-size:.58rem;}
+    .product-grid--featured .product-body .product-add{min-height:38px;padding:8px 6px;font-size:.7rem;}
     /* A thumb this size still cannot carry a full-size badge, so it keeps its
        compact form rather than covering the shot. */
     .product-grid--featured .product-badge{

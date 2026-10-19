@@ -5,14 +5,28 @@
   <div class="container">
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow hero-slide">China to Africa sourcing</span>
-        <h1 class="hero-slide">Your trusted bridge<br>from China to <em>Africa</em>.</h1>
-        <p class="hero-sub hero-slide">IZUIRE sources, inspects and ships products for African importers, from Guangzhou's factories and markets straight to your door in Nigeria and beyond.</p>
+        <span class="eyebrow hero-slide">Sourcing, made clear</span>
+        <h1 class="hero-slide">What are you bringing to <em>market?</em></h1>
+        <p class="hero-sub hero-slide">Describe the product, quantity, or goal. Explore live listings or send a sourcing request to our team in Guangzhou.</p>
+        <form class="discovery-prompt hero-slide" (submit)="submitDiscovery($event)">
+          <label class="sr-only" for="discoveryPrompt">Describe what you want to source</label>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="discoveryPrompt" type="search" autocomplete="off" placeholder="Try “solar panels for my shop”…" [value]="searchPrompt()" (input)="searchPrompt.set($any($event.target).value)">
+          <button type="submit" aria-label="Search products">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </form>
+        <div class="discovery-suggestions hero-slide" aria-label="Suggested searches">
+          <span>Explore</span>
+          <button type="button" (click)="searchFor('solar panels')">Solar panels</button>
+          <button type="button" (click)="searchFor('human hair bundles')">Human hair</button>
+          <button type="button" (click)="searchFor('phone screens')">Phone screens</button>
+        </div>
         <div class="cta-row hero-slide">
           @if (!auth.user()) {
             <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started</button>
           }
-          <a routerLink="/marketplace" class="btn btn-primary">Explore marketplace</a>
+          <a routerLink="/quote" class="hero-quote-link">Request a product quote <span aria-hidden="true">↗</span></a>
         </div>
       </div>
       <div class="hero-visual hero-slide" role="region" aria-label="Products sourced for African buyers">
@@ -240,8 +254,8 @@
      Each card adds straight to the cart instead of routing out to the quote
      form; the cart then carries the basket through to the quote page. Adding
      lands the line at that product's minimum, and the button confirms for a
-     moment via CartService.addedId. styles.css lays the cards out as a row on
-     narrow screens, where four columns would squeeze the text too far. -->
+    moment via CartService.addedId. The featured rail displays up to six compact
+    cards in two columns across screen sizes. -->
 <section class="section" id="products">
   <div class="container">
     <div class="section-head">
@@ -439,35 +453,6 @@
       <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>Registered with CAC, Izuire Co. Ltd.</div>
       <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>Team based in China, on the ground in Guangzhou</div>
         <div class="trust-badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Quality assurance before shipping</div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ SUB-BRANDS ============ -->
-<section class="section" id="subbrands">
-  <div class="container">
-    <div class="section-head">
-      <div><span class="eyebrow">Under the IZUIRE umbrella</span><h2>Our sub-brands</h2></div>
-      <p>Specialist storefronts for two of our fastest growing categories.</p>
-    </div>
-    <!-- No cards: two unboxed columns split by a hairline. Each column is type only -
-         the category still that used to sit behind the words is gone, so there is no
-         media layer left to hold back and the brand names carry the section on their
-         own. The name still wipes on and the copy still rises behind it as the section
-         is scrolled to (see revealCards), and the link's rule draws on hover. -->
-    <div class="subbrand-rail">
-      <a class="subbrand okrika" routerLink="/quote">
-        <span class="sb-kicker">Thrift &amp; Bales</span>
-        <h3>IZUIRE Okrika</h3>
-        <p>Graded secondhand clothing bales, sourced and sorted for resellers across Nigeria.</p>
-        <span class="sb-link">Explore Okrika<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
-      </a>
-      <a class="subbrand haircubr" routerLink="/quote">
-        <span class="sb-kicker">Hair &amp; Wigs</span>
-        <h3>Haircubr</h3>
-        <p>Raw and human hair bundles and units, built to give every woman confidence.</p>
-        <span class="sb-link">Explore Haircubr<span class="sb-arrow" aria-hidden="true">&rarr;</span></span>
-      </a>
     </div>
   </div>
 </section>
