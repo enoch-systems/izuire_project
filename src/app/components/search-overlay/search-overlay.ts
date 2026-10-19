@@ -55,11 +55,6 @@ const POPULAR = [
 
 /** Suggested replacements when a search finds nothing. */
 const FALLBACKS = ['hair', 'solar', 'bales', 'panels', 'shipping', 'MOQ'];
-const STOP_WORDS = new Set([
-  'a', 'an', 'and', 'buy', 'find', 'for', 'from', 'i', 'in', 'looking', 'me',
-  'my', 'need', 'of', 'please', 'product', 'products', 'some', 'source', 'the',
-  'to', 'want', 'with', 'wholesale', 'bulk', 'shop',
-]);
 
 /**
  * Search panel, rebuilt around the catalogue.
@@ -114,18 +109,12 @@ export class SearchOverlay {
     const q = this.query().trim().toLowerCase();
     if (!q) return [];
 
-    const terms = q.split(/[^a-z0-9]+/).filter((term) => term.length > 1 && !STOP_WORDS.has(term));
-    const products: Hit[] = this.catalogue.all()
-      .map((product) => {
-        const haystack = `${product.title} ${product.name} ${CAT_LABELS.get(product.cat) ?? product.cat} ${product.unit}`.toLowerCase();
-        const matchedTerms = terms.filter((term) => haystack.includes(term));
-        const score = matchedTerms.length + (haystack.includes(q) ? 2 : 0);
-        return { product, score };
-      })
-      .filter((match) => match.score > 0)
-      .sort((first, second) => second.score - first.score)
+    const products: Hit[] = this.catalogue.all().filter((p) =>
+      (p.title + ' ' + (CAT_LABELS.get(p.cat) ?? p.cat))
+        .toLowerCase()
+        .includes(q),
+    )
       .slice(0, 8)
-      .map(({ product }) => product)
       .map((p) => ({
         key: 'p-' + p.id,
         group: 'Products',
@@ -142,13 +131,9 @@ export class SearchOverlay {
         meta: CAT_LABELS.get(p.cat) ?? p.cat,
       }));
 
-    const pages: Hit[] = SEARCH_ITEMS.map((item) => {
-      const haystack = `${item.title} ${item.desc} ${item.cat}`.toLowerCase();
-      const matchedTerms = terms.filter((term) => haystack.includes(term));
-      return { item, score: matchedTerms.length + (haystack.includes(q) ? 2 : 0) };
-    }).filter((match) => match.score > 0)
-      .sort((first, second) => second.score - first.score)
-      .map(({ item: i }) => ({
+    const pages: Hit[] = SEARCH_ITEMS.filter((i) =>
+      (i.title + ' ' + i.desc + ' ' + i.cat).toLowerCase().includes(q),
+    ).map((i) => ({
       key: 'i-' + i.title,
       group: i.cat,
       title: i.title,
@@ -158,7 +143,7 @@ export class SearchOverlay {
       route: [i.route],
       fragment: i.fragment,
       index: 0,
-      }));
+    }));
 
     return [...products, ...pages].map((hit, index) => ({ ...hit, index }));
   });

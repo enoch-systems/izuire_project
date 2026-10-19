@@ -5,28 +5,14 @@
   <div class="container">
     <div class="hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow hero-slide">Sourcing, made clear</span>
-        <h1 class="hero-slide">What are you bringing to <em>market?</em></h1>
-        <p class="hero-sub hero-slide">Describe the product, quantity, or goal. Explore live listings or send a sourcing request to our team in Guangzhou.</p>
-        <form class="discovery-prompt hero-slide" (submit)="submitDiscovery($event)">
-          <label class="sr-only" for="discoveryPrompt">Describe what you want to source</label>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-          <input id="discoveryPrompt" type="search" autocomplete="off" placeholder="Try “solar panels for my shop”…" [value]="searchPrompt()" (input)="searchPrompt.set($any($event.target).value)">
-          <button type="submit" aria-label="Search products">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          </button>
-        </form>
-        <div class="discovery-suggestions hero-slide" aria-label="Suggested searches">
-          <span>Explore</span>
-          <button type="button" (click)="searchFor('solar panels')">Solar panels</button>
-          <button type="button" (click)="searchFor('human hair bundles')">Human hair</button>
-          <button type="button" (click)="searchFor('phone screens')">Phone screens</button>
-        </div>
+        <span class="eyebrow hero-slide">China to Africa sourcing</span>
+        <h1 class="hero-slide">Your trusted bridge<br>from China to <em>Africa</em>.</h1>
+        <p class="hero-sub hero-slide">IZUIRE sources, inspects and ships products for African importers, from Guangzhou's factories and markets straight to your door in Nigeria and beyond.</p>
         <div class="cta-row hero-slide">
           @if (!auth.user()) {
             <button type="button" class="btn btn-ghost hero-join" (click)="openAuth()">Get started</button>
           }
-          <a routerLink="/quote" class="hero-quote-link">Request a product quote <span aria-hidden="true">↗</span></a>
+          <a routerLink="/marketplace" class="btn btn-primary">Explore marketplace</a>
         </div>
       </div>
       <div class="hero-visual hero-slide" role="region" aria-label="Products sourced for African buyers">

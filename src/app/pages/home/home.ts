@@ -17,7 +17,6 @@ import { CartService } from '../../services/cart.service';
 import { FlyToCartService } from '../../services/fly-to-cart.service';
 import { AuthService } from '../../services/auth.service';
 import { DisplayCurrencyService } from '../../services/display-currency.service';
-import { UiService } from '../../services/ui.service';
 
 /** One slide of the hero stat carousel (a card plus its backdrop design). */
 interface HeroStat {
@@ -185,8 +184,6 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   protected readonly testimonials = TESTIMONIALS;
   protected readonly current = signal(0);
   protected readonly featureNotice = signal<string | null>(null);
-  protected readonly searchPrompt = signal('');
-  private readonly ui = inject(UiService);
 
   /** Hero slides, in order. Add another entry here for an 8th slide. */
   protected readonly heroStats: HeroStat[] = [
@@ -352,16 +349,6 @@ export class Home implements OnInit, OnDestroy, AfterViewInit {
   /** Open the login screen from the hero's secondary call. */
   protected openAuth(): void {
     this.auth.openAuth();
-  }
-
-  protected submitDiscovery(event: SubmitEvent): void {
-    event.preventDefault();
-    this.ui.openSearch(this.searchPrompt().trim());
-  }
-
-  protected searchFor(term: string): void {
-    this.searchPrompt.set(term);
-    this.ui.openSearch(term);
   }
 
   /**

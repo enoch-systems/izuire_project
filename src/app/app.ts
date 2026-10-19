@@ -14,11 +14,10 @@ import { AuthLoader } from './components/auth-loader/auth-loader';
 import { LogoutConfirm } from './components/logout-confirm/logout-confirm';
 import { ActionFeedback } from './components/action-feedback/action-feedback';
 import { MediaMuteService } from './services/media-mute.service';
-import { CommerceGuide } from './components/commerce-guide/commerce-guide';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SiteHeader, SiteFooter, RateTicker, SearchOverlay, LegalModal, AuthModal, CartToast, SignatureLoader, AuthLoader, LogoutConfirm, ActionFeedback, CommerceGuide],
+  imports: [RouterOutlet, SiteHeader, SiteFooter, RateTicker, SearchOverlay, LegalModal, AuthModal, CartToast, SignatureLoader, AuthLoader, LogoutConfirm, ActionFeedback],
   templateUrl: './app.html',
 })
 export class App implements OnDestroy {
